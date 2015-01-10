@@ -8,7 +8,8 @@
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/core.typed "0.2.77"]
-                 [org.clojure/tools.cli "0.3.1"]]
+                 [org.clojure/tools.cli "0.3.1"]
+                 [org.clojure/core.match "0.3.0-alpha4"]]
    :main jest.jest
    :core.typed {:check [jest.jest parser.parse]})
 
