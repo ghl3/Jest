@@ -1,5 +1,5 @@
 
-package jest.compiler;
+package jest.grammar;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;

@@ -6,7 +6,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :plugins [[lein-typed "0.3.5"]
             [lein-antlr "0.2.0"]]
-  :hooks [leiningen.antlr]
+  ;;:hooks [leiningen.antlr]
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}
 
   :source-paths ["src/clj"]
