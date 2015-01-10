@@ -43,5 +43,7 @@
 
     ;; Read the main file and parse it
     ;; Print the results
-    (println (parse/parse (slurp (first arguments))))))
+    (let [ast (parse/parse (slurp (first arguments)))]
+      (println ast)
+      (map eval ast))))
 

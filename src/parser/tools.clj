@@ -12,6 +12,16 @@
     (println text)
     (if (re-find matcher)
       (match [(re-groups matcher)]
-             [[match variable value]] (list 'def variable value)
+             [[match variable value]] (read-string (format "(def %s %s)" variable value)) ;;'(def variable value)
              :else nil)
       nil)))
+
+
+(def whitespace-regex #"\s*//.*")
+
+(defn parse-whitespace-statement
+  "Parse the setting of a val of the form:
+  val x = 10;"
+  [text]
+  (println (format "Parsing for whitepspace: %s" text))
+  (if (re-matches whitespace-regex text) '() nil))
