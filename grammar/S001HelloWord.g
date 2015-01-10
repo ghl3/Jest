@@ -11,18 +11,18 @@ options
 //as the generated lexer will reside in org.meri.antlr_step_by_step.parsers 
 //package, we have to add package declaration on top of it
 @lexer::header {
-package org.meri.antlr_step_by_step.parsers;
+  package jest.grammar;
 }
 
 //as the generated parser will reside in org.meri.antlr_step_by_step.parsers 
 //package, we have to add package declaration on top of it
 @parser::header {
-package org.meri.antlr_step_by_step.parsers;
+package jest.grammar;
 }
 
 // ***************** lexer rules:
 //the grammar must contain at least one lexer rule
-SALUTATION:'Hello word';   
+SALUTATION:'Hello world';   
 ENDSYMBOL:'!';
 
 // ***************** parser rules:
