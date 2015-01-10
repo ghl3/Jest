@@ -4,14 +4,23 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :plugins [[lein-typed "0.3.5"]]
+  :plugins [[lein-typed "0.3.5"]
+            [lein-antlr "0.2.0"]]
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}
+  :java-source-paths ["src/java"]
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/core.typed "0.2.77"]
                  [org.clojure/tools.cli "0.3.1"]
                  [org.clojure/core.match "0.3.0-alpha4"]]
    :main jest.jest
-   :core.typed {:check [jest.jest parser.parse]})
+
+   ;; Typed configs
+   :core.typed {:check [jest.jest parser.parse]}
+
+   ;; ANTLR configs
+   :antlr-src-dir "grammar"
+   :antlr-dest-dir "src/java/grammar"
+   :antlr-options {:verbose true})
 
 
 
