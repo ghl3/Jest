@@ -7,3 +7,6 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
+
+src/java/grammar/*.java
+src/java/grammar/*.tokens
