@@ -17,7 +17,6 @@
   "Remove comments"
   [line]
   (str/replace line #"[//,#].*" ""))
-;;  (first (str/split line #"[//,#]")))
 
 
 (defn strip-ignored
@@ -27,10 +26,11 @@
   and concatenate again."
   [text]
 
-  (let [lines (str/split text #"\n")
-        no-comments (map strip-comments lines)
-        non-empty-lines (remove clojure.string/blank? no-comments)]
-    (str/join "" non-empty-lines)))
+  (->> text
+      (#(str/split % #"\n"))
+      (map strip-comments)
+      (remove clojure.string/blank?)
+      (str/join "")))
 
 
 (defn parse
@@ -41,6 +41,3 @@
     (println "Statements: ")
     (println statements)
     (map parse-statement statements)))
-;;  (let [stripped-text (strip text)
-;;        (map parse-statement (str/split stripped-text #";"))))
-
