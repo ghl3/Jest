@@ -1,4 +1,4 @@
-(ns language-project.core)
+(ns jest.jest)
 
 (defn foo
   "I don't do a whole lot."
