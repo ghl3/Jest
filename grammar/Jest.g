@@ -18,6 +18,13 @@ package jest.grammar;
 
 // A comment is a c-style single-line comment
 
+/*
+tokens {
+  FUNC;
+  PARAMS;
+        }
+*/
+
 // or a python style hash comment
 LineComment
     :   '[//,#]' ~('\n'|'\r')* //NEWLINE
@@ -46,6 +53,8 @@ DIGIT   :   '0'..'9';
 
 SEMICOLON : ';';
 
+COMMA : ',';
+
 /** Parser Rules **/
 
 // A file is a list of statements
@@ -60,7 +69,15 @@ statement
     : expression SEMICOLON
     ;
 
-expression : val_assignment;
+expression : (val_assignment | function_call);
 
 val_assignment
     : VAL ID '=' INTEGER_NUMBER -> ^(ID INTEGER_NUMBER);
+
+paramdefs
+    :  (ID COMMA!)* ID
+    ;
+
+function_call
+    : ID '(' paramdefs ')' -> ^(ID paramdefs);
+
