@@ -16,17 +16,31 @@ options
 package jest.grammar;
 }
 
-
 // A comment is a c-style single-line comment
+/*
 // or a python style hash comment
 LineComment
     :   '[//,#]' ~('\n'|'\r')* //NEWLINE
         {System.out.println("lc > " + getText());
         skip();}
     ;
+*/
+// A comment is a c-style single-line comment
+// or a python style hash comment
+/*
+WS
+    :   ('[ \n\t\r]')+ -> skip
+    ;
+*/
+/*
+WS  :   (' '
+        |   '\t'
+        |   ('\n'|'\r'('\n')) {newline();}
+        )+
+    ;
+*/
 
-// Whitespace that we ignore
-// Tabs and newlines
+/*
 WS     :
         (' '
         | '\\t'
@@ -34,7 +48,10 @@ WS     :
         | '\\n'      { newline(); }
         )
         { $setType(Token.SKIP); } ;
+*/
+// WS : '[ \r\t\n]+' -> skip ;
 
+//WS  :   ( ' ' | '\t' | '\r' | '\n')+ {$channel=HIDDEN;} -> skip ;
 
 // A file is a list of statements
 // followed by an EOF
@@ -45,7 +62,7 @@ exprlist
 // A statement is an expression followed
 // by a semicolon
 statement
-    : expression SEMICOLON!
+    : expression SEMICOLON
     ;
 
 expression : (val_assignment | foobar);
@@ -64,4 +81,4 @@ integer_number
 fragment
 DIGIT   :   ('0'..'9');
 
-fragment SEMICOLON! : ';';
+fragment SEMICOLON : ';';
