@@ -5,8 +5,6 @@
 (import 'jest.grammar.JestCompiler)
 
 (deftest a-test
-  (let [program "val foo = 10;"
+  (let [program "val foo = 10;" ;;\u001a"
         ast (. JestCompiler (compile program))]
-    (is (.. ast (getChild 0) getType) (. JestParser SALUTATION))
-    (is (.. ast (getChild 1) getType) (. JestParser ENDSYMBOL))
     ))

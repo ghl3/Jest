@@ -17,46 +17,41 @@ package jest.grammar;
 }
 
 // A comment is a c-style single-line comment
-/*
+
 // or a python style hash comment
 LineComment
     :   '[//,#]' ~('\n'|'\r')* //NEWLINE
         {System.out.println("lc > " + getText());
         skip();}
     ;
-*/
-// A comment is a c-style single-line comment
-// or a python style hash comment
-/*
-WS
-    :   ('[ \n\t\r]')+ -> skip
-    ;
-*/
-/*
+
 WS  :   (' '
         |   '\t'
-        |   ('\n'|'\r'('\n')) {newline();}
+        |   ('\n'|'\r'('\n'))
         )+
+        {$channel=HIDDEN;}
     ;
-*/
 
-/*
-WS     :
-        (' '
-        | '\\t'
-        | '\\r' '\\n' { newline(); }
-        | '\\n'      { newline(); }
-        )
-        { $setType(Token.SKIP); } ;
-*/
-// WS : '[ \r\t\n]+' -> skip ;
+/** Lexer Rules **/
 
-//WS  :   ( ' ' | '\t' | '\r' | '\n')+ {$channel=HIDDEN;} -> skip ;
+VAL: 'val';
+
+ID: ('a'..'z' | 'A'..'Z')+;
+
+INTEGER_NUMBER
+    :   (DIGIT)+;
+
+fragment
+DIGIT   :   '0'..'9';
+
+SEMICOLON : ';';
+
+/** Parser Rules **/
 
 // A file is a list of statements
 // followed by an EOF
 exprlist
-    : ( statement )* EOF!
+    : ( statement )* (WS)? EOF!
     ;
 
 // A statement is an expression followed
@@ -65,20 +60,7 @@ statement
     : expression SEMICOLON
     ;
 
-expression : (val_assignment | foobar);
-
-foobar
-    : ('FOOBAR')+;
+expression : val_assignment;
 
 val_assignment
-    : 'val' ID '=' integer_number -> ^(ID integer_number);
-
-ID: ('a'..'z' | 'A'..'Z')+;
-
-integer_number
-    :   DIGIT+;
-
-fragment
-DIGIT   :   ('0'..'9');
-
-fragment SEMICOLON : ';';
+    : VAL ID '=' INTEGER_NUMBER -> ^(ID INTEGER_NUMBER);
