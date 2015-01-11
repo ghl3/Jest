@@ -48,35 +48,20 @@ statement
     : expression SEMICOLON!
     ;
 
-ID: ('a'..'z' | 'A'..'Z')+;
+expression : (val_assignment | foobar);
 
-fragment
-DIGIT   :   ('0'..'9');
+foobar
+    : ('FOOBAR')+;
+
+val_assignment
+    : 'val' ID '=' integer_number -> ^(ID integer_number);
+
+ID: ('a'..'z' | 'A'..'Z')+;
 
 integer_number
     :   DIGIT+;
 
-val_assignment
-    : "val" ID '=' integer_number -> ^(ID integer_number);
+fragment
+DIGIT   :   ('0'..'9');
 
-
-/*    : "val" ID "=" integer_number;*/
-
-/*
-function_call
-    : "func" LPAREN! func_params RPAREN!
-
-
-func_params
-        :  (ID COMMA)* ID -> ^(PARAMS ID+)
-        ;
-*/
-/*
-funcdef
-        :  ID  '(' paramdefs ')' '=' expr   -> ^(FUNC ID paramdefs expr)
-        ;
-*/
-
-/*expression : (val_assignment | function_call | funcdef)*/
-
-expression : (val_assignment);
+fragment SEMICOLON! : ';';
