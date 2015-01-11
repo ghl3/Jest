@@ -26,4 +26,4 @@
   ;; ANTLR configs
   :antlr-src-dir "grammar"
   :antlr-dest-dir "src/java/grammar"
-  :antlr-options {:verbose true})
+  :antlr-options {:verbose true :report true})

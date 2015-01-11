@@ -8,14 +8,10 @@ options
   output = AST;
 }
 
-//as the generated lexer will reside in org.meri.antlr_step_by_step.parsers 
-//package, we have to add package declaration on top of it
 @lexer::header {
   package jest.grammar;
 }
 
-//as the generated parser will reside in org.meri.antlr_step_by_step.parsers 
-//package, we have to add package declaration on top of it
 @parser::header {
 package jest.grammar;
 }
@@ -52,22 +48,35 @@ statement
     : expression SEMICOLON!
     ;
 
+ID: ('a'..'z' | 'A'..'Z')+;
+
+fragment
+DIGIT   :   ('0'..'9');
+
+integer_number
+    :   DIGIT+;
 
 val_assignment
-    : val ID "=" expr
+    : "val" ID '=' integer_number -> ^(ID integer_number);
 
 
+/*    : "val" ID "=" integer_number;*/
+
+/*
 function_call
-    : func(params)
+    : "func" LPAREN! func_params RPAREN!
 
 
+func_params
+        :  (ID COMMA)* ID -> ^(PARAMS ID+)
+        ;
+*/
+/*
 funcdef
         :  ID  '(' paramdefs ')' '=' expr   -> ^(FUNC ID paramdefs expr)
         ;
+*/
 
-params
-        :  (ID COMMA)* ID                   -> ^(PARAMS ID+)
-        ;
+/*expression : (val_assignment | function_call | funcdef)*/
 
-
-expression : (val_assignment | function_call | funcdef)
+expression : (val_assignment);

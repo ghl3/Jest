@@ -8,5 +8,8 @@ pom.xml.asc
 /.lein-*
 /.nrepl-port
 
+.idea
+src/jest.iml
+
 src/java/grammar/*.java
 src/java/grammar/*.tokens
