@@ -50,3 +50,13 @@
         code (. JestCompiler (getCode program))]
     (is (= code ["(import 'foo.bar)"]))))
 
+(deftest list-test-1
+  (let [program "val list = [1,2,3];"
+        code (. JestCompiler (getCode program))]
+    (is (= code ["(def list [1, 2, 3])"]))))
+
+(deftest list-test-2
+  (let [program "val list = [1, 2, 3 ];"
+        code (. JestCompiler (getCode program))]
+    (is (= code ["(def list [1, 2, 3])"]))))
+

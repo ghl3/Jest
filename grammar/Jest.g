@@ -92,8 +92,15 @@ import_statement returns [String code]
 expression returns [String code]
     : INTEGER {$code = $INTEGER.text; }
     | DOUBLE {$code = $DOUBLE.text; }
+    | clojure_list {$code = $clojure_list.code; }
     ;
 
+
+clojure_list returns [String code]
+@init{$code = "["; }
+@after{$code += "]"; }
+    : '[' a=expression {$code += $a.code;} (COMMA WS? b=expression {$code += ", " + $b.code;})* ']'
+    ;
 
 val_assignment returns [String code]
     : 'val' ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
