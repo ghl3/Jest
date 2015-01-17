@@ -1,4 +1,4 @@
-(ns jest.jest-grammar-test
+(ns jest.parse-test
   (:require [clojure.test :refer :all]))
 
 (import 'jest.grammar.JestParser)
