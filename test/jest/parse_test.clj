@@ -20,43 +20,67 @@
     (is (.. ast (getChild 0) getType) (. JestParser ID))
     ))
 
+
+(defn test-code
+  "Test that the given jest code
+  compiles into the given clojure code"
+  [jest clojure]
+  (let [code-list (. JestCompiler (getCode jest))]
+    (println "\nJest: ")
+    (println jest)
+    (println "Clojure: ")
+    (doall (map println code-list))
+    (println "")
+    (is (= code-list clojure))))
+
+
 (deftest val-test
-  (let [program "val foo = 10;"
-        code (. JestCompiler (getCode program))]
-    (is (= code ["(def foo 10)"]))))
+  (test-code
+   "val foo = 10;"
+   ["(def foo 10)"]))
 
 (deftest multi-val-test
-  (let [program "val foo = 10; \n val bar = 20;"
-        code (. JestCompiler (getCode program))]
-    (is (= code ["(def foo 10)" "(def bar 20)"]))))
+  (test-code
+   "val foo = 10; \n val bar = 20;"
+   ["(def foo 10)" "(def bar 20)"]))
 
 (deftest func-test
-  (let [program "foobar(a, b, c);"
-        code (. JestCompiler (getCode program))]
-    (is (= code ["(foobar a b c)"]))))
+  (test-code
+   "foobar(a, b, c);"
+   ["(foobar a b c)"]))
 
 (deftest println-test
-  (let [program "println(a);"
-        code (. JestCompiler (getCode program))]
-    (is (= code ["(println a)"]))))
+  (test-code
+   "println(a);"
+   ["(println a)"]))
 
 (deftest func-def-test
-  (let [program "defn foobar(a, b, c){ 10 };"
-        code (. JestCompiler (getCode program))]
-    (is (= code ["(defn foobar[ a b c] 10)"]))))
+  (test-code
+   "defn foobar(a, b, c){ 10 };"
+   ["(defn foobar[ a b c] 10)"]))
 
 (deftest import-test
-  (let [program "import foo.bar;"
-        code (. JestCompiler (getCode program))]
-    (is (= code ["(import 'foo.bar)"]))))
+  (test-code
+   "import foo.bar;"
+   ["(import 'foo.bar)"]))
 
 (deftest list-test-1
-  (let [program "val list = [1,2,3];"
-        code (. JestCompiler (getCode program))]
-    (is (= code ["(def list [1, 2, 3])"]))))
+  (test-code
+   "val list = [1,2,3];"
+   ["(def list [1, 2, 3])"]))
 
 (deftest list-test-2
-  (let [program "val list = [1, 2, 3 ];"
-        code (. JestCompiler (getCode program))]
-    (is (= code ["(def list [1, 2, 3])"]))))
+  (test-code
+   "val list = [1, 2, 3];"
+   ["(def list [1, 2, 3])"]))
+
+(deftest list-test-3
+  (test-code
+   "val list = [1, 2, 3 ];"
+   ["(def list [1, 2, 3])"]))
+
+(deftest list-test-3
+  (test-code
+   "val list = [1, 2, 3 ];"
+   ["(def list [1, 2, 3])"]))
 
