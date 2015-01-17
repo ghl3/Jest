@@ -29,3 +29,8 @@
   (let [program "foobar(a, b, c);"
         code (. JestCompiler (getCode program))]
     (is (= code ["(foobar a b c)"]))))
+
+(deftest func-def-test
+  (let [program "defn foobar(a, b, c){ val foo = 10 };"
+        code (. JestCompiler (getCode program))]
+    (is (= code ["(defn foobar[ a b c](def foo 10))"]))))

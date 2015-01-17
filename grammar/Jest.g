@@ -73,6 +73,7 @@ statement returns [String code]
 expression returns [String code]
     : val_assignment {$code = $val_assignment.code; }
     | function_call {$code = $function_call.code; }
+    | function_def {$code = $function_def.code; }
     ;
 
 val_assignment returns [String code]
@@ -89,6 +90,16 @@ function_call returns [String code]
                 $code = "(" + $ID.text;
                 for(int i=0; i < $paramdefs.code_list.size(); ++i) { $code += " " + $paramdefs.code_list.get(i); }
                 $code += ")";
+        }
+    ;
+
+function_def returns [String code]
+    : 'defn' ID '(' paramdefs ')' '{' expression '}' {
+            $code = "(defn " + $ID.text + "[";
+            for(int i=0; i < $paramdefs.code_list.size(); ++i) { $code += " " + $paramdefs.code_list.get(i); }
+            $code += "]";
+            $code += $expression.code;
+            $code += ")";
         }
     ;
 
