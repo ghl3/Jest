@@ -8,7 +8,7 @@
   (let [program "val foo = 10;"
         ast (. JestCompiler (compile program))]
     (is (.. ast getType) (. JestParser ID))
-    (is (.. ast (getChild 0) getType) (. JestParser INTEGER_NUMBER))
+    (is (.. ast (getChild 0) getType) (. JestParser INTEGER))
     ))
 
 (deftest func-test
@@ -31,6 +31,6 @@
     (is (= code ["(foobar a b c)"]))))
 
 (deftest func-def-test
-  (let [program "defn foobar(a, b, c){ val foo = 10 };"
+  (let [program "defn foobar(a, b, c){ 10 };"
         code (. JestCompiler (getCode program))]
-    (is (= code ["(defn foobar[ a b c](def foo 10))"]))))
+    (is (= code ["(defn foobar[ a b c] 10)"]))))

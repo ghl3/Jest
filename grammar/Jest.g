@@ -41,15 +41,16 @@ WS  :   (' '
 
 /** Lexer Rules **/
 
-VAL: 'val';
+/*VAL: 'val';*/
 
 ID: ('a'..'z' | 'A'..'Z')+;
 
-INTEGER_NUMBER
-    :   (DIGIT)+;
+INTEGER : (DIGIT)+;
+
+DOUBLE : '0'..'9'+'.''0'..'9'+ ;
 
 fragment
-DIGIT   :   '0'..'9';
+DIGIT : '0'..'9';
 
 SEMICOLON : ';';
 
@@ -61,23 +62,28 @@ COMMA : ',';
 // followed by an EOF
 exprlist returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
-    : ( statement {$code_list.add($statement.code);} )* (WS)? EOF!
+    : ( statement_term {$code_list.add($statement_term.code);} )* (WS)? EOF!
     ;
 
-// A statement is an expression followed
+// A statement_term is a statement followed
 // by a semicolon
-statement returns [String code]
-    : expression SEMICOLON {$code = $expression.code;}
+statement_term returns [String code]
+    : statement SEMICOLON {$code = $statement.code;}
     ;
 
-expression returns [String code]
+statement returns [String code]
     : val_assignment {$code = $val_assignment.code; }
     | function_call {$code = $function_call.code; }
     | function_def {$code = $function_def.code; }
     ;
 
+expression returns [String code]
+    : INTEGER {$code = $INTEGER.text; }
+    | DOUBLE {$code = $DOUBLE.text; }
+    ;
+
 val_assignment returns [String code]
-    : VAL ID '=' INTEGER_NUMBER { $code = "(def " + $ID.text + " " + $INTEGER_NUMBER.text + ")"; }
+    : 'val' ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
     ;
 
 paramdefs returns [List<String> code_list]
@@ -98,8 +104,7 @@ function_def returns [String code]
             $code = "(defn " + $ID.text + "[";
             for(int i=0; i < $paramdefs.code_list.size(); ++i) { $code += " " + $paramdefs.code_list.get(i); }
             $code += "]";
-            $code += $expression.code;
+            $code += " " + $expression.code;
             $code += ")";
         }
     ;
-
