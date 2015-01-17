@@ -35,6 +35,11 @@
         code (. JestCompiler (getCode program))]
     (is (= code ["(foobar a b c)"]))))
 
+(deftest println-test
+  (let [program "println(a);"
+        code (. JestCompiler (getCode program))]
+    (is (= code ["(println a)"]))))
+
 (deftest func-def-test
   (let [program "defn foobar(a, b, c){ 10 };"
         code (. JestCompiler (getCode program))]

@@ -5,6 +5,7 @@
             )
 (:gen-class))
 
+(import 'jest.grammar.JestCompiler)
 
 (def cli-options
 
@@ -41,12 +42,17 @@
        (str/join \newline)))
 
 
+(defn get-code [code]
+  (. JestCompiler (getCode code)))
+
+
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
 
     ;; Read the main file and parse it
     ;; Print the results
-    (let [ast (parse/parse (slurp (first arguments)))]
-      (println ast)
-      (map eval ast))))
-
+    (let [code (slurp (first arguments))]
+      (println code)
+      (doall (map println (get-code code)))
+      (doall (map (comp eval read-string) (get-code code)))
+      )))
