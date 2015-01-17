@@ -45,7 +45,8 @@
         code (. JestCompiler (getCode program))]
     (is (= code ["(defn foobar[ a b c] 10)"]))))
 
-(deftest func-resource-test-jst-test
-  (let [program (slurp "resources/test.jst")
+(deftest import-test
+  (let [program "import foo.bar;"
         code (. JestCompiler (getCode program))]
-    (is (= code ["(def x 10)" "(def y 20)"]))))
+    (is (= code ["(import 'foo.bar)"]))))
+

@@ -45,6 +45,11 @@ WS  :   (' '
 
 ID: ('a'..'z' | 'A'..'Z')+;
 
+PATH: PATH_COMPONENT ('.' PATH_COMPONENT)*;
+
+fragment
+PATH_COMPONENT: ('a'..'z' | 'A'..'Z')+;
+
 INTEGER : (DIGIT)+;
 
 DOUBLE : '0'..'9'+'.''0'..'9'+ ;
@@ -75,12 +80,20 @@ statement returns [String code]
     : val_assignment {$code = $val_assignment.code; }
     | function_call {$code = $function_call.code; }
     | function_def {$code = $function_def.code; }
+    | import_statement {$code = $import_statement.code; }
     ;
+
+
+import_statement returns [String code]
+    : 'import ' PATH {$code = "(import '" + $PATH.text + ")";}
+    ;
+
 
 expression returns [String code]
     : INTEGER {$code = $INTEGER.text; }
     | DOUBLE {$code = $DOUBLE.text; }
     ;
+
 
 val_assignment returns [String code]
     : 'val' ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
@@ -108,3 +121,4 @@ function_def returns [String code]
             $code += ")";
         }
     ;
+
