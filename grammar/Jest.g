@@ -86,7 +86,7 @@ paramdefs returns [List<String> code_list]
 
 function_call returns [String code]
     : ID '(' paramdefs ')' {
-                $code = "(defn " + $ID;
+                $code = "(" + $ID.text;
                 for(int i=0; i < $paramdefs.code_list.size(); ++i) { $code += " " + $paramdefs.code_list.get(i); }
                 $code += ")";
         }
