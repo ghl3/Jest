@@ -1,14 +1,22 @@
 # Jest
 
-A Clojure library designed to ... well, that part is up to you.
+Jest is an interpreted language that runs on the JVM.
+
+Jest programs are compiled into Clojure source code and executed by the Clojure runtime.
+
+## Installing
+
+Download the jest source code.
+Add "jest/bin" to your path.
 
 ## Usage
 
-FIXME
+Run a jest program:
+>jest program.jst
 
 ## License
 
-Copyright © 2015 FIXME
+Copyright © 2015
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the MIT License.
+
