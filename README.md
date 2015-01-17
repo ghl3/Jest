@@ -19,4 +19,3 @@ Run a jest program:
 Copyright © 2015
 
 Distributed under the MIT License.
-
