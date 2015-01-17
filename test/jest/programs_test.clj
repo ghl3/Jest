@@ -6,6 +6,6 @@
 
 
 (deftest func-resource-test-jst-test
-  (let [program (slurp "resources/test.jst")
+  (let [program (slurp "resources/print.jst")
         code (. JestCompiler (getCode program))]
     (is (= code ["(def x 10)" "(def y 20)" "(println x)" "(println y)"]))))
