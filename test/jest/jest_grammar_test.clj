@@ -19,3 +19,8 @@
     (is (.. ast (getChild 0) getType) (. JestParser ID))
     (is (.. ast (getChild 0) getType) (. JestParser ID))
     ))
+
+(deftest code-test
+  (let [program "val foo = 10;"
+        code (. JestCompiler (getCode program))]
+    (is (= code ["(def foo 10)"]))))

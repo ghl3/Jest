@@ -6,6 +6,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :plugins [[lein-typed "0.3.5"]
             [lein-antlr "0.2.0"]]
+
   ;;:hooks [leiningen.antlr]
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}
 
@@ -17,6 +18,7 @@
                  [org.clojure/core.match "0.3.0-alpha4"]
 
                  ;; https://github.com/alexhall/lein-antlr
+                 [org.antlr/antlr "3.5.2"]
                  [org.antlr/antlr-runtime "3.5.2"]]
   :main jest.jest
 

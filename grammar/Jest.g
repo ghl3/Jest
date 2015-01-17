@@ -59,25 +59,36 @@ COMMA : ',';
 
 // A file is a list of statements
 // followed by an EOF
-exprlist
-    : ( statement )* (WS)? EOF!
+exprlist returns [List<String> code_list]
+@init{$code_list = new ArrayList<String>();}
+    : ( statement {$code_list.add($statement.code);} )* (WS)? EOF!
     ;
 
 // A statement is an expression followed
 // by a semicolon
-statement
-    : expression SEMICOLON
+statement returns [String code]
+    : expression SEMICOLON {$code = $expression.code;}
     ;
 
-expression : (val_assignment | function_call);
-
-val_assignment
-    : VAL ID '=' INTEGER_NUMBER -> ^(ID INTEGER_NUMBER);
-
-paramdefs
-    :  (ID COMMA!)* ID
+expression returns [String code]
+    : val_assignment {$code = $val_assignment.code; }
+    | function_call {$code = $function_call.code; }
     ;
 
-function_call
-    : ID '(' paramdefs ')' -> ^(ID paramdefs);
+val_assignment returns [String code]
+    : VAL ID '=' INTEGER_NUMBER { $code = "(def " + $ID.text + " " + $INTEGER_NUMBER.text + ")"; }
+    ;
+
+paramdefs returns [List<String> code_list]
+@init{$code_list = new ArrayList<String>();}
+    :  (a=ID COMMA! {$code_list.add($a.text);})* b=ID { $code_list.add($b.text);}
+    ;
+
+function_call returns [String code]
+    : ID '(' paramdefs ')' {
+                $code = "(defn " + $ID;
+                for(int i=0; i < $paramdefs.code_list.size(); ++i) { $code += " " + $paramdefs.code_list.get(i); }
+                $code += ")";
+        }
+    ;
 
