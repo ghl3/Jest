@@ -21,6 +21,7 @@
                  [org.antlr/antlr "3.5.2"]
                  [org.antlr/antlr-runtime "3.5.2"]]
   :main jest.jest
+  :aot [jest.jest]
 
   ;; Typed configs
   :core.typed {:check [jest.jest parser.parse]}
