@@ -93,39 +93,55 @@ expression returns [String code]
     : INTEGER {$code = $INTEGER.text; }
     | DOUBLE {$code = $DOUBLE.text; }
     | clojure_list {$code = $clojure_list.code; }
+    | function_call {$code = $function_call.code; }
+    | ID {$code = $ID.text; }
     ;
+
+
+expression_list returns [List<String> code_list]
+@init{$code_list = new ArrayList<String>();}
+    :  a=expression {$code_list.add($a.code);} (COMMA! b=expression { $code_list.add($b.code);})+
+    ;
+
+
+val_assignment returns [String code]
+    : 'val' ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
+    ;
+
+
+
+function_def_params returns [List<String> code_list]
+@init{$code_list = new ArrayList<String>();}
+    :  (a=ID COMMA! {$code_list.add($a.text);})* b=ID { $code_list.add($b.text);}
+    ;
+
+function_def returns [String code]
+    : 'defn' ID '(' function_def_params ')' '{' expression '}' {
+            $code = "(defn " + $ID.text + "[";
+            for(int i=0; i < $function_def_params.code_list.size(); ++i) { $code += " " + $function_def_params.code_list.get(i); }
+            $code += "]";
+            $code += " " + $expression.code;
+            $code += ")";
+        }
+    ;
+
+
+function_call returns [String code]
+    : ID '(' expression ')' { $code = "(" + $ID.text + " " + $expression.code + ")"; }
+    | ('(' expression COMMA!) => ID '(' expression_list ')' {
+            $code = "(" + $ID.text;
+            for(int i=0; i < $expression_list.code_list.size(); ++i) {
+                $code += " " + $expression_list.code_list.get(i);
+            }
+            $code += ")";
+        }
+    ;
+
 
 
 clojure_list returns [String code]
 @init{$code = "["; }
 @after{$code += "]"; }
     : '[' a=expression {$code += $a.code;} (COMMA WS? b=expression {$code += ", " + $b.code;})* ']'
-    ;
-
-val_assignment returns [String code]
-    : 'val' ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
-    ;
-
-paramdefs returns [List<String> code_list]
-@init{$code_list = new ArrayList<String>();}
-    :  (a=ID COMMA! {$code_list.add($a.text);})* b=ID { $code_list.add($b.text);}
-    ;
-
-function_call returns [String code]
-    : ID '(' paramdefs ')' {
-                $code = "(" + $ID.text;
-                for(int i=0; i < $paramdefs.code_list.size(); ++i) { $code += " " + $paramdefs.code_list.get(i); }
-                $code += ")";
-        }
-    ;
-
-function_def returns [String code]
-    : 'defn' ID '(' paramdefs ')' '{' expression '}' {
-            $code = "(defn " + $ID.text + "[";
-            for(int i=0; i < $paramdefs.code_list.size(); ++i) { $code += " " + $paramdefs.code_list.get(i); }
-            $code += "]";
-            $code += " " + $expression.code;
-            $code += ")";
-        }
     ;
 

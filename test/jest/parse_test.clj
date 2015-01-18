@@ -89,3 +89,8 @@
    "\nval list = [1, 2, 3 ];\n"
    ["(def list [1, 2, 3])"]))
 
+
+(deftest sum-test
+  (test-code
+   "val list = [1, 2, 3];\nprintln(sum(list));"
+   ["(def list [1, 2, 3])" "(println (sum list))"]))
