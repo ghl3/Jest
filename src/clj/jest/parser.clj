@@ -1,7 +1,5 @@
 (ns jest.parser
-  (:require [clojure.core.typed :as t]
-            [clojure.string :as str]
-            [parser.tools :as tools]))
+  (:require [clojure.core.typed :as t]))
 
 (import 'jest.grammar.JestCompiler)
 
@@ -41,5 +39,3 @@
   "Evaluate the given jest code and
   return the value"
   (doall (map read-and-eval (parse-source-file jest-code))))
-
-

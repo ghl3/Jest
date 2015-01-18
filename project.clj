@@ -24,7 +24,7 @@
   :aot [jest.jest]
 
   ;; Typed configs
-  :core.typed {:check [jest.jest parser.parse]}
+  :core.typed {:check [jest.jest jest.parser]}
 
   ;; ANTLR configs
   :antlr-src-dir "grammar"

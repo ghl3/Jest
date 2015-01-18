@@ -1,17 +1,13 @@
 (ns jest.jest
   (:require [clojure.tools.cli :refer [parse-opts]]
             [clojure.string :as str]
-            [parser.parse :refer :all]
-            )
-(:gen-class))
-
+            [jest.parser :refer :all])
+  (:gen-class))
 
 
 (def cli-options
   [
-   ;; A non-idempotent option
-   [nil "-v" "--verbose" "Print verbose information"]
-   ;; A boolean option defaulting to nil
+   ["-v" "--verbose" :default false]
    ["-h" "--help"]])
 
 
@@ -30,6 +26,7 @@
         ""
         "Please refer to the manual page for more information."]
        (str/join \newline)))
+
 
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
