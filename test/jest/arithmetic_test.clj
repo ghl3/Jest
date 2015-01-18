@@ -3,6 +3,17 @@
             [jest.utils :refer :all]
             :verbose))
 
+(deftest sum-test-1
+  (test-code
+   "val x = 1 + 2;"
+   ["(def x (+ 1 2))"]))
+
+(deftest sum-test-2
+  (test-code
+   "val x = 1 + 2 + 3;"
+   ["(def x (+ (+ 1 2) 3))"]))
+
+
 (deftest product-test-1
   (test-code
    "val x = 1 * 2;"
