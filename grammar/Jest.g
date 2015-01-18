@@ -127,16 +127,15 @@ function_def returns [String code]
 
 
 function_call returns [String code]
-    : ID '(' expression ')' { $code = "(" + $ID.text + " " + $expression.code + ")"; }
-    | ('(' expression COMMA!) => ID '(' expression_list ')' {
+    : (ID '(' expression COMMA!) => ID '(' expression_list ')' {
             $code = "(" + $ID.text;
             for(int i=0; i < $expression_list.code_list.size(); ++i) {
                 $code += " " + $expression_list.code_list.get(i);
             }
             $code += ")";
         }
+    | ID '(' expression ')' { $code = "(" + $ID.text + " " + $expression.code + ")"; }
     ;
-
 
 
 clojure_list returns [String code]
@@ -144,4 +143,3 @@ clojure_list returns [String code]
 @after{$code += "]"; }
     : '[' a=expression {$code += $a.code;} (COMMA WS? b=expression {$code += ", " + $b.code;})* ']'
     ;
-

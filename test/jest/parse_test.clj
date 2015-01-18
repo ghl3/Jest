@@ -1,38 +1,7 @@
 (ns jest.parse-test
-  (:require [clojure.test :refer :all]))
-
-(import 'jest.grammar.JestParser)
-(import 'jest.grammar.JestCompiler)
-
-(deftest compile-assignment-test
-  (let [program "val foo = 10;"
-        ast (. JestCompiler (compile program))]
-    (is (.. ast getType) (. JestParser ID))
-    (is (.. ast (getChild 0) getType) (. JestParser INTEGER))
-    ))
-
-(deftest compile-func-test
-  (let [program "foobar(a, b, c);"
-        ast (. JestCompiler (compile program))]
-    (is (.. ast getType) (. JestParser ID))
-    (is (.. ast (getChild 0) getType) (. JestParser ID))
-    (is (.. ast (getChild 0) getType) (. JestParser ID))
-    (is (.. ast (getChild 0) getType) (. JestParser ID))
-    ))
-
-
-(defn test-code
-  "Test that the given jest code
-  compiles into the given clojure code"
-  [jest clojure]
-  (let [code-list (. JestCompiler (getCode jest))]
-    (println "\nJest: ")
-    (println jest)
-    (println "Clojure: ")
-    (doall (map println code-list))
-    (println "")
-    (is (= code-list clojure))))
-
+  (:require [clojure.test :refer :all]
+            [jest.utils :refer :all]
+            :verbose))
 
 (deftest val-test
   (test-code
@@ -44,7 +13,17 @@
    "val foo = 10; \n val bar = 20;"
    ["(def foo 10)" "(def bar 20)"]))
 
-(deftest func-test
+(deftest func-test-1
+  (test-code
+   "foobar(a);"
+   ["(foobar a)"]))
+
+(deftest func-test-2
+  (test-code
+   "foobar(a,b);"
+   ["(foobar a b)"]))
+
+(deftest func-test-3
   (test-code
    "foobar(a, b, c);"
    ["(foobar a b c)"]))
