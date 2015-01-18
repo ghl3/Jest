@@ -43,6 +43,11 @@ WS  :   (' '
 
 /*VAL: 'val';*/
 
+PLUS:     '+' ;
+MINUS:    '-' ;
+MULT:     '*' ;
+DIV:      '/' ;
+
 ID: ('a'..'z' | 'A'..'Z')+;
 
 PATH: PATH_COMPONENT ('.' PATH_COMPONENT)*;
@@ -50,12 +55,19 @@ PATH: PATH_COMPONENT ('.' PATH_COMPONENT)*;
 fragment
 PATH_COMPONENT: ('a'..'z' | 'A'..'Z')+;
 
-INTEGER : (DIGIT)+;
-
-DOUBLE : '0'..'9'+'.''0'..'9'+ ;
-
 fragment
 DIGIT : '0'..'9';
+
+fragment
+INTEGER : (DIGIT)+;
+
+fragment
+DOUBLE : '0'..'9'+'.''0'..'9'+ ;
+
+NUMBER
+    : INTEGER
+    | DOUBLE
+    ;
 
 SEMICOLON : ';';
 
@@ -90,11 +102,30 @@ import_statement returns [String code]
 
 
 expression returns [String code]
-    : INTEGER {$code = $INTEGER.text; }
-    | DOUBLE {$code = $DOUBLE.text; }
+    : NUMBER {$code = $NUMBER.text; }
     | clojure_list {$code = $clojure_list.code; }
     | function_call {$code = $function_call.code; }
     | ID {$code = $ID.text; }
+    | arithmetic_expression {$code = $arithmetic_expression.code; }
+    ;
+
+arithmetic_expression returns [String code]
+    : arithmetic_term_product {$code = $arithmetic_term_product.code;}
+    ;
+
+/*
+arithmetic_expression returns [String code]
+    : arithmetic_term ( ( PLUS | MINUS )  arithmetic_term )*
+    ;
+*/
+arithmetic_term_product returns [String code]
+@init{$code = "(* "; }
+@after{$code += ")"; }
+    : a=arithmetic_factor {$code += $a.code;} (MULT! b=arithmetic_factor {$code += " " + $b.code;})+
+    ;
+
+arithmetic_factor returns [String code]
+    : NUMBER {$code = $NUMBER.text;}
     ;
 
 
