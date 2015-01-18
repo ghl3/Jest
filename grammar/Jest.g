@@ -37,7 +37,14 @@ MINUS:    '-' ;
 MULT:     '*' ;
 DIV:      '/' ;
 
+/*ID: ('a'..'z' | 'A'..'Z')+;*/
+
+STRING : '"' ~('\r' | '\n' | '"')* '"' ;
+
 ID: ('a'..'z' | 'A'..'Z')+;
+
+/*STRING: '"' (NAME)? '"';*/
+
 
 PATH: PATH_COMPONENT ('.' PATH_COMPONENT)*;
 
@@ -101,13 +108,14 @@ arithmetic_expression returns [String code]
 
 arithmetic_term returns [String code]
 @init{$code = ""; }
-    : a=arithmetic_factor {$code = $a.code;} ( ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=arithmetic_factor {$code += $b.code + ")";} )*
+    : a=expression_atom {$code = $a.code;} ( ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expression_atom {$code += $b.code + ")";} )*
     ;
 
 fragment
-arithmetic_factor returns [String code]
+expression_atom returns [String code]
     : NUMBER {$code = $NUMBER.text;}
     | ID {$code = $ID.text; }
+    | STRING {$code = $STRING.text; }
     | clojure_list {$code = $clojure_list.code; }
     | clojure_map {$code = $clojure_map.code; }
     | function_call {$code = $function_call.code; }
@@ -158,7 +166,7 @@ clojure_list returns [String code]
 clojure_map returns [String code]
 @init{$code = "{"; }
 @after{$code += "}"; }
-    : '{' a=ID COLON b=expression {$code += $a.text + " " + $b.code;} (COMMA WS? c=ID COLON d=expression {$code += " " + $c.text + " " + $d.code;})* '}'
+    : '{' a=expression COLON b=expression {$code += $a.code + " " + $b.code;} (COMMA WS? c=expression COLON d=expression {$code += " " + $c.code + " " + $d.code;})* '}'
     ;
 
 clojure_get returns [String code]

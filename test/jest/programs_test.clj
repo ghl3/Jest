@@ -13,4 +13,4 @@
   (let [program (slurp "resources/list.jst")]
     (test-code
      program
-     ["(def list [1, 2, 3])" "(println list)" "(println (first list))"])))
+     ["(def lst [1, 2, 3])" "(println lst)" "(println (first lst))" "(println (get lst 2))"])))
