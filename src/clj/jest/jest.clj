@@ -57,11 +57,13 @@
   return the value"
   (doall (map println (parse-source-file jest-code))))
 
+(defn read-and-eval [clojure]
+  (eval (read-string clojure)))
 
 (defn eval-jest [jest-code]
   "Evaluate the given jest code and
   return the value"
-  (doall (map (comp eval read-string) (parse-source-file jest-code))))
+  (doall (map read-and-eval (parse-source-file jest-code))))
 
 
 (defn -main [& args]

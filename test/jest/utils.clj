@@ -18,19 +18,22 @@
     (is (= code-list clojure))))
 
 
-(defn test-code-and-val
+(defn test-code-eval
   "Test that the given jest code
   compiles into the given clojure code.
   In addition, test that, when evaluated,
   the code gives the supplied 'val'."
   [jest clojure val]
-  (let [code-list (parse-source-file jest)]
+  (let [expression (parse-expression jest)]
     (println "\nJest: ")
     (println jest)
     (println "Clojure: ")
-    (doall (map println code-list))
+    (println expression)
     (println "")
-    (is (= code-list clojure))
-    (let [code-val (eval-jest jest)]
-      (is code-val val))))
+
+    (is (= expression clojure))
+    (let [code-val (read-and-eval expression)]
+      (println "Code Val:")
+      (println code-val)
+      (is (= code-val val)))))
 

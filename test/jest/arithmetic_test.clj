@@ -9,9 +9,9 @@
    ["(def x (+ 1 2))"]))
 
 (deftest sum-test-val-1
-  (test-code-and-val
-   "val x = 1 + 2;"
-   ["(def x (+ 1 2))"]
+  (test-code-eval
+   "1 + 2"
+   "(+ 1 2)"
    3))
 
 (deftest sum-test-2
