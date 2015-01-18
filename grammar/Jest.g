@@ -111,6 +111,7 @@ expression returns [String code]
 
 arithmetic_expression returns [String code]
     : arithmetic_term_product {$code = $arithmetic_term_product.code;}
+    | arithmetic_term_quotent {$code = $arithmetic_term_quotent.code;}
     ;
 
 /*
@@ -118,10 +119,17 @@ arithmetic_expression returns [String code]
     : arithmetic_term ( ( PLUS | MINUS )  arithmetic_term )*
     ;
 */
+
 arithmetic_term_product returns [String code]
 @init{$code = "(* "; }
 @after{$code += ")"; }
     : a=arithmetic_factor {$code += $a.code;} (MULT! b=arithmetic_factor {$code += " " + $b.code;})+
+    ;
+
+arithmetic_term_quotent returns [String code]
+@init{$code = "(/ "; }
+@after{$code += ")"; }
+    : a=arithmetic_factor {$code += $a.code;} (DIV! b=arithmetic_factor {$code += " " + $b.code;})+
     ;
 
 arithmetic_factor returns [String code]
