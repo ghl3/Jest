@@ -32,6 +32,27 @@
   (System/exit status))
 
 
+(defn line-break [n]
+  (str/join (repeat n "=")))
+
+
+(defn verbose-print-jest-source [source-code]
+  "Print helpful information based on the
+  input source code we're running"
+
+  (println "\n" "Raw input source code: \n")
+  (println (line-break 20))
+  (println source-code)
+  (println (line-break 20))
+
+  (println "\n" "Translated into Clojure: \n")
+  (println (line-break 20))
+  (print-jest source-code)
+  (println (line-break 20))
+
+  (println "\n" "Program Output: \n"))
+
+
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     ;; Read the main file and parse it
@@ -42,7 +63,9 @@
 
     (let [source-file (first arguments)
           source-code (slurp source-file)]
-      (if (:verbose options) (do
-                               (println source-code)
-                               (print-jest source-code)) nil)
+
+      ;; Print some helpful output for testing/debugging
+      (cond (:verbose options) (verbose-print-jest-source source-code))
+
+      ;; Run all the things!
       (eval-jest source-code))))
