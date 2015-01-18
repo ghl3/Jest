@@ -16,15 +16,6 @@ options
 package jest.grammar;
 }
 
-// A comment is a c-style single-line comment
-
-/*
-tokens {
-  FUNC;
-  PARAMS;
-        }
-*/
-
 // or a python style hash comment
 LineComment
     :   '[//,#]' ~('\n'|'\r')* //NEWLINE
@@ -40,8 +31,6 @@ WS  :   (' '
     ;
 
 /** Lexer Rules **/
-
-/*VAL: 'val';*/
 
 PLUS:     '+' ;
 MINUS:    '-' ;
@@ -95,35 +84,13 @@ statement returns [String code]
     | import_statement {$code = $import_statement.code; }
     ;
 
-
 import_statement returns [String code]
     : 'import ' PATH {$code = "(import '" + $PATH.text + ")";}
     ;
 
-
 expression returns [String code]
     : arithmetic_expression {$code = $arithmetic_expression.code; }
     ;
-
-
-/*
-arithmetic_expression returns [String code]
-    : arithmetic_term_product {$code = $arithmetic_term_product.code;}
-    | arithmetic_term_quotent {$code = $arithmetic_term_quotent.code;}
-    ;
-
-arithmetic_term_product returns [String code]
-@init{$code = "(* "; }
-@after{$code += ")"; }
-    : a=arithmetic_factor {$code += $a.code;} (MULT! b=arithmetic_factor {$code += " " + $b.code;})+
-    ;
-
-arithmetic_term_quotent returns [String code]
-@init{$code = "(/ "; }
-@after{$code += ")"; }
-    : a=arithmetic_factor {$code += $a.code;} (DIV! b=arithmetic_factor {$code += " " + $b.code;})+
-    ;
-*/
 
 arithmetic_expression returns [String code]
 @init{$code = ""; }
@@ -143,23 +110,14 @@ arithmetic_factor returns [String code]
     | function_call {$code = $function_call.code; }
     ;
 
-/*
-arithmetic_expression returns [String code]
-    : arithmetic_term_multiply (arithmetic_term_multiply)*
-    | arithmetic_term_quotent {$code = $arithmetic_term_quotent.code;}
-    ;
-*/
 expression_list returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
     :  a=expression {$code_list.add($a.code);} (COMMA! b=expression { $code_list.add($b.code);})+
     ;
 
-
 val_assignment returns [String code]
     : 'val' ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
     ;
-
-
 
 function_def_params returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
@@ -176,7 +134,6 @@ function_def returns [String code]
         }
     ;
 
-
 function_call returns [String code]
     : (ID '(' expression COMMA!) => ID '(' expression_list ')' {
             $code = "(" + $ID.text;
@@ -187,7 +144,6 @@ function_call returns [String code]
         }
     | ID '(' expression ')' { $code = "(" + $ID.text + " " + $expression.code + ")"; }
     ;
-
 
 clojure_list returns [String code]
 @init{$code = "["; }
