@@ -1,6 +1,6 @@
 (ns jest.utils
   (:require [clojure.test :refer :all]
-            [jest.jest :refer :all]))
+            [jest.parser :refer :all]))
 
 ;;(import 'jest.grammar.JestParser)
 ;;(import 'jest.grammar.JestCompiler)

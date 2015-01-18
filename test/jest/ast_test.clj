@@ -1,7 +1,7 @@
 (ns jest.ast-test
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all]
-            [jest.jest :refer :all]
+            [jest.parser :refer [create-ast]]
             :verbose))
 
 (import 'jest.grammar.JestParser)

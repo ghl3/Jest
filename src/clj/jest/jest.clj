@@ -1,11 +1,11 @@
 (ns jest.jest
   (:require [clojure.tools.cli :refer [parse-opts]]
             [clojure.string :as str]
-            ;;[parser.parse :as parse]
+            [parser.parse :refer :all]
             )
 (:gen-class))
 
-(import 'jest.grammar.JestCompiler)
+
 
 (def cli-options
   [
@@ -30,41 +30,6 @@
         ""
         "Please refer to the manual page for more information."]
        (str/join \newline)))
-
-
-;; TODO: Move the next three functions to the parser
-(defn parse-source-file [code]
-  "Parse a string representing a full
-   jest source file and return a list of
-   clojure expressions."
-  (. JestCompiler (parseSourceFile code)))
-
-
-(defn parse-expression [code]
-  "Parse a string representing a jest
-  expression and return a clojure expression"
-  (. JestCompiler (parseExpression code)))
-
-
-(defn create-ast
-  "Get the AST"
-  [program]
-  (. JestCompiler (compile program)))
-
-
-(defn print-jest [jest-code]
-  "Evaluate the given jest code and
-  return the value"
-  (doall (map println (parse-source-file jest-code))))
-
-(defn read-and-eval [clojure]
-  (eval (read-string clojure)))
-
-(defn eval-jest [jest-code]
-  "Evaluate the given jest code and
-  return the value"
-  (doall (map read-and-eval (parse-source-file jest-code))))
-
 
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
