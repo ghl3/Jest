@@ -13,7 +13,6 @@
    "val x = 1 + 2 + 3;"
    ["(def x (+ (+ 1 2) 3))"]))
 
-
 (deftest product-test-1
   (test-code
    "val x = 1 * 2;"
@@ -34,8 +33,23 @@
    "val x = 1 / 2 / 3;"
    ["(def x (/ (/ 1 2) 3))"]))
 
-
 (deftest multiply-divide-test
   (test-code
    "val x = 1 * 2 / 3;"
    ["(def x (/ (* 1 2) 3))"]))
+
+(deftest add-multiply-test
+  (test-code
+   "val x = 1 + 2 / 3;"
+   ["(def x (+ 1 (/ 2 3)))"]))
+
+
+(deftest func-test-1
+  (test-code
+   "val x = f(a, b, c) + 5;"
+   ["(def x (+ (f a b c) 5))"]))
+
+(deftest func-test-2
+  (test-code
+   "val x = f(a+b, b, c) + 5;"
+   ["(def x (+ (f (+ a b) b c) 5))"]))
