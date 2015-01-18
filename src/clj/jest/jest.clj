@@ -7,32 +7,42 @@
 
 (def cli-options
   [
-   ["-v" "--verbose" :default false]
+   ["-v" "--verbose" :flag true]
    ["-h" "--help"]])
 
 
 (defn usage [options-summary]
-  (->> ["This is my program. There are many like it, but this one is mine."
+  (->> ["This is the main Jest executable."
         ""
-        "Usage: program-name [options] action"
+        "Usage: jest /path/to/source/file.jst [options]"
         ""
         "Options:"
         options-summary
         ""
-        "Actions:"
-        "  start    Start a new server"
-        "  stop     Stop an existing server"
-        "  status   Print a server's status"
-        ""
-        "Please refer to the manual page for more information."]
+        "Please refer to the hosted source for more information: https://github.com/ghl3/Jest"]
        (str/join \newline)))
+
+(defn error-msg [errors]
+  (str "The following errors occurred while parsing your command:\n\n"
+       (str/join \newline errors)))
+
+
+(defn exit [status msg]
+  (println msg)
+  (System/exit status))
 
 
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     ;; Read the main file and parse it
     ;; Print the results
-    (let [code (slurp (first arguments))]
-      (println code)
-      (print-jest code)
-      (eval-jest code))))
+
+    (cond
+     (:help options) (exit 0 (usage summary)))
+
+    (let [source-file (first arguments)
+          source-code (slurp source-file)]
+      (if (:verbose options) (do
+                               (println source-code)
+                               (print-jest source-code)) nil)
+      (eval-jest source-code))))
