@@ -1,7 +1,6 @@
 (ns jest.parse-test
   (:require [clojure.test :refer :all]
-            [jest.utils :refer :all]
-            :verbose))
+            [jest.utils :refer :all]))
 
 (deftest val-test
   (test-code
