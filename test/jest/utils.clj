@@ -18,6 +18,24 @@
     (is (= code-list clojure))))
 
 
+
+(defn test-eval
+  "Evaluate the jest expression and
+  assert that it equals the given value"
+  [jest val]
+  (let [expression (parse-expression jest)]
+    (println "\nJest: ")
+    (println jest)
+    (println "Clojure: ")
+    (println expression)
+    (println "")
+
+    (let [code-val (read-and-eval expression)]
+      (println "Code Val:")
+      (println code-val)
+      (is (= code-val val)))))
+
+
 (defn test-code-eval
   "Test that the given jest code
   compiles into the given clojure code.

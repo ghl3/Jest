@@ -12,3 +12,8 @@
   (test-code
    "val map = {a:1, b:2};"
    ["(def map {a 1 b 2})"]))
+
+(deftest map-get-1
+  (test-code
+   "val map = {a:1, b:2}; val x = map[a];"
+   ["(def map {a 1 b 2})" "(def x (get map a))"]))

@@ -27,3 +27,9 @@
   (test-code
    "\nval list = [1, 2, 3 ];\n"
    ["(def list [1, 2, 3])"]))
+
+
+(deftest map-get-1
+  (test-code
+   "val list = [1, 2, 3, 4, 5]; val x = list[3];"
+   ["(def list [1, 2, 3, 4, 5])" "(def x (get list 3))"]))

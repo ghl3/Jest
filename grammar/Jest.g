@@ -111,6 +111,7 @@ arithmetic_factor returns [String code]
     | clojure_list {$code = $clojure_list.code; }
     | clojure_map {$code = $clojure_map.code; }
     | function_call {$code = $function_call.code; }
+    | clojure_get {$code = $clojure_get.code; }
     ;
 
 expression_list returns [List<String> code_list]
@@ -158,4 +159,8 @@ clojure_map returns [String code]
 @init{$code = "{"; }
 @after{$code += "}"; }
     : '{' a=ID COLON b=expression {$code += $a.text + " " + $b.code;} (COMMA WS? c=ID COLON d=expression {$code += " " + $c.text + " " + $d.code;})* '}'
+    ;
+
+clojure_get returns [String code]
+    : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";}
     ;
