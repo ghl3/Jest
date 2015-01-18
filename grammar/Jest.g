@@ -62,6 +62,8 @@ SEMICOLON : ';';
 
 COMMA : ',';
 
+COLON : ':';
+
 /** Parser Rules **/
 
 // A file is a list of statements
@@ -107,6 +109,7 @@ arithmetic_factor returns [String code]
     : NUMBER {$code = $NUMBER.text;}
     | ID {$code = $ID.text; }
     | clojure_list {$code = $clojure_list.code; }
+    | clojure_map {$code = $clojure_map.code; }
     | function_call {$code = $function_call.code; }
     ;
 
@@ -149,4 +152,10 @@ clojure_list returns [String code]
 @init{$code = "["; }
 @after{$code += "]"; }
     : '[' a=expression {$code += $a.code;} (COMMA WS? b=expression {$code += ", " + $b.code;})* ']'
+    ;
+
+clojure_map returns [String code]
+@init{$code = "{"; }
+@after{$code += "}"; }
+    : '{' a=ID COLON b=expression {$code += $a.text + " " + $b.code;} (COMMA WS? c=ID COLON d=expression {$code += " " + $c.text + " " + $d.code;})* '}'
     ;
