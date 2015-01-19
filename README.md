@@ -2,7 +2,7 @@
 
 >I knew him, Horatio; a fellow of infinite jest, of most excellent fancy
 
-- Hamlet, Act 5, Scene 1
+- Hamlet, V.i
 
 ## About
 
