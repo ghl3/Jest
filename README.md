@@ -62,7 +62,7 @@ val answers = {"Jane": ["A", "C", "D", "A"],
     "Bob": ["B", "C", "D", "B"],
     "Tom": ["A", "C", "B", "A"]};
 
-for (a, b : studentAges.seq(), answers.seq()) {
+for (a, b : studentAges, answers) {
     println(a, b);
 };
 ```
