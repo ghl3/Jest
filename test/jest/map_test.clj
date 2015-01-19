@@ -25,7 +25,6 @@
    ["(def mp {\"a\" 1 \"b\" 2})" "(get mp \"a\")"]
    1))
 
-
 (deftest map-test-3
   (test-code-eval
    "val mp = {:a : 1, :b : 2}; mp[:a];"

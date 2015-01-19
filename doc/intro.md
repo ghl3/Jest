@@ -67,6 +67,11 @@ Items in a map are related using a colon and pairs of items must be separated by
 
     val myVal = mp.get("a"); 
 
+As discussed earlier, symbols are useful as keys to maps:
+
+    val mp = {:a : 1, :b : 2};
+    val x = mp[:a];
+
 ## Functions
 
 Functions in Jest are first class objects.  They can be created using the "defn" keyword:
