@@ -69,9 +69,14 @@ HASH : '#';
 
 // A file is a list of statements
 // followed by an EOF
-exprlist returns [List<String> code_list]
+source_code returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
-    : ( statement_term {$code_list.add($statement_term.code);} )* (WS)? EOF!
+    : statement_list {for (String str: $statement_list.code_list) { $code_list.add(str); }} EOF!
+    ;
+
+statement_list returns [List<String> code_list]
+@init{$code_list = new ArrayList<String>();}
+    : ( statement_term {$code_list.add($statement_term.code);} )* (WS)?
     ;
 
 // A statement_term is a statement followed
