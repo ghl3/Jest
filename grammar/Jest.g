@@ -39,6 +39,10 @@ DIV:      '/' ;
 
 STRING : '"' ~('\r' | '\n' | '"')* '"' ;
 
+VAL: 'val';
+
+DEFN: 'defn';
+
 ID: ('a'..'z' | 'A'..'Z')+;
 
 fragment
@@ -131,7 +135,7 @@ expression_list returns [List<String> code_list]
     ;
 
 val_assignment returns [String code]
-    : 'val' ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
+    : VAL ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
     ;
 
 function_def_params returns [List<String> code_list]
@@ -140,16 +144,29 @@ function_def_params returns [List<String> code_list]
     ;
 
 function_def returns [String code]
-    : 'defn' ID '(' function_def_params ')' '{' expression '}' {
+@init{$code = "(defn ";}
+@after{$code += ")"; }
+    : DEFN ID '(' function_def_params ')' {
             $code = "(defn " + $ID.text;
             $code += " [";
             for(int i=0; i < $function_def_params.code_list.size(); ++i) {
                 $code += " " + $function_def_params.code_list.get(i);
             }
             $code += " ]";
+        }
+        '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
+/*
+
+
+            for(int i=0; i < $statement_termfunction_def_params.code_list.size(); ++i) {
+                $code += " " + $function_def_params.code_list.get(i);
+            }
+            
             $code += " " + $expression.code;
             $code += ")";
+
         }
+*/
     ;
 
 function_call returns [String code]

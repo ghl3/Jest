@@ -1,15 +1,16 @@
 (ns jest.utils
   (:require [clojure.test :refer :all]
-            [jest.parser :refer :all]))
+            [jest.parser :refer :all]
+            [clojure.string :as string]))
 
-;;(import 'jest.grammar.JestParser)
-;;(import 'jest.grammar.JestCompiler)
-
+(defn remove-code-compare-whitespace
+  [s]
+  (string/replace s #"[\n\t]" ""))
 
 (defn compare-code
   [x y]
   (println x y)
-  (is (= x y)))
+  (is (= (remove-code-compare-whitespace x) (remove-code-compare-whitespace y))))
 
 
 (defn test-code
@@ -27,7 +28,8 @@
     (doall (map compare-code clojure code-list))
 
     ;; Conmpare all of the code
-    (is (= clojure code-list))))
+    (is (= (map remove-code-compare-whitespace clojure)
+           (map remove-code-compare-whitespace code-list)))))
 
 
 (defn test-eval

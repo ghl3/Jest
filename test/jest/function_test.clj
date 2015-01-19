@@ -31,3 +31,13 @@
   (test-code
    "defn myFunc(a, b, c) { a + b + c };",
    ["(defn myFunc [ a b c ] (+ (+ a b) c))"]))
+
+(deftest func-def-2
+  (test-code
+   "defn myFunc(a, b, c) {
+      val x = a + b + c;
+      x * 2;
+      };",
+   ["(defn myFunc [ a b c ]
+(def x (+ (+ a b) c))
+(* x 2))"]))
