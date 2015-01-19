@@ -12,21 +12,6 @@
    "val foo = 10; \n val bar = 20;"
    ["(def foo 10)" "(def bar 20)"]))
 
-(deftest func-test-1
-  (test-code
-   "foobar(a);"
-   ["(foobar a)"]))
-
-(deftest func-test-2
-  (test-code
-   "foobar(a,b);"
-   ["(foobar a b)"]))
-
-(deftest func-test-3
-  (test-code
-   "foobar(a, b, c);"
-   ["(foobar a b c)"]))
-
 (deftest println-test
   (test-code
    "println(a);"

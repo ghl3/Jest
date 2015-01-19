@@ -155,6 +155,25 @@ function_call returns [String code]
             $code += ")";
         }
     | ID '(' expression ')' { $code = "(" + $ID.text + " " + $expression.code + ")"; }
+    /*| ID '(' ')' { $code = "(" + $ID.text + ")"; }*/
+    ;
+
+/**
+Method calls are inverted functions:
+
+obj.func(x, y, z) <--> func(obj, x, y, z)
+
+*/
+method_call returns [String code]
+    : (ID '.' ID '(' expression COMMA!) => obj=ID '.' func=ID '(' expression_list ')' {
+            $code = "(" + $func.text + " " + $obj.text;
+            for(int i=0; i < $expression_list.code_list.size(); ++i) {
+                $code += " " + $expression_list.code_list.get(i);
+            }
+            $code += ")";
+        }
+    | obj=ID '.' func=ID '(' expression ')' { $code = "(" + $func.text + " " + $obj.text + " " + $expression.code + ")"; }
+    /*| obj=ID '.' func=ID  '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }*/
     ;
 
 clojure_list returns [String code]
@@ -172,3 +191,7 @@ clojure_map returns [String code]
 clojure_get returns [String code]
     : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";}
     ;
+
+
+
+
