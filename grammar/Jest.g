@@ -125,7 +125,7 @@ expression_atom returns [String code]
     : NUMBER {$code = $NUMBER.text;}
     | ID {$code = $ID.text; }
     | STRING {$code = $STRING.text; }
-    | clojure_list {$code = $clojure_list.code; }
+    | clojure_vector {$code = $clojure_vector.code; }
     | clojure_map {$code = $clojure_map.code; }
     | function_call {$code = $function_call.code; }
     | method_call {$code = $method_call.code; }
@@ -229,16 +229,18 @@ for_loop returns [String code]
     ;
 
 
-clojure_list returns [String code]
+clojure_vector returns [String code]
 @init{$code = "["; }
 @after{$code += "]"; }
-    : '[' a=expression {$code += $a.code;} (COMMA WS? b=expression {$code += ", " + $b.code;})* ']'
+    : '[' ']'
+    | '[' a=expression {$code += $a.code;} (COMMA WS? b=expression {$code += ", " + $b.code;})* ']'
     ;
 
 clojure_map returns [String code]
 @init{$code = "{"; }
 @after{$code += "}"; }
-    : '{' a=expression COLON b=expression {$code += $a.code + " " + $b.code;} (COMMA WS? c=expression COLON d=expression {$code += " " + $c.code + " " + $d.code;})* '}'
+    : '{' '}'
+    | '{' a=expression COLON b=expression {$code += $a.code + " " + $b.code;} (COMMA WS? c=expression COLON d=expression {$code += " " + $c.code + " " + $d.code;})* '}'
     ;
 
 clojure_get returns [String code]
