@@ -34,10 +34,15 @@ val incremented = map(inc, myList);
 
 println(incremented);
 
-val range = myList[4] - myList[0];
+val halfRange = (incremented.first() + incremented.last()) / 2;
 
-println(range);
+println(halfRange);
 ```
+
+Which prints
+
+    (2 3 4 5 6)
+    4
 
 ## License
 
