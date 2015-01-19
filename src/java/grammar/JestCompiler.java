@@ -22,13 +22,10 @@ public class JestCompiler {
             JestParser parser = new JestParser(tokens);
             JestParser.source_code_return ret = parser.source_code();
 
-            //parser.getAST().toStringList();
-            //            org.antlr.CommonAST;
-
             //acquire parse result
             CommonTree ast = (CommonTree) ret.tree;
-            printTree(ast);
             return ast;
+
         } catch (RecognitionException e) {
             throw new IllegalStateException("Recognition exception is never thrown, only declared.");
         }
@@ -48,7 +45,6 @@ public class JestCompiler {
         JestParser parser = new JestParser(tokens);
 
         // invoke the entry point of our grammar
-
         JestParser.source_code_return code = parser.source_code();
         java.util.List<String> data = new java.util.ArrayList<String>();
 
@@ -133,5 +129,4 @@ public class JestCompiler {
             }
         }
     }
-
 }

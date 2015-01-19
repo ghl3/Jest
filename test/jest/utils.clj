@@ -3,15 +3,20 @@
             [jest.parser :refer :all]
             [clojure.string :as string]))
 
+(defn test-println [& log]
+  "Print the line, if necessary"
+  ;;(println log))
+  )
+
 (defn remove-code-compare-whitespace
   [s]
   (-> s
-  (string/replace #"[\n\t]" " ")
-  (string/replace #"\s+" " ")))
+      (string/replace #"[\n\t]" " ")
+      (string/replace #"\s+" " ")))
 
 (defn compare-code
   [x y]
-  (println x y)
+  (test-println x y)
   (is (= (remove-code-compare-whitespace x) (remove-code-compare-whitespace y))))
 
 
@@ -20,11 +25,11 @@
   compiles into the given clojure code"
   [jest clojure]
   (let [code-list (parse-source-file jest)]
-    (println "\nJest: ")
-    (println jest)
-    (println "Clojure: ")
-    (doall (map println code-list))
-    (println "")
+    (test-println "\nJest: ")
+    (test-println jest)
+    (test-println "Clojure: ")
+    (doall (map test-println code-list))
+    (test-println "")
 
     ;; Compare each line individually
     (doall (map compare-code clojure code-list))
@@ -39,15 +44,15 @@
   assert that it equals the given value"
   [jest val]
   (let [clojure (get-clojure jest)]
-    (println "\nJest: ")
-    (println jest)
-    (println "Clojure: ")
-    (println clojure)
-    (println "")
+    (test-println "\nJest: ")
+    (test-println jest)
+    (test-println "Clojure: ")
+    (test-println clojure)
+    (test-println "")
 
     (let [code-val (eval-jest jest)]
-      (println "Code Val:")
-      (println code-val)
+      (test-println "Code Val:")
+      (test-println code-val)
       (is (= code-val val)))))
 
 
@@ -59,6 +64,6 @@
   [jest clojure val]
   (test-code jest clojure)
   (let [code-val (eval-jest jest)]
-    (println "Code Val:")
-    (println code-val)
+    (test-println "Code Val:")
+    (test-println code-val)
     (is (= code-val val))))

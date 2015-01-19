@@ -61,7 +61,7 @@
 
 (deftest paren-test-1
   (test-code
-   "val x = (a+b);;"
+   "val x = (a+b);"
    ["(def x (+ a b))"]))
 
 (deftest paren-test-2
