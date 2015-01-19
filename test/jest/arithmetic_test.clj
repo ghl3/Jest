@@ -9,8 +9,8 @@
 
 (deftest sum-test-val-1
   (test-code-eval
-   "1 + 2"
-   "(+ 1 2)"
+   "1 + 2;"
+   ["(+ 1 2)"]
    3))
 
 (deftest sum-test-2
