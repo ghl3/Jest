@@ -19,7 +19,7 @@
 
 (deftest func-def-test
   (test-code
-   "defn foobar(a, b, c){ 10 };"
+   "defn foobar(a, b, c){ 10; };"
    ["(defn foobar [ a b c ] 10)"]))
 
 (deftest import-test

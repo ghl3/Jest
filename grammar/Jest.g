@@ -149,7 +149,7 @@ function_def_params returns [List<String> code_list]
 function_def returns [String code]
 @init{$code = "(defn ";}
 @after{$code += ")"; }
-    : DEFN ID '(' function_def_params ')' {
+    : /*(DEFN ID '(' .* ';') =>*/ DEFN ID '(' function_def_params ')' {
             $code = "(defn " + $ID.text;
             $code += " [";
             for(int i=0; i < $function_def_params.code_list.size(); ++i) {
@@ -158,7 +158,19 @@ function_def returns [String code]
             $code += " ]";
         }
         '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
+/* TODO: Add expression only function body
+    | DEFN ID '(' function_def_params ')' {
+            $code = "(defn " + $ID.text;
+            $code += " [";
+            for(int i=0; i < $function_def_params.code_list.size(); ++i) {
+                $code += " " + $function_def_params.code_list.get(i);
+            }
+            $code += " ]";
+        }
+        '{' expression { $code += $expression.code; } '}'
+*/
     ;
+
 
 function_call returns [String code]
     : (ID '(' ')') => ID '(' ')' { $code = "(" + $ID.text + ")"; }
@@ -192,7 +204,7 @@ method_call returns [String code]
 
 for_loop returns [String code]
 @init{
-    String func = "(defn TMP ";
+    String func = "(fn ";
     String iterator = "";
 }
 @after{ $code = "(doall (map " + func + " " + iterator + "))"; }

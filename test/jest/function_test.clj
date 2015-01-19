@@ -29,7 +29,7 @@
 
 (deftest func-def-1
   (test-code
-   "defn myFunc(a, b, c) { a + b + c };",
+   "defn myFunc(a, b, c) { a + b + c; };",
    ["(defn myFunc [ a b c ] (+ (+ a b) c))"]))
 
 (deftest func-def-2
