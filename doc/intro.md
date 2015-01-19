@@ -121,7 +121,7 @@ For loops in Jest are expressions, meaning that they evaluate to values.  This m
     
 The value of a loop is an eager sequence, but one may return a lazy sequence by adding the "lazy" keyword:
 
-    val x = for lazy(a, b: iterA, iterB) {
+    val x = for(a, b: iterA, iterB) lazy {
         a*b;
     }
     

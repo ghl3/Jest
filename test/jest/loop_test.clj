@@ -33,5 +33,5 @@
 
 (deftest for-lazy-test-1
   (test-code
-   "for lazy(a: lst) { println(a); };"
+   "for (a: lst) lazy { println(a); };"
    ["(map (fn [ a ] (println a)) (seq lst))"]))

@@ -191,7 +191,7 @@ function_call returns [String code]
     ;
 
 /*
-Method calls are inverted functions:
+Method calls are inverted functions
 obj.func(x, y, z) <--> func(obj, x, y, z)
 */
 
@@ -227,9 +227,9 @@ for_loop returns [String code]
 
     if (!lazy) $code += ")";
 }
-    : FOR (LAZY {lazy=true;} )?'(' a=ID {func += "[ " + $a.text;} (COMMA b=ID {func += " " + $b.text;})* {func += " ]";}
+    : FOR '(' a=ID {func += "[ " + $a.text;} (COMMA b=ID {func += " " + $b.text;})* {func += " ]";}
       COLON c=expression {iterator = "(seq " + $c.code + ")";} (COMMA d=expression {iterator += " (seq " + $d.code + ")";})* ')'
-      '{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'
+      (LAZY {lazy=true;})? '{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'
     ;
 
 
