@@ -74,6 +74,11 @@ Which prints
     [Jane 14] [Jane [A C D A]]
     [Bob 16] [Bob [B C D B]]
 
+
+## Documentation
+
+For further documentation, go [here](doc/intro.md).
+
 ## License
 
 Copyright © 2015
