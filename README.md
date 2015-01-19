@@ -51,6 +51,29 @@ Which prints
     4141
 
 
+```
+val scores = [90, 85, 95, 92];
+
+println("Scores: ", scores);
+
+val studentAges = {"Jane" :14, "Bob": 16, "Tom": 15};
+
+val answers = {"Jane": ["A", "C", "D", "A"],
+    "Bob": ["B", "C", "D", "B"],
+    "Tom": ["A", "C", "B", "A"]};
+
+for (a, b : studentAges.seq(), answers.seq()) {
+    println(a, b);
+};
+```
+
+Which prints
+
+    [90 85 95 92]
+    [Tom 15] [Tom [A C B A]]
+    [Jane 14] [Jane [A C D A]]
+    [Bob 16] [Bob [B C D B]]
+
 ## License
 
 Copyright © 2015
