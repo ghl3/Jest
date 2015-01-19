@@ -25,3 +25,15 @@
    "val x = [1, 2]; x.get(0);"
    ["(def x [1, 2])" "(get x 0)"]
    1))
+
+(deftest vec-first-test
+  (test-code-eval
+   "val x = [1, 2]; x.first();"
+   ["(def x [1, 2])" "(first x)"]
+   1))
+
+(deftest vec-last-test
+  (test-code-eval
+   "val x = [1, 2]; x.last();"
+   ["(def x [1, 2])" "(last x)"]
+   2))
