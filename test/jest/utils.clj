@@ -5,6 +5,13 @@
 ;;(import 'jest.grammar.JestParser)
 ;;(import 'jest.grammar.JestCompiler)
 
+
+(defn compare-code
+  [x y]
+  (println x y)
+  (is (= x y)))
+
+
 (defn test-code
   "Test that the given jest code
   compiles into the given clojure code"
@@ -15,10 +22,7 @@
     (println "Clojure: ")
     (doall (map println code-list))
     (println "")
-    (doall (map #(do (println %1 %2) (is (= %1 %2))) clojure code-list))))
-;;    (map vector clojure code-list doseq [x clojure
-;;            y code-list]
-;;      (is (= x y)))))
+    (doall (map compare-code clojure code-list))))
 
 
 
