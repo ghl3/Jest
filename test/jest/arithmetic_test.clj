@@ -69,7 +69,7 @@
    "val x = (a+b) + c;"
    ["(def x (+ (+ a b) c))"]))
 
-(deftest paren-test-2
+(deftest paren-test-3
   (test-eval
-   "((3+5) / 2)*10 - 5"
+   "((3+5) / 2)*10 - 5;"
    35))
