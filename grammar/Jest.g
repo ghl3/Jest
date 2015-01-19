@@ -47,7 +47,10 @@ FOR: 'for';
 
 LAZY: 'lazy';
 
+/* Names of variables and functions */
 ID: ('a'..'z' | 'A'..'Z')+;
+
+SYMBOL: ':' ID;
 
 fragment
 DIGIT : '0'..'9';
@@ -125,6 +128,7 @@ expression_atom returns [String code]
     : NUMBER {$code = $NUMBER.text;}
     | ID {$code = $ID.text; }
     | STRING {$code = $STRING.text; }
+    | SYMBOL {$code = $SYMBOL.text; }
     | clojure_vector {$code = $clojure_vector.code; }
     | clojure_map {$code = $clojure_map.code; }
     | function_call {$code = $function_call.code; }
