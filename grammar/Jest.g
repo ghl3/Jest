@@ -32,6 +32,8 @@ WS  :   (' '
 
 /** Lexer Rules **/
 
+ARROW: '->' ;
+
 PLUS:     '+' ;
 MINUS:    '-' ;
 MULT:     '*' ;
@@ -144,7 +146,9 @@ expression_list returns [List<String> code_list]
     ;
 
 val_assignment returns [String code]
-    : VAL ID '=' expression { $code = "(def " + $ID.text + " " + $expression.code + ")"; }
+    : VAL name=ID
+      (COLON type=ID {$code = "(t/ann " + $name.text + " " + $type.text +  ")\n";})?
+      '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     ;
 
 function_def_params returns [List<String> code_list]
@@ -155,14 +159,15 @@ function_def_params returns [List<String> code_list]
 function_def returns [String code]
 @init{$code = "(defn ";}
 @after{$code += ")"; }
-    : /*(DEFN ID '(' .* ';') =>*/ DEFN ID '(' function_def_params ')' {
-            $code = "(defn " + $ID.text;
+    : /*(DEFN ID '(' .* ';') =>*/ DEFN name=ID '(' function_def_params ')' {
+            $code = "(defn " + $name.text;
             $code += " [";
             for(int i=0; i < $function_def_params.code_list.size(); ++i) {
                 $code += " " + $function_def_params.code_list.get(i);
             }
             $code += " ]";
         }
+        (COLON b=ID ARROW c=ID {$code = "(t/ann " + $name.text + " [" + $b.text + " -> " + $c.text + "])\n" + $code;})?
         '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
 /* TODO: Add expression only function body
     | DEFN ID '(' function_def_params ')' {
