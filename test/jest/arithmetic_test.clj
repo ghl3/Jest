@@ -48,7 +48,6 @@
    "val x = 1 + 2 / 3;"
    ["(def x (+ 1 (/ 2 3)))"]))
 
-
 (deftest func-test-1
   (test-code
    "val x = f(a, b, c) + 5;"
@@ -58,3 +57,14 @@
   (test-code
    "val x = f(a+b, b, c) + 5;"
    ["(def x (+ (f (+ a b) b c) 5))"]))
+
+
+(deftest paren-test-1
+  (test-code
+   "val x = (a+b);;"
+   ["(def x (+ a b))"]))
+
+(deftest paren-test-2
+  (test-code
+   "val x = (a+b) + c;"
+   ["(def x (+ (+ a b) c))"]))

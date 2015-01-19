@@ -117,6 +117,7 @@ expression_atom returns [String code]
     | function_call {$code = $function_call.code; }
     | method_call {$code = $method_call.code; }
     | clojure_get {$code = $clojure_get.code; }
+    | '(' expression ')' {$code = $expression.code; }
     ;
 
 expression_list returns [List<String> code_list]
