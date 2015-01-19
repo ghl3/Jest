@@ -178,7 +178,7 @@ function_def returns [String code]
             }
             $code += " ]";
         }
-        (COLON b=ID ARROW c=ID {annotation = "(t/ann " + $name.text + " [" + $b.text + " -> " + $c.text + "])\n";})?
+        (COLON {annotation = "(t/ann " + $name.text + " [";}  (b=ID {annotation += $b.text + " ";})+ ARROW c=ID {annotation += "-> " + $c.text + "])\n";})?
         '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
 /* TODO: Add expression only function body
     | DEFN ID '(' function_def_params ')' {
