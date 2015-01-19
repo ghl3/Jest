@@ -146,8 +146,14 @@ expression_list returns [List<String> code_list]
     ;
 
 val_assignment returns [String code]
+@init{
+    String annotation = "";
+}
+@after {
+    $code = annotation + $code;
+}
     : VAL name=ID
-      (COLON type=ID {$code = "(t/ann " + $name.text + " " + $type.text +  ")\n";})?
+      (COLON type=ID {annotation = "(t/ann " + $name.text + " " + $type.text +  ")\n";})?
       '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     ;
 
@@ -157,8 +163,13 @@ function_def_params returns [List<String> code_list]
     ;
 
 function_def returns [String code]
-@init{$code = "(defn ";}
-@after{$code += ")"; }
+@init{
+    String annotation = "";
+    $code = "(defn ";}
+@after{
+    $code += ")";
+    $code = annotation + $code;
+}
     : /*(DEFN ID '(' .* ';') =>*/ DEFN name=ID '(' function_def_params ')' {
             $code = "(defn " + $name.text;
             $code += " [";
@@ -167,7 +178,7 @@ function_def returns [String code]
             }
             $code += " ]";
         }
-        (COLON b=ID ARROW c=ID {$code = "(t/ann " + $name.text + " [" + $b.text + " -> " + $c.text + "])\n" + $code;})?
+        (COLON b=ID ARROW c=ID {annotation = "(t/ann " + $name.text + " [" + $b.text + " -> " + $c.text + "])\n";})?
         '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
 /* TODO: Add expression only function body
     | DEFN ID '(' function_def_params ')' {
