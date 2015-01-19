@@ -57,16 +57,9 @@
   In addition, test that, when evaluated,
   the code gives the supplied 'val'."
   [jest clojure val]
-  (let [expression (parse-expression jest)]
-    (println "\nJest: ")
-    (println jest)
-    (println "Clojure: ")
-    (println expression)
-    (println "")
-
-    (is (= expression clojure))
-    (let [code-val (read-and-eval expression)]
-      (println "Code Val:")
-      (println code-val)
-      (is (= code-val val)))))
-
+  (test-code jest clojure)
+  (let [expression (parse-expression jest)
+        code-val (read-and-eval expression)]
+    (println "Code Val:")
+    (println code-val)
+    (is (= code-val val))))
