@@ -6,13 +6,16 @@
 
 ## About
 
-Jest is an interpreted language that runs on the JVM.
+Jest is an dynamic language that runs on the JVM.  Jest is a (mostly) functional language with an emphasis on immutability, simplicity, and readability.
 
-Jest programs are compiled into Clojure source code and executed by the Clojure runtime.
+Jest programs are internally represented as Clojure data structures and are interpreted using Clojure's runtime.
 
 ## Installing
 
+Jest requires a recent version of <a href="http://leiningen.org/">leiningen</a> to be installed.
+
 Download the jest source code.
+Navigate inside the source directory and type "make" to run the makefile.
 Add "jest/bin" to your path.
 
 ## Usage
