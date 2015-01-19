@@ -8,6 +8,7 @@
 (def cli-options
   [
    ["-v" "--verbose" :flag true]
+   ["-c" "--clojure" "Print the Clojure representation of the Jest source code" :flag true]
    ["-h" "--help"]])
 
 
@@ -61,11 +62,14 @@
     (cond
      (:help options) (exit 0 (usage summary)))
 
+
     (let [source-file (first arguments)
           source-code (slurp source-file)]
 
       ;; Print some helpful output for testing/debugging
-      (cond (:verbose options) (verbose-print-jest-source source-code))
+      (cond
+       (:verbose options) (exit 0 (verbose-print-jest-source source-code))
+       (:clojure options) (exit 0 (get-clojure source-code)))
 
       ;; Run all the things!
       (eval-jest source-code))))

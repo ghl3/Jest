@@ -1,5 +1,6 @@
 (ns jest.parser
-  (:require [clojure.core.typed :as t]))
+  (:require [clojure.core.typed :as t]
+            [clojure.string :as str]))
 
 (import 'jest.grammar.JestCompiler)
 
@@ -22,6 +23,10 @@
   [program]
   (. JestCompiler (compile program)))
 
+
+(defn get-clojure [jest-code]
+  "Converge the given jest code into clojure source"
+  (str/join "\n" (parse-source-file jest-code)))
 
 (defn print-jest [jest-code]
   "Evaluate the given jest code and
