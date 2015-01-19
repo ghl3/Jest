@@ -1,5 +1,10 @@
 # Jest
 
+>I knew him, Horatio; a fellow of infinite jest, of most excellent fancy
+- Hamlet, Act 5, Scene 1
+
+## About
+
 Jest is an interpreted language that runs on the JVM.
 
 Jest programs are compiled into Clojure source code and executed by the Clojure runtime.
