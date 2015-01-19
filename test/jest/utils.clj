@@ -38,14 +38,14 @@
   "Evaluate the jest expression and
   assert that it equals the given value"
   [jest val]
-  (let [expression (parse-expression jest)]
+  (let [clojure (get-clojure jest)]
     (println "\nJest: ")
     (println jest)
     (println "Clojure: ")
-    (println expression)
+    (println clojure)
     (println "")
 
-    (let [code-val (read-and-eval expression)]
+    (let [code-val (eval-jest jest)]
       (println "Code Val:")
       (println code-val)
       (is (= code-val val)))))
@@ -58,8 +58,7 @@
   the code gives the supplied 'val'."
   [jest clojure val]
   (test-code jest clojure)
-  (let [expression (parse-expression jest)
-        code-val (read-and-eval expression)]
+  (let [code-val (eval-jest jest)]
     (println "Code Val:")
     (println code-val)
     (is (= code-val val))))

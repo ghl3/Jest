@@ -28,19 +28,32 @@
   "Converge the given jest code into clojure source"
   (str/join "\n" (parse-source-file jest-code)))
 
+
+(defn eval-clojure [clojure]
+  "Read the given clojure code and evaluate it,
+  returning the value"
+  (eval (read-string clojure)))
+
+
+(defn do-eval-clojure [clojure]
+  "Read the given clojure code and evaluate it,
+  returning the value"
+  (eval-clojure (format "(do %s )" clojure)))
+
+
 (defn print-jest [jest-code]
   "Evaluate the given jest code and
   return the value"
   (doall (map println (parse-source-file jest-code))))
 
 
-(defn read-and-eval [clojure]
-  "Read the given clojure code and evaluate it,
-  returning the value"
-  (eval (read-string clojure)))
-
-
 (defn eval-jest [jest-code]
-  "Evaluate the given jest code and
-  return the value"
-  (doall (map read-and-eval (parse-source-file jest-code))))
+  "Take a string representing jest source code and evaluate
+  it, returning the terminal value."
+  (do-eval-clojure (get-clojure jest-code)))
+
+
+(defn execute-jest [jest-code]
+  "Take a list of strings representing jest source code statements
+  and evaluate them all sequentially."
+  (doall (map eval-clojure (parse-source-file jest-code))))

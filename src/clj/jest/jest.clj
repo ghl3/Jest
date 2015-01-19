@@ -72,4 +72,4 @@
        (:clojure options) (exit 0 (get-clojure source-code)))
 
       ;; Run all the things!
-      (eval-jest source-code))))
+      (execute-jest source-code))))
