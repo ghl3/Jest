@@ -211,7 +211,7 @@ for_loop returns [String code]
     func += ") ";
     $code = "(doall (map " + func + " " + iterator + "))";
 }
-    : FOR '(' a=ID {func += "[ " + $a.text;} (b=ID {func += " " + $b.text;})* {func += " ]";}
+    : FOR '(' a=ID {func += "[ " + $a.text;} (COMMA b=ID {func += " " + $b.text;})* {func += " ]";}
       COLON c=expression {iterator = $c.code;} (COMMA d=expression {iterator += " " + $d.code;})* ')'
       '{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'
     ;

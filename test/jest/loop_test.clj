@@ -15,5 +15,5 @@
 
 (deftest for-test-3
   (test-code
-   "for (x y z: lstX, lstY, lstZ) { println(x+y+z); z; };"
+   "for (x, y, z: lstX, lstY, lstZ) { println(x+y+z); z; };"
    ["(doall (map (fn [ x y z ] (println (+ (+ x y) z)) z) lstX lstY lstZ))"]))
