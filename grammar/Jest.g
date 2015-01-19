@@ -207,9 +207,13 @@ for_loop returns [String code]
     String func = "(fn ";
     String iterator = "";
 }
-@after{ $code = "(doall (map " + func + " " + iterator + "))"; }
+@after{
+    func += ") ";
+    $code = "(doall (map " + func + " " + iterator + "))";
+}
     : FOR '(' a=ID {func += "[ " + $a.text;} (b=ID {func += " " + $b.text;})* {func += " ]";}
-      COLON expression {iterator = $expression.code;} ')' '{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}' {func += ") ";}
+      COLON c=expression {iterator = $c.code;} (COMMA d=expression {iterator += " " + $d.code;})* ')'
+      '{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'
     ;
 
 
