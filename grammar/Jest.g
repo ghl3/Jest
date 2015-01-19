@@ -37,21 +37,9 @@ MINUS:    '-' ;
 MULT:     '*' ;
 DIV:      '/' ;
 
-/*ID: ('a'..'z' | 'A'..'Z')+;*/
-
 STRING : '"' ~('\r' | '\n' | '"')* '"' ;
 
 ID: ('a'..'z' | 'A'..'Z')+;
-
-/*STRING: '"' (NAME)? '"';*/
-
-/*
-fragment
-PATH: PATH_COMPONENT (PERIOD PATH_COMPONENT)*;
-*/
-
-fragment
-PATH_COMPONENT: ('a'..'z' | 'A'..'Z')+;
 
 fragment
 DIGIT : '0'..'9';
@@ -94,7 +82,6 @@ statement_term returns [String code]
 
 statement returns [String code]
     : val_assignment {$code = $val_assignment.code; }
-/*    | function_call {$code = $function_call.code; }*/
     | function_def {$code = $function_def.code; }
     | import_statement {$code = $import_statement.code; }
     | expression {$code = $expression.code; }
@@ -157,7 +144,8 @@ function_def returns [String code]
     ;
 
 function_call returns [String code]
-    : (ID '(' expression COMMA!) => ID '(' expression_list ')' {
+    : (ID '(' ')') => ID '(' ')' { $code = "(" + $ID.text + ")"; }
+    | (ID '(' expression COMMA!) => ID '(' expression_list ')' {
             $code = "(" + $ID.text;
             for(int i=0; i < $expression_list.code_list.size(); ++i) {
                 $code += " " + $expression_list.code_list.get(i);
@@ -165,17 +153,15 @@ function_call returns [String code]
             $code += ")";
         }
     | ID '(' expression ')' { $code = "(" + $ID.text + " " + $expression.code + ")"; }
-    /*| ID '(' ')' { $code = "(" + $ID.text + ")"; }*/
     ;
 
 /**
 Method calls are inverted functions:
-
 obj.func(x, y, z) <--> func(obj, x, y, z)
-
 */
 method_call returns [String code]
-    : (ID PERIOD ID '(' expression COMMA ) => obj=ID PERIOD func=ID '(' expression_list ')' {
+    : (ID PERIOD ID '(' ')') => obj=ID PERIOD func=ID '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }
+    | (ID PERIOD ID '(' expression COMMA ) => obj=ID PERIOD func=ID '(' expression_list ')' {
             $code = "(" + $func.text + " " + $obj.text;
             for(int i=0; i < $expression_list.code_list.size(); ++i) {
                 $code += " " + $expression_list.code_list.get(i);
@@ -183,7 +169,6 @@ method_call returns [String code]
             $code += ")";
         }
     | obj=ID PERIOD func=ID '(' expression ')' { $code = "(" + $func.text + " " + $obj.text + " " + $expression.code + ")"; }
-    /*| obj=ID PERIOD func=ID  '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }*/
     ;
 
 clojure_list returns [String code]
@@ -199,9 +184,5 @@ clojure_map returns [String code]
     ;
 
 clojure_get returns [String code]
-    : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";}
-    ;
-
-
-
-
+    : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";} 
+;
