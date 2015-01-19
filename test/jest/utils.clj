@@ -30,7 +30,6 @@
     (is (= clojure code-list))))
 
 
-
 (defn test-eval
   "Evaluate the jest expression and
   assert that it equals the given value"

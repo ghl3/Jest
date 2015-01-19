@@ -68,3 +68,8 @@
   (test-code
    "val x = (a+b) + c;"
    ["(def x (+ (+ a b) c))"]))
+
+(deftest paren-test-2
+  (test-eval
+   "((3+5) / 2)*10 - 5"
+   35))
