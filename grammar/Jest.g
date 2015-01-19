@@ -45,8 +45,10 @@ ID: ('a'..'z' | 'A'..'Z')+;
 
 /*STRING: '"' (NAME)? '"';*/
 
-
-PATH: PATH_COMPONENT ('.' PATH_COMPONENT)*;
+/*
+fragment
+PATH: PATH_COMPONENT (PERIOD PATH_COMPONENT)*;
+*/
 
 fragment
 PATH_COMPONENT: ('a'..'z' | 'A'..'Z')+;
@@ -71,6 +73,10 @@ COMMA : ',';
 
 COLON : ':';
 
+PERIOD : '.';
+
+HASH : '#';
+
 /** Parser Rules **/
 
 // A file is a list of statements
@@ -88,13 +94,16 @@ statement_term returns [String code]
 
 statement returns [String code]
     : val_assignment {$code = $val_assignment.code; }
-    | function_call {$code = $function_call.code; }
+/*    | function_call {$code = $function_call.code; }*/
     | function_def {$code = $function_def.code; }
     | import_statement {$code = $import_statement.code; }
+    | expression {$code = $expression.code; }
     ;
 
 import_statement returns [String code]
-    : 'import ' PATH {$code = "(import '" + $PATH.text + ")";}
+@init{$code = "(import '"; }
+@after{$code += ")"; }
+    : 'import ' a=ID {$code += $a.text;} (PERIOD b=ID {$code += "." + $b.text;} )*
     ;
 
 expression returns [String code]
@@ -119,6 +128,7 @@ expression_atom returns [String code]
     | clojure_list {$code = $clojure_list.code; }
     | clojure_map {$code = $clojure_map.code; }
     | function_call {$code = $function_call.code; }
+    | method_call {$code = $method_call.code; }
     | clojure_get {$code = $clojure_get.code; }
     ;
 
@@ -165,15 +175,15 @@ obj.func(x, y, z) <--> func(obj, x, y, z)
 
 */
 method_call returns [String code]
-    : (ID '.' ID '(' expression COMMA!) => obj=ID '.' func=ID '(' expression_list ')' {
+    : (ID PERIOD ID '(' expression COMMA ) => obj=ID PERIOD func=ID '(' expression_list ')' {
             $code = "(" + $func.text + " " + $obj.text;
             for(int i=0; i < $expression_list.code_list.size(); ++i) {
                 $code += " " + $expression_list.code_list.get(i);
             }
             $code += ")";
         }
-    | obj=ID '.' func=ID '(' expression ')' { $code = "(" + $func.text + " " + $obj.text + " " + $expression.code + ")"; }
-    /*| obj=ID '.' func=ID  '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }*/
+    | obj=ID PERIOD func=ID '(' expression ')' { $code = "(" + $func.text + " " + $obj.text + " " + $expression.code + ")"; }
+    /*| obj=ID PERIOD func=ID  '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }*/
     ;
 
 clojure_list returns [String code]

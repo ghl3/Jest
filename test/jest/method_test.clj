@@ -4,16 +4,16 @@
 
 (deftest method-test-1
   (test-code
-   "a.foobar(b);"
-   ["(foobar a b)"]))
+   "val g = a.foobar(b);"
+   ["(def g (foobar a b))"]))
 
 (deftest method-test-2
   (test-code
-   "x.foobar(a,b);"
-   ["(foobar x a b)"]))
+   "val g = x.foobar(a,b);"
+   ["(def g (foobar x a b))"]))
 
 (deftest method-test-3
   (test-code
-   "y.foobar(a, b, c);"
-   ["(foobar y a b c)"]))
+   "val g = y.foobar(a, b, c);"
+   ["(def g (foobar y a b c))"]))
 

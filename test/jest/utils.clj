@@ -22,7 +22,12 @@
     (println "Clojure: ")
     (doall (map println code-list))
     (println "")
-    (doall (map compare-code clojure code-list))))
+
+    ;; Compare each line individually
+    (doall (map compare-code clojure code-list))
+
+    ;; Conmpare all of the code
+    (is (= clojure code-list))))
 
 
 

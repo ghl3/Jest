@@ -2,6 +2,11 @@
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all]))
 
+(deftest func-test-0
+  (test-code
+   "foobar();"
+   ["(foobar)"]))
+
 (deftest func-test-1
   (test-code
    "foobar(a);"
