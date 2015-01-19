@@ -1,6 +1,16 @@
 # Introduction to Jest
 
 
+## Testing
+
+To run the Jest test suite, simply do:
+
+    > lein test
+    
+To add verbose logging, do:
+
+    > lein with-profile verbose test
+
 ## Executable
 
 The main jest executable lives in a pre-compiled java Jar file and is run using a bash script that uses whatever version of Java is in the environment to run the jar file.  This is the equivalent of doing:

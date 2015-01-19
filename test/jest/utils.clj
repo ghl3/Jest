@@ -1,12 +1,16 @@
 (ns jest.utils
   (:require [clojure.test :refer :all]
             [jest.parser :refer :all]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [environ.core :refer [env]]))
+
 
 (defn test-println [& log]
-  "Print the line, if necessary"
-  ;;(println log))
-  )
+  "Print the line if the :verbose
+   keyword is set in the environment
+   of the current profile"
+  (if (env :verbose) (apply println log) nil))
+
 
 (defn remove-code-compare-whitespace
   [s]
