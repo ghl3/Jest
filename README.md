@@ -25,6 +25,20 @@ To install Jest:
 Run a jest program:
 >jest program.jst
 
+## Example Programs
+
+```
+val myList = [1, 2, 3, 4, 5];
+
+val incremented = map(inc, myList);
+
+println(incremented);
+
+val range = myList[4] - myList[0];
+
+println(range);
+```
+
 ## License
 
 Copyright © 2015

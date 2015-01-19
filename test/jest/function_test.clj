@@ -22,3 +22,7 @@
    "foobar(a, b, c);"
    ["(foobar a b c)"]))
 
+(deftest map-test
+  (test-code
+   "val x = map(inc, myList);"
+   ["(def x (map inc myList))"]))
