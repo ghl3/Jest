@@ -5,7 +5,9 @@
 
 (defn remove-code-compare-whitespace
   [s]
-  (string/replace s #"[\n\t]" ""))
+  (-> s
+  (string/replace #"[\n\t]" " ")
+  (string/replace #"\s+" " ")))
 
 (defn compare-code
   [x y]

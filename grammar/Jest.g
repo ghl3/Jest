@@ -43,6 +43,8 @@ VAL: 'val';
 
 DEFN: 'defn';
 
+FOR: 'for';
+
 ID: ('a'..'z' | 'A'..'Z')+;
 
 fragment
@@ -126,6 +128,7 @@ expression_atom returns [String code]
     | function_call {$code = $function_call.code; }
     | method_call {$code = $method_call.code; }
     | clojure_get {$code = $clojure_get.code; }
+    | for_loop {$code = $for_loop.code; }
     | '(' expression ')' {$code = $expression.code; }
     ;
 
@@ -155,18 +158,6 @@ function_def returns [String code]
             $code += " ]";
         }
         '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
-/*
-
-
-            for(int i=0; i < $statement_termfunction_def_params.code_list.size(); ++i) {
-                $code += " " + $function_def_params.code_list.get(i);
-            }
-            
-            $code += " " + $expression.code;
-            $code += ")";
-
-        }
-*/
     ;
 
 function_call returns [String code]
@@ -181,10 +172,11 @@ function_call returns [String code]
     | ID '(' expression ')' { $code = "(" + $ID.text + " " + $expression.code + ")"; }
     ;
 
-/**
+/*
 Method calls are inverted functions:
 obj.func(x, y, z) <--> func(obj, x, y, z)
 */
+
 method_call returns [String code]
     : (ID PERIOD ID '(' ')') => obj=ID PERIOD func=ID '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }
     | (ID PERIOD ID '(' expression COMMA ) => obj=ID PERIOD func=ID '(' expression_list ')' {
@@ -196,6 +188,18 @@ method_call returns [String code]
         }
     | obj=ID PERIOD func=ID '(' expression ')' { $code = "(" + $func.text + " " + $obj.text + " " + $expression.code + ")"; }
     ;
+
+
+for_loop returns [String code]
+@init{
+    String func = "(defn TMP ";
+    String iterator = "";
+}
+@after{ $code = "(doall (map " + func + " " + iterator + "))"; }
+    : FOR '(' a=ID {func += "[ " + $a.text;} (b=ID {func += " " + $b.text;})* {func += " ]";}
+      COLON expression {iterator = $expression.code;} ')' '{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}' {func += ") ";}
+    ;
+
 
 clojure_list returns [String code]
 @init{$code = "["; }
@@ -210,5 +214,5 @@ clojure_map returns [String code]
     ;
 
 clojure_get returns [String code]
-    : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";} 
-;
+    : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";}
+    ;
