@@ -30,6 +30,20 @@ Variables are declared using the "val" keyword, an equals sign, and an expressio
     
 Variable declaration statements must terminate with a semi-colon.  Variable names may not be re-used (currently the language implementation allows this, but future iterations will remove this, so programs should not depend on it as a property).
 
+## Strings
+
+String literals are declared using double quotes:
+
+    val str = "My String";
+
+Jest strings are _Clojure_ Strings, which are _java.util.String_ Strings.  Among other things, this means that Jest strings are immutable.
+
+## Symbols
+
+Jest supports symbols (or "keywords" in _Clojure_ notation).  Symbols are values that evaluate to themselves and have no meaning outside of their own identity (in other words, they store no data other than their own id).  The main use case of a Symbol is a quick comparison, which makes them useful as keys to maps (see later);
+
+    val symb = :mySymbol;
+
 ## Vectors
 
 Jest has vector literals that can be created using bracket notation:
