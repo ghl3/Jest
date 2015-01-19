@@ -45,6 +45,8 @@ DEFN: 'defn';
 
 FOR: 'for';
 
+LAZY: 'lazy';
+
 ID: ('a'..'z' | 'A'..'Z')+;
 
 fragment
@@ -206,12 +208,22 @@ for_loop returns [String code]
 @init{
     String func = "(fn ";
     String iterator = "";
+    Boolean lazy = false;
 }
 @after{
     func += ") ";
-    $code = "(doall (map " + func + " " + iterator + "))";
+
+    if (lazy) {
+      $code = "";
+    } else {
+      $code = "(doall ";
+    }
+
+    $code += "(map " + func + " " + iterator + ")";
+
+    if (!lazy) $code += ")";
 }
-    : FOR '(' a=ID {func += "[ " + $a.text;} (COMMA b=ID {func += " " + $b.text;})* {func += " ]";}
+    : FOR (LAZY {lazy=true;} )?'(' a=ID {func += "[ " + $a.text;} (COMMA b=ID {func += " " + $b.text;})* {func += " ]";}
       COLON c=expression {iterator = $c.code;} (COMMA d=expression {iterator += " " + $d.code;})* ')'
       '{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'
     ;
