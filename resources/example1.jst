@@ -1,11 +1,17 @@
 
 
-val myList = [1, 2, 3, 4, 5];
+val myList = range(0, 100, 10);
 
 val incremented = map(inc, myList);
 
-println(incremented);
+defn square(x) {
+     x*x;
+};
 
-val halfRange = (incremented.first() + incremented.last()) / 2;
+val squared = map(square, incremented);
+
+println(squared);
+
+val halfRange = (squared.first() + squared.last()) / 2;
 
 println(halfRange);

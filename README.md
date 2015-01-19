@@ -28,21 +28,52 @@ Run a jest program:
 ## Example Programs
 
 ```
-val myList = [1, 2, 3, 4, 5];
+val myList = range(0, 100, 10);
 
 val incremented = map(inc, myList);
 
-println(incremented);
+defn square(x) {
+     x*x;
+};
 
-val halfRange = (incremented.first() + incremented.last()) / 2;
+val squared = map(square, incremented);
+
+println(squared);
+
+val halfRange = (squared.first() + squared.last()) / 2;
 
 println(halfRange);
 ```
 
 Which prints
 
-    (2 3 4 5 6)
-    4
+    (1 121 441 961 1681 2601 3721 5041 6561 8281)
+    4141
+
+
+```
+val myList = range(0, 100, 10);
+
+val incremented = map(inc, myList);
+
+defn square(x) {
+     x*x;
+};
+
+val squared = map(square, incremented);
+
+println(squared);
+
+val halfRange = (squared.first() + squared.last()) / 2;
+
+println(halfRange);
+```
+
+Which prints
+
+    (1 121 441 961 1681 2601 3721 5041 6561 8281)
+    4141
+
 
 ## License
 
