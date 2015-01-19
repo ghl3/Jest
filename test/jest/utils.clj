@@ -15,7 +15,10 @@
     (println "Clojure: ")
     (doall (map println code-list))
     (println "")
-    (is (= code-list clojure))))
+    (doall (map #(do (println %1 %2) (is (= %1 %2))) clojure code-list))))
+;;    (map vector clojure code-list doseq [x clojure
+;;            y code-list]
+;;      (is (= x y)))))
 
 
 

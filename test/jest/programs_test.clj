@@ -14,3 +14,9 @@
     (test-code
      program
      ["(def lst [1, 2, 3])" "(println lst)" "(println (first lst))" "(println (get lst 2))"])))
+
+(deftest map-test
+  (let [program (slurp "resources/map.jst")]
+    (test-code
+     program
+     ["(def mp {\"a\" 10 \"b\" 20 \"c\" 20})" "(def x (get mp \"a\"))" "(def y (get mp \"b\"))" "(println x y (+ x y))"])))
