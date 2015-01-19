@@ -136,9 +136,12 @@ function_def_params returns [List<String> code_list]
 
 function_def returns [String code]
     : 'defn' ID '(' function_def_params ')' '{' expression '}' {
-            $code = "(defn " + $ID.text + "[";
-            for(int i=0; i < $function_def_params.code_list.size(); ++i) { $code += " " + $function_def_params.code_list.get(i); }
-            $code += "]";
+            $code = "(defn " + $ID.text;
+            $code += " [";
+            for(int i=0; i < $function_def_params.code_list.size(); ++i) {
+                $code += " " + $function_def_params.code_list.get(i);
+            }
+            $code += " ]";
             $code += " " + $expression.code;
             $code += ")";
         }
