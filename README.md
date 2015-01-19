@@ -14,9 +14,11 @@ Jest programs are internally represented as Clojure data structures and are inte
 
 Jest requires a recent version of <a href="http://leiningen.org/">leiningen</a> to be installed.
 
-Download the jest source code.
-Navigate inside the source directory and type "make" to run the makefile.
-Add "jest/bin" to your path.
+To install Jest:
+
+* Download the jest source code.
+* Navigate inside the source directory and type "make" to run the makefile.
+* Add "jest/bin" to your path.
 
 ## Usage
 
