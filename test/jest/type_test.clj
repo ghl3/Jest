@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all]
             [clojure.core.typed :as t]
-            [jest.parser :refer [type-check-clojure]]))
+            [jest.parser :refer [get-clojure]]))
 
 (deftest type-val-test-1
   (test-code
@@ -29,21 +29,26 @@
 
 
 (deftest type-clojure-pass-test-1
-  (test-type-correct
+  (test-clojure-type-correct
    "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1))"))
 
 (deftest type-clojure-fail-test-1
-  (test-type-correct
+  (test-clojure-type-correct
    "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1.0))"
    false))
 
 (deftest type-clojure-correct-test-1
-  (test-type-equals
+  (test-clojure-type-equals
    "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1))"
-   'java.lang.Iteger))
+   'java.lang.Integer))
 
 (deftest type-clojure-incorrect-test-1
-  (test-type-equals
+  (test-clojure-type-equals
    "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1))"
    'java.lang.String false))
 
+(deftest type-clojure-pass-test-1
+  (test-clojure-type-correct
+   (format "(do (require '[clojure.core.typed :as t]) %s)"
+           (get-clojure
+            "val x : String = \"Foobar\";"))))

@@ -64,6 +64,13 @@
   (doall (map eval-clojure (parse-source-file jest-code))))
 
 
-(defn type-check-jest [jest-code]
-  "Type check the given jest source code"
-  (type-check-clojure (parse-source-file jest-code)))
+;;(defn type-check-jest [jest-code]
+;;  "Type check the given jest source code"
+;;  (type-check-clojure (parse-source-file jest-code)))
+
+
+(defn type-check-jest [jest-source]
+  "Type check the given jest source code.
+  It seems that we have to wrap the resulting
+  clojure in a 'do' loop to get it to work."
+  (t/check-form* (read-string (format "(do %s)" (get-clojure jest-source)))))

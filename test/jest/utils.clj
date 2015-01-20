@@ -73,27 +73,53 @@
     (is (= code-val val))))
 
 
-(defn test-type-correct
+(defn test-clojure-type-correct
   "Takes clojure code and either asserts that
   the code is correct in terms of type or that
   it IS NOT (based on correct?)"
-  ([clojure-code] (test-type-correct clojure-code true))
+  ([clojure-code] (test-clojure-type-correct clojure-code true))
   ([clojure-code correct?]
      (if correct?
        (is (type-check-clojure clojure-code))
        (is (thrown? clojure.lang.ExceptionInfo (type-check-clojure clojure-code))))))
 
 
-(defn test-type-equals
+(defn test-clojure-type-equals
   "Takes clojure code as a string and ensures
   that it is type correct.  It then checks the
   resulting type against the supplied type and
   either requires that they match or that they
   DO NOT match (based on match?)"
 
-  ([clojure-code type] (test-type-equals type true))
+  ([clojure-code type] (test-clojure-type-equals clojure-code type true))
   ([clojure-code type match?]
-     (test-type-correct clojure-code)
+     (test-clojure-type-correct clojure-code)
      (if match?
        (is (= (type-check-clojure clojure-code) type))
        (is (not= (type-check-clojure clojure-code) type)))))
+
+
+(defn test-jest-type-correct
+  "Takes jest code and either asserts that
+  the code is correct in terms of type or that
+  it IS NOT (based on correct?)"
+  ([jest-code] (test-jest-type-correct jest-code true))
+  ([jest-code correct?]
+     (if correct?
+       (is (type-check-jest jest-code))
+       (is (thrown? clojure.lang.ExceptionInfo (type-check-jest jest-code))))))
+
+
+(defn test-jest-type-equals
+  "Takes jest code as a string and ensures
+  that it is type correct.  It then checks the
+  resulting type against the supplied type and
+  either requires that they match or that they
+  DO NOT match (based on match?)"
+
+  ([jest-code type] (test-jest-type-equals jest-code type true))
+  ([jest-code type match?]
+     (test-jest-type-correct jest-code)
+     (if match?
+       (is (= (type-check-jest jest-code) type))
+       (is (not= (type-check-jest jest-code) type)))))
