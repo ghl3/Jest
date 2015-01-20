@@ -9,6 +9,7 @@
   [
    ["-v" "--verbose" :flag true]
    ["-c" "--clojure" "Print the Clojure representation of the Jest source code" :flag true]
+   ["-t" "--type-check" "Type check the Jest code" :flag true]
    ["-h" "--help"]])
 
 
@@ -70,6 +71,9 @@
       (cond
        (:verbose options) (exit 0 (verbose-print-jest-source source-code))
        (:clojure options) (exit 0 (get-clojure source-code)))
+
+      ;; Type check if requested
+      (cond (:type-check options) (type-check-jest source-code))
 
       ;; Run all the things!
       (execute-jest source-code))))

@@ -1,6 +1,8 @@
 (ns jest.type-test
   (:require [clojure.test :refer :all]
-            [jest.utils :refer :all]))
+            [jest.utils :refer :all]
+            [clojure.core.typed :as t]
+            [jest.parser :refer [type-check-clojure]]))
 
 (deftest type-val-test-1
   (test-code
@@ -25,3 +27,29 @@
    ["(t/ann func [String String -> String])
      (defn func [ x y ] (+ x y))"]))
 
+
+
+;; (deftest type-clojure-pass-test-1
+;;   (is (thrown? clojure.lang.ExceptionInfo
+;;                (type-check-clojure
+;;                 "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1))" (symbol 'java.lang.Integer)))))
+
+;; (deftest type-clojure-test-1
+;;   (is (thrown? clojure.lang.ExceptionInfo
+;;                (type-check-clojure
+;;                 "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1))" (symbol 'java.lang.String)))))
+
+
+(deftest type-clojure-pass-test-1
+  (test-type-correct
+   "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1))"))
+
+(deftest type-clojure-correct-test-1
+  (test-type-equals
+   "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1))"
+   'java.lang.Iteger))
+
+(deftest type-clojure-fail-test-1
+  (test-type-correct
+   "(do (require '[clojure.core.typed :as t]) (t/ann fun [Integer -> Integer]) (defn fun [x] x) (fun 1.0))"
+   false))

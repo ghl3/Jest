@@ -4,7 +4,6 @@
 
 (import 'jest.grammar.JestCompiler)
 
-
 (defn parse-source-file [code]
   "Parse a string representing a full
    jest source file and return a list of
@@ -41,6 +40,12 @@
   (eval-clojure (format "(do %s )" clojure)))
 
 
+(defn type-check-clojure [clj]
+  "Type check the given clojure source code"
+  (let [clj-form (read-string clj)]
+    (t/check-form* clj-form)))
+
+
 (defn print-jest [jest-code]
   "Evaluate the given jest code and
   return the value"
@@ -57,3 +62,8 @@
   "Take a list of strings representing jest source code statements
   and evaluate them all sequentially."
   (doall (map eval-clojure (parse-source-file jest-code))))
+
+
+(defn type-check-jest [jest-code]
+  "Type check the given jest source code"
+  (type-check-clojure (parse-source-file jest-code)))

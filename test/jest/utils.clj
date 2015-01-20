@@ -71,3 +71,23 @@
     (test-println "Code Val:")
     (test-println code-val)
     (is (= code-val val))))
+
+
+(defn test-type-correct
+  "Takes clojure code as a string and a
+  type (as a symbol) and determines if
+  the clojure code "
+  ([clojure-code] (test-type-correct clojure-code true))
+  ([clojure-code correct?]
+     (if correct?
+       (is (type-check-clojure clojure-code))
+       (is (thrown? clojure.lang.ExceptionInfo (type-check-clojure clojure-code))))))
+
+
+(defn test-type-equals
+  "Takes clojure code as a string and a
+  type (as a symbol) and determines if
+  the clojure code "
+  [clojure-code type]
+  ((test-type-correct clojure-code)
+   (is (= (type-check-clojure clojure-code) type))))
