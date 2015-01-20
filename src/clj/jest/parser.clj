@@ -35,6 +35,8 @@
   "Add additional source code necessary after
   the direct translation from Jest->Clojure"
   [clojure-source]
+  ;; Do we want to add anything from here:
+  ; https://github.com/clojure/core.typed/blob/master/module-check/src/main/clojure/clojure/core/typed/base_env.clj
   (format "(do
  (require '[clojure.core.typed :as t])
  %s
@@ -99,4 +101,8 @@
   "Type check the given jest source code.
   It seems that we have to wrap the resulting
   clojure in a 'do' loop to get it to work."
-  (t/check-form* (read-string (format "(do %s)" (get-clojure jest-code true)))))
+  (let [clojure-source (get-clojure jest-code true)
+        clojure-form (read-string clojure-source)]
+    (println "Checking type")
+    (t/check-form* clojure-form)
+    (println "Checked type")))

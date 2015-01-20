@@ -73,7 +73,8 @@
        (:clojure options) (exit 0 (get-clojure source-code)))
 
       ;; Type check if requested
-      (cond (:type-check options) (type-check-jest source-code))
+      (cond (:type-check options) (do (println "Checking types") (type-check-jest source-code)))
 
       ;; Run all the things!
+      (println "Running")
       (execute-jest source-code))))
