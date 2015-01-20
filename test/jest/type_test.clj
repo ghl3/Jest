@@ -10,6 +10,10 @@
    ["(t/ann x String)
      (def x \"Foobar\")"]))
 
+(deftest type-val-check-test-1
+  (test-jest-type-correct
+   "val x : String = \"Foobar\";"))
+
 
 (deftest type-func-test-1
   (test-code
@@ -18,6 +22,13 @@
     };"
    ["(t/ann func [String -> String])
      (defn func [ x ] x)"]))
+
+(deftest type-func-check-test-1
+  (test-jest-type-correct
+   "defn func(x): String -> String {
+         x;
+    };"))
+
 
 (deftest type-func-test-2
   (test-code
@@ -52,3 +63,6 @@
    (format "(do (require '[clojure.core.typed :as t]) %s)"
            (get-clojure
             "val x : String = \"Foobar\";"))))
+
+
+
