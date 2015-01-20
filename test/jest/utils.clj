@@ -74,9 +74,9 @@
 
 
 (defn test-type-correct
-  "Takes clojure code as a string and a
-  type (as a symbol) and determines if
-  the clojure code "
+  "Takes clojure code and either asserts that
+  the code is correct in terms of type or that
+  it IS NOT (based on correct?)"
   ([clojure-code] (test-type-correct clojure-code true))
   ([clojure-code correct?]
      (if correct?
@@ -85,9 +85,15 @@
 
 
 (defn test-type-equals
-  "Takes clojure code as a string and a
-  type (as a symbol) and determines if
-  the clojure code "
-  [clojure-code type]
-  ((test-type-correct clojure-code)
-   (is (= (type-check-clojure clojure-code) type))))
+  "Takes clojure code as a string and ensures
+  that it is type correct.  It then checks the
+  resulting type against the supplied type and
+  either requires that they match or that they
+  DO NOT match (based on match?)"
+
+  ([clojure-code type] (test-type-equals type true))
+  ([clojure-code type match?]
+     (test-type-correct clojure-code)
+     (if match?
+       (is (= (type-check-clojure clojure-code) type))
+       (is (not= (type-check-clojure clojure-code) type)))))
