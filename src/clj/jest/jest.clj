@@ -70,11 +70,8 @@
       ;; Print some helpful output for testing/debugging
       (cond
        (:verbose options) (exit 0 (verbose-print-jest-source source-code))
-       (:clojure options) (exit 0 (get-clojure source-code)))
-
-      ;; Type check if requested
-      (cond (:type-check options) (do (println "Checking types") (type-check-jest source-code)))
+       (:clojure options) (exit 0 (get-clojure source-code))
+       (:type-check options) (exit 0 (do (println "Using Type Checking") (type-check-jest source-code))))
 
       ;; Run all the things!
-      (println "Running")
       (execute-jest source-code))))
