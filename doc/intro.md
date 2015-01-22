@@ -136,3 +136,39 @@ The value of a loop is an eager sequence, but one may return a lazy sequence by 
     }
     
 Note, of course, that any side effects executed in a lazy for loop (such as printing) won't happen until the lazy sequence is realized (which may never happen).
+
+
+## Type Checking (Experimental!)
+
+Jest currently supports an experimental and optional type-checking system.  To run a Jest script with type checking, just add the "-t" flag:
+
+    >jest myProgram.jst -t
+    
+Jest type checking leverages Typed Clojure (core.typed) to validate type annotations.  In order to take advantage of this, one can optionally annotate their variables and functions:
+
+    val x: Integer = 5;
+    val y: Integer = 10;
+
+    val myList: Vec[Integer] = [1, 2, 3, 4];
+
+    defn func(a, b): Integer Integer -> #AnyInteger {
+        a + b;
+    };
+
+    println(func(x, y));
+    
+ 
+The above function is correctly typed, as we are passing two integers into a function that expects integers, and our list of integers indeed consists of integers.  (Note that we put a hash '#' in front of AnyInteger to denote generic types).
+
+If we had instead written:
+
+    val x: Double = 5.0;
+    val y: Integer = 10;
+
+    defn func(a, b): Integer Integer -> #AnyInteger {
+        a + b;
+    };
+
+    println(func(x, y));
+    
+Our type checking would have failed, as we're passing a double ('x') into a function that expects only integers.
