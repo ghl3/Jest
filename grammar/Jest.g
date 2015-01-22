@@ -145,6 +145,9 @@ expression_list returns [List<String> code_list]
     :  a=expression {$code_list.add($a.code);} (COMMA! b=expression { $code_list.add($b.code);})+
     ;
 
+/* Consider adding '/t' as a prefix to all of these
+   and remove the hash notation to prefix that by hand*/
+
 type_annotation returns [String code]
     : type=ID  {$code=$type.text;}
     | ('#' ID) => '#' type=ID  {$code="t/" + $type.text;}

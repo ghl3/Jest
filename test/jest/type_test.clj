@@ -30,7 +30,7 @@
     };"))
 
 
-(deftest type-func-test-1
+(deftest type-func-test-2
   (test-code
    "defn func(x, y): String String -> String {
          x + y;
@@ -38,6 +38,14 @@
    ["(t/ann func [String String -> String])
      (defn func [ x y ] (+ x y))"]))
 
+
+(deftest type-func-test-3
+  (test-code
+   "defn addScores(scores): Vec[Integer] -> #AnyInteger {
+     scores.get(0,0) + scores.get(1, 1) + scores.get(2, 2) + scores.get(3, 3);
+};"
+   ["(t/ann addScores [(t/Vec Integer) -> t/AnyInteger])
+     (defn addScores [ scores ] (+ (+ (+ (get scores 0 0) (get scores 1 1)) (get scores 2 2)) (get scores 3 3)))"]))
 
 (deftest type-container-test-1
   (test-code
@@ -48,6 +56,14 @@
   (test-code
    "val x: Map[String String] = {\"Foo\" : \"Bar\"};"
    ["(t/ann x (t/Map String String)) (def x {\"Foo\" \"Bar\"})"]))
+
+(deftest type-container-test-3
+  (test-code
+   "val scores: HVec[[(Integer 1) (Integer 2) (Integer 3) (Integer 4)]] = [90, 85, 95, 92];"
+   ["(t/ann scores (t/HVec [ (Integer 1) (Integer 2) (Integer 3) (Integer 4)])) (def scores [90, 85, 95, 92])"]))
+
+
+
 
 
 (deftest type-clojure-pass-test-1
