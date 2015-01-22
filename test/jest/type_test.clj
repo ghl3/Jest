@@ -32,6 +32,11 @@
 
 (deftest type-func-test-2
   (test-code
+   "val x: List[String] = [\"FooBar\"];"
+   ["(t/ann x (List String)) (def x [\"FooBar\"])"]))
+
+(deftest type-container-test-1
+  (test-code
    "defn func(x, y): String String -> String {
          x + y;
     };"

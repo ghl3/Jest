@@ -103,6 +103,4 @@
   clojure in a 'do' loop to get it to work."
   (let [clojure-source (get-clojure jest-code true)
         clojure-form (read-string clojure-source)]
-    (println "Checking type")
-    (t/check-form* clojure-form)
-    (println "Checked type")))
+    (t/check-form* clojure-form)))

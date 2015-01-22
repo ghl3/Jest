@@ -145,6 +145,12 @@ expression_list returns [List<String> code_list]
     :  a=expression {$code_list.add($a.code);} (COMMA! b=expression { $code_list.add($b.code);})+
     ;
 
+/*
+type_annotation returns [String code]
+    : ID  {annotation = "(t/ann " + $name.text + " " + $type.text +  ")\n";}
+    | ID '[' ID ']'
+*/
+
 val_assignment returns [String code]
 @init{
     String annotation = "";
@@ -154,6 +160,9 @@ val_assignment returns [String code]
 }
     : VAL name=ID
       (COLON type=ID {annotation = "(t/ann " + $name.text + " " + $type.text +  ")\n";})?
+      '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
+    | VAL name=ID
+      COLON container=ID '[' type=ID ']' {annotation = "(t/ann " + $name.text + " (" + $container.text + " " + $type.text + "))\n";}
       '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     ;
 
