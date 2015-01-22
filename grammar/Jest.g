@@ -148,6 +148,11 @@ expression_list returns [List<String> code_list]
 type_annotation returns [String code]
     : type=ID  {$code=$type.text;}
     | container=ID {$code = "(t/" + $container.text;} '[' (inner=type_annotation {$code += " " + $inner.code;})+ ']' {$code += ")";}
+
+    ;
+
+func_type_annotation returns [String code]
+    : first=type_annotation {$code = $first.code;} (next=type_annotation {$code += " " + $next.code;})+
     ;
 
 val_assignment returns [String code]
@@ -160,11 +165,6 @@ val_assignment returns [String code]
     : VAL name=ID
       (COLON type=type_annotation {annotation = "(t/ann " + $name.text + " " + $type.code +  ")\n";})?
       '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
-/*
-    | VAL name=ID
-      COLON container=ID {annotation = "(t/ann " + $name.text + " (t/" + $container.text;} '[' (type=ID {annotation += " " + $type.text;})+ ']' {annotation += "))\n";}
-      '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
-*/
     ;
 
 function_def_params returns [List<String> code_list]
@@ -180,7 +180,7 @@ function_def returns [String code]
     $code += ")";
     $code = annotation + $code;
 }
-    : /*(DEFN ID '(' .* ';') =>*/ DEFN name=ID '(' function_def_params ')' {
+    : DEFN name=ID '(' function_def_params ')' {
             $code = "(defn " + $name.text;
             $code += " [";
             for(int i=0; i < $function_def_params.code_list.size(); ++i) {
@@ -188,19 +188,9 @@ function_def returns [String code]
             }
             $code += " ]";
         }
-        (COLON {annotation = "(t/ann " + $name.text + " [";}  (b=ID {annotation += $b.text + " ";})+ ARROW c=ID {annotation += "-> " + $c.text + "])\n";})?
+        (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";} /*   (b=ID {annotation += $b.text + " ";})+*/
+         ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
         '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
-/* TODO: Add expression only function body
-    | DEFN ID '(' function_def_params ')' {
-            $code = "(defn " + $ID.text;
-            $code += " [";
-            for(int i=0; i < $function_def_params.code_list.size(); ++i) {
-                $code += " " + $function_def_params.code_list.get(i);
-            }
-            $code += " ]";
-        }
-        '{' expression { $code += $expression.code; } '}'
-*/
     ;
 
 
