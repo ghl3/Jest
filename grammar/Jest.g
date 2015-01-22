@@ -162,7 +162,7 @@ val_assignment returns [String code]
       (COLON type=ID {annotation = "(t/ann " + $name.text + " " + $type.text +  ")\n";})?
       '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     | VAL name=ID
-      COLON container=ID '[' type=ID ']' {annotation = "(t/ann " + $name.text + " (t/" + $container.text + " " + $type.text + "))\n";}
+      COLON container=ID {annotation = "(t/ann " + $name.text + " (t/" + $container.text;} '[' (type=ID {annotation += " " + $type.text;})+ ']' {annotation += "))\n";}
       '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     ;
 

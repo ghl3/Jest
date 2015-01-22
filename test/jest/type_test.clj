@@ -41,8 +41,13 @@
 
 (deftest type-container-test-1
   (test-code
-   "val x: List[String] = [\"FooBar\"];"
-   ["(t/ann x (t/List String)) (def x [\"FooBar\"])"]))
+   "val x: Vec[String] = [\"FooBar\"];"
+   ["(t/ann x (t/Vec String)) (def x [\"FooBar\"])"]))
+
+(deftest type-container-test-2
+  (test-code
+   "val x: Map[String String] = {\"Foo\" : \"Bar\"};"
+   ["(t/ann x (t/Map String String)) (def x {\"Foo\" \"Bar\"})"]))
 
 
 (deftest type-clojure-pass-test-1
