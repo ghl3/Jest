@@ -30,18 +30,19 @@
     };"))
 
 
-(deftest type-func-test-2
-  (test-code
-   "val x: List[String] = [\"FooBar\"];"
-   ["(t/ann x (List String)) (def x [\"FooBar\"])"]))
-
-(deftest type-container-test-1
+(deftest type-func-test-1
   (test-code
    "defn func(x, y): String String -> String {
          x + y;
     };"
    ["(t/ann func [String String -> String])
      (defn func [ x y ] (+ x y))"]))
+
+
+(deftest type-container-test-1
+  (test-code
+   "val x: List[String] = [\"FooBar\"];"
+   ["(t/ann x (t/List String)) (def x [\"FooBar\"])"]))
 
 
 (deftest type-clojure-pass-test-1
