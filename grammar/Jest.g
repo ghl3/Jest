@@ -96,11 +96,11 @@ statement_list returns [List<String> code_list]
 // by a semicolon
 statement_term returns [String code]
     : statement SEMICOLON {$code = $statement.code;}
+    | function_def {$code = $function_def.code; }
     ;
 
 statement returns [String code]
     : val_assignment {$code = $val_assignment.code; }
-    | function_def {$code = $function_def.code; }
     | import_statement {$code = $import_statement.code; }
     | expression {$code = $expression.code; }
     ;
@@ -200,7 +200,7 @@ function_def returns [String code]
         }
         (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
          ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
-        '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
+        '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}' (SEMICOLON)?
     ;
 
 

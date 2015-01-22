@@ -88,9 +88,9 @@ Functions in Jest are first class objects.  They can be created using the "defn"
 
     defn function(a, b, c) {
         a + b + c;
-    };
+    }
 
-The value of a function is the value of the last expression in the body of the function when evaluated with the input parameters.  Function bodies must include braces and, when ending a statement, the braces must terminate in a semi-colon.  
+The value of a function is the value of the last expression in the body of the function when evaluated with the input parameters.  Function bodies must include curly braces and the body between the braces must consist of one or more statements or expressions (each ending in a semi-colon).
 
 Functions are called by passing arguments to the name bound to the function in the standard way:
 
