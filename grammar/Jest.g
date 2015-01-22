@@ -147,12 +147,19 @@ expression_list returns [List<String> code_list]
 
 type_annotation returns [String code]
     : type=ID  {$code=$type.text;}
+    | ('#' ID) => '#' type=ID  {$code="t/" + $type.text;}
+    | typeleft=ID num=NUMBER  {$code=$typeleft.text + " " + $num.text;}
+    | '(' thing=type_annotation ')'  {$code = "(" + $thing.code + ")";}
     | container=ID {$code = "(t/" + $container.text;} '[' (inner=type_annotation {$code += " " + $inner.code;})+ ']' {$code += ")";}
-
+        /* This is a bit of a hack to get nested containers to work */
+        /* The issue is that in jest: HVec[[(?) (?) (?)]] coudl be parsed */
+        /* by allowing a '[' type_annotation ']' branch, but this breaks */
+        /* the jest container branch style below */
+    | container=ID {$code = "(t/" + $container.text + " [";} '[[' (inner=type_annotation {$code += " " + $inner.code;})+ ']]' {$code += "])";}
     ;
 
 func_type_annotation returns [String code]
-    : first=type_annotation {$code = $first.code;} (next=type_annotation {$code += " " + $next.code;})+
+    : first=type_annotation {$code = $first.code;} (next=type_annotation {$code += " " + $next.code;})*
     ;
 
 val_assignment returns [String code]
@@ -188,7 +195,7 @@ function_def returns [String code]
             }
             $code += " ]";
         }
-        (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";} /*   (b=ID {annotation += $b.text + " ";})+*/
+        (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
          ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
         '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'
     ;
