@@ -53,6 +53,8 @@ IF: 'if';
 
 ELSE: 'else';
 
+ELSEIF: 'elif';
+
 /* Names of variables and functions */
 ID: ('a'..'z' | 'A'..'Z')+;
 
@@ -141,6 +143,7 @@ expression_atom returns [String code]
     | method_call {$code = $method_call.code; }
     | clojure_get {$code = $clojure_get.code; }
     | for_loop {$code = $for_loop.code; }
+    | conditional {$code = $conditional.code; }
     | '(' expression ')' {$code = $expression.code; }
     ;
 
@@ -264,14 +267,14 @@ for_loop returns [String code]
     ;
 
 block returns [String code]
-    : '{' {$code="";} (statement_term {$code += "\n\t" + $statement_term.code;})+ '}'
+    : ('{' expression '}') => '{' expression {$code=$expression.code;} '}'
+    | '{' {$code="";} (statement_term {$code += "\n\t" + $statement_term.code;})+ '}'
     ;
 
-/*
+
 conditional returns [String code]
-    : IF '(' expression ')' 
-         '{'
-*/
+    : IF '(' expression ')' iftrue=block ELSE iffalse=block {$code="(if "+$expression.code+" "+$iftrue.code+" "+$iffalse.code+")";}
+    ;
 
 clojure_vector returns [String code]
 @init{$code = "["; }
