@@ -96,6 +96,25 @@ Functions are called by passing arguments to the name bound to the function in t
 
     val result = function(1.0, 2.0, 3.0); 
 
+## Conditionals
+
+In Jest, if statements are expressions, meaning they evaluate to a value.  The value of an if statement is the value of the final like of the block that is conditionally selected or 'nil' if no block is conditionally selected.
+
+    val conditional = if (true) { 20 } else { 30 };
+
+In the above, 'conditional' will be set to the value 20;
+
+    val alwaysNil = if (false) { 100 };
+    
+One can always call functions for their side effects and still ignore the value of the if statement:
+
+    if (true) {
+        println("It's True!!");
+    } else {
+        println("Oh no, False...");
+    }
+
+
 ## For Loop
 
 For loops allow for looping over and mapping over one or more iterables:
