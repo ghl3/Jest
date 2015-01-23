@@ -49,6 +49,10 @@ FOR: 'for';
 
 LAZY: 'lazy';
 
+IF: 'if';
+
+ELSE: 'else';
+
 /* Names of variables and functions */
 ID: ('a'..'z' | 'A'..'Z')+;
 
@@ -255,9 +259,18 @@ for_loop returns [String code]
 }
     : FOR '(' a=ID {func += "[ " + $a.text;} (COMMA b=ID {func += " " + $b.text;})* {func += " ]";}
       COLON c=expression {iterator = "(seq " + $c.code + ")";} (COMMA d=expression {iterator += " (seq " + $d.code + ")";})* ')'
-      (LAZY {lazy=true;})? '{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'
+      (LAZY {lazy=true;})? block { func += $block.code;} /*'{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'*/
     ;
 
+block returns [String code]
+    : '{' {$code="";} (statement_term {$code += "\n\t" + $statement_term.code;})+ '}'
+    ;
+
+/*
+conditional returns [String code]
+    : IF '(' expression ')' 
+         '{'
+*/
 
 clojure_vector returns [String code]
 @init{$code = "["; }
