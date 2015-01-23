@@ -204,7 +204,8 @@ function_def returns [String code]
         }
         (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
          ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
-        '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}' (SEMICOLON)?
+         block {$code+=$block.code;} /*
+        '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'*/ (SEMICOLON)?
     ;
 
 
