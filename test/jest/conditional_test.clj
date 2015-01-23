@@ -5,11 +5,23 @@
 
 (deftest if-test-1
   (test-code-eval
+   "if (true) {10};"
+   ["(if true 10)"]
+   10))
+
+(deftest if-test-2
+  (test-code-eval
+   "if (nil) {10};"
+   ["(if nil 10)"]
+   nil))
+
+(deftest if-test-3
+  (test-code-eval
    "if (true) {10;} else {20;};"
    ["(if true 10 20)"]
    10))
 
-(deftest if-test-2
+(deftest if-test-4
   (test-code-eval
    "if (nil) {10} else {20};"
    ["(if nil 10 20)"]

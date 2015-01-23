@@ -273,8 +273,10 @@ block returns [String code]
 
 
 conditional returns [String code]
-    : IF '(' expression ')' iftrue=block ELSE iffalse=block {$code="(if "+$expression.code+" "+$iftrue.code+" "+$iffalse.code+")";}
+    : (IF '(' expression ')' block ELSE block)=> IF '(' expression ')' iftrue=block ELSE iffalse=block {$code="(if "+$expression.code+" "+$iftrue.code+" "+$iffalse.code+")";}
+    | IF '(' expression ')' iftrue=block {$code="(if "+$expression.code+" "+$iftrue.code+")";}
     ;
+
 
 clojure_vector returns [String code]
 @init{$code = "["; }
