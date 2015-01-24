@@ -53,7 +53,7 @@ IF: 'if';
 
 ELSE: 'else';
 
-ELSEIF: 'elif';
+ELIF: 'elif';
 
 /* Names of variables and functions */
 ID: ('a'..'z' | 'A'..'Z')+;
@@ -273,8 +273,41 @@ block returns [String code]
 
 
 conditional returns [String code]
-    : (IF '(' expression ')' block ELSE block)=> IF '(' expression ')' iftrue=block ELSE iffalse=block {$code="(if "+$expression.code+" "+$iftrue.code+" "+$iffalse.code+")";}
-    | IF '(' expression ')' iftrue=block {$code="(if "+$expression.code+" "+$iftrue.code+")";}
+@init{
+    List<String> conditions = new ArrayList<String>();
+    List<String> results = new ArrayList<String>();
+}
+@after{
+
+    if (conditions.size()==results.size()) {
+        if (conditions.size()==1) {
+            $code = "(if " + conditions.get(0) + " " + results.get(0) + ")";
+        } else {
+            $code = "(cond ";
+            for (int i=0; i < conditions.size(); ++i) {
+                $code += "\n" + conditions.get(i) + " " + results.get(i);
+            }
+            $code += ")";
+        }
+    } else if (conditions.size()+1 == results.size()) {
+        // If we have 1 more result than condition, the
+        // final result is a guaranteed 'else'
+        if (conditions.size()==1) {
+            $code = "(if " + conditions.get(0) + " " + results.get(0) + " " + results.get(1) +")";
+        } else {
+            $code = "(cond ";
+            for (int i=0; i < conditions.size(); ++i) {
+                $code += "\n" + conditions.get(i) + " " + results.get(i);
+            }
+            $code += "\n :else " + results.get(results.size()-1) + ")";
+        }
+    } else {
+        $code = "WTF!!!";
+    }
+}
+    : IF '(' if_condition=expression ')' iftrue=block {conditions.add($if_condition.code);results.add($iftrue.code);}
+      (ELIF '(' elif_expression=expression ')' elif_block=block {conditions.add($elif_expression.code);results.add($elif_block.code);})*
+       (ELSE else_block=block {results.add($else_block.code);})?
     ;
 
 
