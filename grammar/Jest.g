@@ -268,9 +268,12 @@ obj.func(x, y, z) <--> func(obj, x, y, z)
 
 
 method_call_chain returns [String code]
-    : (method_call PERIOD) => method_call PERIOD ID '(' ')' {$code="("+$ID.text+" "+$method_call.code+")";}
-    /*| (method_call PERIOD) => method_call PERIOD ID '(' expression ')' {$code="("+$ID.text+" "+$method_call.code+")";}a */
+    : (method_call PERIOD) => method_call {$code=$method_call.code;} (PERIOD ID '(' ')' {$code="("+$ID.text+" "+$code+")";})+
     | method_call {$code=$method_call.code;}
+
+    /*| (method_call_chain PERIOD) => method_call_chain PERIOD ID '(' ')' {$code="("+$ID.text+" "+$method_call_chain.code+")";}*/
+    /*| (method_call PERIOD) => method_call PERIOD ID '(' expression ')' {$code="("+$ID.text+" "+$method_call.code+")";}a */
+
     ;
 
 
