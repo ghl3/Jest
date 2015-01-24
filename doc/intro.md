@@ -43,7 +43,7 @@ Variable declaration statements must terminate with a semi-colon.  Variable name
 
 ## Scope
 
-Scoped variables in Jest are created the "let" keyword to form a let expression:
+Variables declared in Jest are global unless they are declared in a let expression:
 
     let (val x = 10) {
         x+5;
@@ -202,27 +202,6 @@ The value of a loop is an eager sequence, but one may return a lazy sequence by 
     }
     
 Note, of course, that any side effects executed in a lazy for loop (such as printing) won't happen until the lazy sequence is realized (which may never happen).
-
-
-## Scope
-
-Variables declared in Jest are global unless they are declared in a let expression:
-
-    let(val x=0) {
-        x + 10;
-    }
-
-Let expressions are indeed expressions and will evaluate to the value of the last line in the block. One can declare multiple variables in a let expression.  Each variable declared in the let expression has scope only until the end of the let expression's block.  Variables declared in the let expression will shadow any earlier declared variables.
-
-    val x = 100;
-    val res = let(val x=10; val y=20) {
-        x+y;
-    }
-
-	println(res);
-	
-	// Prints 30 (not 120)
-
 
 ## Comments
 
