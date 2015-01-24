@@ -80,7 +80,7 @@ Double equals asserts that two expressions are equal to each other (where equali
     val x = 12;
     val y = 12;
     
-    x == 12    
+    x == y
     // true    
 
 
