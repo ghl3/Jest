@@ -134,11 +134,12 @@ expression returns [String code]
 
 
 comparison_expression returns [String code]
-    : (arithmetic_expression) => a=arithmetic_expression {$code=$a.code;} (GT b=arithmetic_expression {$code="(> "+$a.code+" "+$b.code+")";})?
+    : (arithmetic_expression GT) => a=arithmetic_expression {$code=$a.code;} (GT b=arithmetic_expression {$code="(> "+$a.code+" "+$b.code+")";})?
     | (arithmetic_expression LT) => a=arithmetic_expression {$code=$a.code;} (LT b=arithmetic_expression {$code="(< "+$a.code+" "+$b.code+")";})?
     | (arithmetic_expression GTEQ) => a=arithmetic_expression {$code=$a.code;} (GTEQ b=arithmetic_expression {$code="(>= "+$a.code+" "+$b.code+")";})?
     | (arithmetic_expression LTEQ) => a=arithmetic_expression {$code=$a.code;} (LTEQ b=arithmetic_expression {$code="(<= "+$a.code+" "+$b.code+")";})?
     | (arithmetic_expression CPEQ) => a=arithmetic_expression {$code=$a.code;} (CPEQ b=arithmetic_expression {$code="(= "+$a.code+" "+$b.code+")";})?
+    | (arithmetic_expression)=> a=arithmetic_expression {$code=$a.code;}
     ;
 
 

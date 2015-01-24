@@ -11,6 +11,7 @@ To add verbose logging, do:
 
     > lein with-profile verbose test
 
+
 ## Executable
 
 The main jest executable lives in a pre-compiled java Jar file and is run using a bash script that uses whatever version of Java is in the environment to run the jar file.  This is the equivalent of doing:
@@ -31,6 +32,7 @@ One can also convert a Jest program to the equivalent Clojure source by using th
     
 This will print the Clojure source to standard out.  Use the "-h" or "--help" flags for other options.
 
+
 ## Variables
 
 Global variables are declared using the "val" keyword, an equals sign, and an expression:
@@ -43,7 +45,7 @@ Variable declaration statements must terminate with a semi-colon.  Variable name
 
 ## Scope
 
-Variables declared in Jest are global unless they are declared in a let expression:
+Scoped variables in Jest are created the "let" keyword to form a let expression:
 
     let (val x = 10) {
         x+5;
@@ -62,6 +64,18 @@ Let expressions are indeed expressions and they evaluate to the value of the fin
     // Prints "30", not "120"
 
 
+## Comparison Operators
+
+Jest uses the usual comparison operators, and comparison expressions return boolean values of true or false
+
+    5 < 10
+    // true
+    
+    100 >= 300
+    // false
+    
+    
+
 ## Strings
 
 String literals are declared using double quotes:
@@ -70,11 +84,13 @@ String literals are declared using double quotes:
 
 Jest strings are _Clojure_ Strings, which are _java.util.String_ Strings.  Among other things, this means that Jest strings are immutable.
 
+
 ## Symbols
 
 Jest supports symbols (or "keywords" in _Clojure_ notation).  Symbols are values that evaluate to themselves and have no meaning outside of their own identity (in other words, they store no data other than their own id).  The main use case of a Symbol is a quick comparison, which makes them useful as keys to maps (see later);
 
     val symb = :mySymbol;
+
 
 ## Vectors
 
@@ -104,6 +120,7 @@ As discussed earlier, symbols are useful as keys to maps:
     val mp = {:a : 1, :b : 2};
     val x = mp[:a];
 
+
 ## Functions
 
 Functions in Jest are first class objects.  They can be created using the "defn" keyword:
@@ -117,6 +134,7 @@ The value of a function is the value of the last expression in the body of the f
 Functions are called by passing arguments to the name bound to the function in the standard way:
 
     val result = function(1.0, 2.0, 3.0); 
+
 
 ## Conditionals
 
@@ -161,7 +179,6 @@ Or, more elegantly
     });
 
 
-
 ## For Loop
 
 For loops allow for looping over and mapping over one or more iterables:
@@ -203,6 +220,27 @@ The value of a loop is an eager sequence, but one may return a lazy sequence by 
     
 Note, of course, that any side effects executed in a lazy for loop (such as printing) won't happen until the lazy sequence is realized (which may never happen).
 
+
+## Scope
+
+Variables declared in Jest are global unless they are declared in a let expression:
+
+    let(val x=0) {
+        x + 10;
+    }
+
+Let expressions are indeed expressions and will evaluate to the value of the last line in the block. One can declare multiple variables in a let expression.  Each variable declared in the let expression has scope only until the end of the let expression's block.  Variables declared in the let expression will shadow any earlier declared variables.
+
+    val x = 100;
+    val res = let(val x=10; val y=20) {
+        x+y;
+    }
+
+	println(res);
+	
+	// Prints 30 (not 120)
+
+
 ## Comments
 
 Jest uses c-style comments
@@ -213,6 +251,7 @@ Jest uses c-style comments
     comment
     comment
     */
+
 
 ## Type Checking (Experimental!)
 

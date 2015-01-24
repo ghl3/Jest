@@ -4,26 +4,38 @@
 
 
 (deftest comparison-test-1
+  (test-code-eval
   "10 > 5;"
   ["(> 10 5)"]
-  true)
+  true))
 
 (deftest comparison-test-2
+  (test-code-eval
   "10 < 5;"
   ["(< 10 5)"]
-  false)
+  false))
 
 (deftest comparison-test-3
+  (test-code-eval
   "10 >= 10;"
   ["(>= 10 10)"]
-  true)
+  true))
 
 (deftest comparison-test-4
+  (test-code-eval
   "10 <= 10;"
   ["(<= 10 10)"]
-  false)
+  true))
 
 (deftest comparison-test-5
+  (test-code-eval
   "10 == 10;"
   ["(= 10 10)"]
-  true)
+  true))
+
+
+(deftest comparison-test-6
+  (test-code-eval
+  "10 + 20 + 1 > 30;"
+  ["(> (+ (+ 10 20) 1) 30)"]
+  true))
