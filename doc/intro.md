@@ -201,6 +201,18 @@ Let expressions are indeed expressions and will evaluate to the value of the las
 	
 	// Prints 30 (not 120)
 
+
+## Comments
+
+Jest uses c-style comments
+
+    // This is a comment
+    
+    /* These are comments too
+    comment
+    comment
+    */
+
 ## Type Checking (Experimental!)
 
 Jest currently supports an experimental and optional type-checking system.  To run a Jest script with type checking, just add the "-t" flag:
