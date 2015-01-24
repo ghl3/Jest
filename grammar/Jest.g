@@ -266,19 +266,25 @@ Method calls are inverted functions
 obj.func(x, y, z) <--> func(obj, x, y, z)
 */
 
-
 method_call_chain returns [String code]
-    : (method_call PERIOD) => method_call {$code=$method_call.code;} (PERIOD ID '(' ')' {$code="("+$ID.text+" "+$code+")";})+
+    : (method_call PERIOD) => method_call {$code=$method_call.code;}
+      (
+        PERIOD ID '(' ')' {$code="("+$ID.text+" "+$code+")";} /*|
+        PERIOD ID '(' expression_list ')' {
+            $code = "(" + $ID.text + " " + $code
+            for(int i=0; i < $expression_list.code_list.size(); ++i) {
+                $code += " " + $expression_list.code_list.get(i);
+            }
+            $code += ")";
+        } |
+        PERIOD ID '(' expression ')' { $code = "(" + $ID.text + " " + $code + " " + $expression.code + ")"; }
+*/
+      )+
     | method_call {$code=$method_call.code;}
-
-    /*| (method_call_chain PERIOD) => method_call_chain PERIOD ID '(' ')' {$code="("+$ID.text+" "+$method_call_chain.code+")";}*/
-    /*| (method_call PERIOD) => method_call PERIOD ID '(' expression ')' {$code="("+$ID.text+" "+$method_call.code+")";}a */
-
     ;
 
 
 method_call returns [String code]
-    /*: (method_call PERIOD) => method_call PERIOD ID '(' ')' {$code="("+$ID.text+" "+$method_call.code+")";}*/
     : ( ID PERIOD ID '(' ')') =>  obj=ID PERIOD func=ID '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }
     | ( ID PERIOD ID '(' expression COMMA ) =>  obj=ID PERIOD func=ID '(' expression_list ')' {
             $code = "(" + $func.text + " " + $obj.text;
@@ -289,6 +295,18 @@ method_call returns [String code]
         }
     | obj=ID PERIOD func=ID '(' expression ')' { $code = "(" + $func.text + " " + $obj.text + " " + $expression.code + ")"; }
     ;
+
+method_params returns [String code]
+    : ( '(' ')') => '(' ')' { $code = "";}
+    | ( '(' expression COMMA ) => '(' expression_list ')' {
+            $code = "";
+            for(int i=0; i < $expression_list.code_list.size(); ++i) {
+                if (i != 0) $code += " ";
+                $code += $expression_list.code_list.get(i);
+            }
+        }
+    | '(' expression ')' { $code = $expression.code; }
+;
 
 
 for_loop returns [String code]
