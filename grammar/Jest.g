@@ -163,6 +163,8 @@ expression_composed returns [String code]
 method_call_chain returns [String code]
     : (method_call PERIOD) => method_call {$code=$method_call.code;}
         (PERIOD ID method_params {$code="("+$ID.text+" "+$code+$method_params.code+")";})+
+    | (method_call ARROW) => method_call {$code=$method_call.code;}
+        (ARROW ID method_params {$code="("+$ID.text+$method_params.code+" "+$code+")";})+
     | method_call {$code=$method_call.code;}
     ;
 
@@ -176,6 +178,7 @@ into a function call on that atom
 
 method_call returns [String code]
     : ( expression_atom PERIOD ID method_params) => obj=expression_atom PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.code + $method_params.code + ")"; }
+    | ( expression_atom ARROW ID method_params) => obj=expression_atom ARROW func=ID method_params { $code = "(" + $func.text + $method_params.code+ " " + $obj.code + ")"; }
     ;
 
 
