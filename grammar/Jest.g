@@ -150,8 +150,28 @@ arithmetic_expression returns [String code]
 
 arithmetic_term returns [String code]
 @init{$code = ""; }
-    : a=expression_atom {$code = $a.code;} ( ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expression_atom {$code += $b.code + ")";} )*
+    : a=expression_composed {$code = $a.code;} ( ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expression_composed {$code += $b.code + ")";} )*
     ;
+
+
+fragment
+expression_composed returns [String code]
+    : (expression_atom PERIOD) => method_call_chain{$code=$method_call_chain.code;}
+    | expression_atom {$code=$expression_atom.code;}
+    ;
+
+method_call_chain returns [String code]
+    : (method_call PERIOD) => method_call {$code=$method_call.code;}
+        (PERIOD ID method_params {$code="("+$ID.text+" "+$code+$method_params.code+")";})+
+    | method_call {$code=$method_call.code;}
+    /*| (ID method_params) => function_call {$code=$function_call.code;}*/
+    ;
+
+method_call returns [String code]
+    : ( expression_atom PERIOD ID method_params) => obj=expression_atom PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.code + $method_params.code + ")"; }
+    /*| ( function_call PERIOD ID method_params) => call=function_call PERIOD func=ID method_params { $code = "(" + $func.text + " " + $call.code + $method_params.code + ")"; }*/
+    ;
+
 
 fragment
 expression_atom returns [String code]
@@ -162,11 +182,11 @@ expression_atom returns [String code]
     | clojure_vector {$code = $clojure_vector.code; }
     | clojure_map {$code = $clojure_map.code; }
     | function_call {$code = $function_call.code; }
-    | method_call_chain {$code = $method_call_chain.code; }
     | clojure_get {$code = $clojure_get.code; }
     | for_loop {$code = $for_loop.code; }
     | conditional {$code = $conditional.code; }
     | let_statement {$code = $let_statement.code; }
+   /* | method_call_chain {$code = $method_call_chain.code; }*/
     | '(' expression ')' {$code = $expression.code; }
     ;
 
@@ -253,20 +273,13 @@ function_call returns [String code]
     : ID method_params { $code = "(" + $ID.text + $method_params.code + ")"; }
     ;
 
+
 /*
 Method calls are inverted functions
 obj.func(x, y, z) <--> func(obj, x, y, z)
 */
 
-method_call_chain returns [String code]
-    : (method_call PERIOD) => method_call {$code=$method_call.code;}
-                              (PERIOD ID method_params {$code="("+$ID.text+" "+$code+$method_params.code+")";})+
-    | method_call {$code=$method_call.code;}
-    ;
 
-method_call returns [String code]
-    : ( ID PERIOD ID method_params) => obj=ID PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.text + $method_params.code + ")"; }
-    ;
 
 /*
  Parameter for a function or method call

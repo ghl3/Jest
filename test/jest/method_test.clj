@@ -22,7 +22,6 @@
    "val g = y.foobar(a, b, c);"
    ["(def g (foobar y a b c))"]))
 
-
 (deftest method-chain-test-1
   (test-code
    "y.foobar().bar();"
@@ -47,4 +46,10 @@
   (test-code
    "y.foobar(2).bar(10, 20, 15).baz(true);"
    ["(baz (bar (foobar y 2) 10 20 15) true)"]))
+
+
+ (deftest method-chain-test-6
+   (test-code
+    "range(0, 100).filter(even?);"
+    ["(filter (range 0 100) even?)"]))
 
