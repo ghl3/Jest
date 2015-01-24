@@ -56,6 +56,16 @@ ELSE: 'else';
 
 ELIF: 'elif';
 
+GT: '>' ;
+
+GTEQ: '>=' ;
+
+LT: '<' ;
+
+LTEQ: '<=' ;
+
+CPEQ: '==';
+
 /* Names of variables and functions */
 ID: ('a'..'z' | 'A'..'Z')+;
 
@@ -119,8 +129,18 @@ import_statement returns [String code]
     ;
 
 expression returns [String code]
-    : arithmetic_expression {$code = $arithmetic_expression.code; }
+    : comparison_expression {$code = $comparison_expression.code; }
     ;
+
+
+comparison_expression returns [String code]
+    : (arithmetic_expression) => a=arithmetic_expression {$code=$a.code;} (GT b=arithmetic_expression {$code="(> "+$a.code+" "+$b.code+")";})?
+    | (arithmetic_expression LT) => a=arithmetic_expression {$code=$a.code;} (LT b=arithmetic_expression {$code="(< "+$a.code+" "+$b.code+")";})?
+    | (arithmetic_expression GTEQ) => a=arithmetic_expression {$code=$a.code;} (GTEQ b=arithmetic_expression {$code="(>= "+$a.code+" "+$b.code+")";})?
+    | (arithmetic_expression LTEQ) => a=arithmetic_expression {$code=$a.code;} (LTEQ b=arithmetic_expression {$code="(<= "+$a.code+" "+$b.code+")";})?
+    | (arithmetic_expression CPEQ) => a=arithmetic_expression {$code=$a.code;} (CPEQ b=arithmetic_expression {$code="(= "+$a.code+" "+$b.code+")";})?
+    ;
+
 
 arithmetic_expression returns [String code]
 @init{$code = ""; }
