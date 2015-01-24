@@ -72,3 +72,10 @@
     ["(apply sum (filter even? (range 0 10)))"]))
 
 
+
+ (deftest method-mixed-test-1
+   (test-code
+    "range(0, 10)->filter(even?).get(0);"
+    ["(get (filter even? (range 0 10)) 0)"]))
+
+

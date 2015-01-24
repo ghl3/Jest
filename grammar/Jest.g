@@ -161,10 +161,11 @@ expression_composed returns [String code]
     ;
 
 method_call_chain returns [String code]
-    : (method_call PERIOD) => method_call {$code=$method_call.code;}
-        (PERIOD ID method_params {$code="("+$ID.text+" "+$code+$method_params.code+")";})+
-    | (method_call ARROW) => method_call {$code=$method_call.code;}
-        (ARROW ID method_params {$code="("+$ID.text+$method_params.code+" "+$code+")";})+
+    : (method_call (PERIOD|ARROW)) => method_call {$code=$method_call.code;}
+        (
+            PERIOD a=ID b=method_params {$code="("+$a.text+" "+$code+$b.code+")";} |
+            ARROW c=ID d=method_params {$code="("+$c.text+$d.code+" "+$code+")";}
+        )+
     | method_call {$code=$method_call.code;}
     ;
 
