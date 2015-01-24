@@ -114,6 +114,31 @@ One can always call functions for their side effects and still ignore the value 
         println("Oh no, False...");
     }
 
+And one can use "else if" statements, which in Jest use the "elif" keyword:
+
+    if (nil) {
+    	println("Not gunna happen");
+    } elif (false) {
+        println("Nope");
+    } elif (true) {
+        println("HELLO WORLD!");
+    } else {
+        println("That ship has sailed");
+    }
+
+Or, more elegantly
+
+    println(if (nil) {
+    	"Not gunna happen"
+    } elif (false) {
+        "Nope"
+    } elif (true) {
+       "HELLO WORLD!"
+    } else {
+        "That ship has sailed"
+    });
+
+
 
 ## For Loop
 
