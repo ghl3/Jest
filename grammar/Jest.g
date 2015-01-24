@@ -162,7 +162,7 @@ expression_atom returns [String code]
     | clojure_vector {$code = $clojure_vector.code; }
     | clojure_map {$code = $clojure_map.code; }
     | function_call {$code = $function_call.code; }
-    | method_call {$code = $method_call.code; }
+    | method_call_chain {$code = $method_call_chain.code; }
     | clojure_get {$code = $clojure_get.code; }
     | for_loop {$code = $for_loop.code; }
     | conditional {$code = $conditional.code; }
@@ -268,11 +268,14 @@ obj.func(x, y, z) <--> func(obj, x, y, z)
 
 
 method_call_chain returns [String code]
-    : method_call {$code=$method_call.code;}
-    | (method_call PERIOD) => method_call PERIOD ID '(' expression ')' {$code="("+$ID.text+" "+$method_call.code+")";}
+    : (method_call PERIOD) => method_call PERIOD ID '(' ')' {$code="("+$ID.text+" "+$method_call.code+")";}
+    /*| (method_call PERIOD) => method_call PERIOD ID '(' expression ')' {$code="("+$ID.text+" "+$method_call.code+")";}a */
+    | method_call {$code=$method_call.code;}
     ;
 
+
 method_call returns [String code]
+    /*: (method_call PERIOD) => method_call PERIOD ID '(' ')' {$code="("+$ID.text+" "+$method_call.code+")";}*/
     : ( ID PERIOD ID '(' ')') =>  obj=ID PERIOD func=ID '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }
     | ( ID PERIOD ID '(' expression COMMA ) =>  obj=ID PERIOD func=ID '(' expression_list ')' {
             $code = "(" + $func.text + " " + $obj.text;

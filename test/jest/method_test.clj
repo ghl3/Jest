@@ -22,3 +22,14 @@
    "val g = y.foobar(a, b, c);"
    ["(def g (foobar y a b c))"]))
 
+
+(deftest method-chain-test-1
+  (test-code
+   "y.foobar().bar();"
+   ["(bar (foobar y))"]))
+
+(deftest method-chain-test-2
+  (test-code
+   "y.foobar().bar().baz();"
+   ["(baz (bar (foobar y)))"]))
+
