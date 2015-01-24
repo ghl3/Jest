@@ -164,14 +164,29 @@ method_call_chain returns [String code]
     : (method_call PERIOD) => method_call {$code=$method_call.code;}
         (PERIOD ID method_params {$code="("+$ID.text+" "+$code+$method_params.code+")";})+
     | method_call {$code=$method_call.code;}
-    /*| (ID method_params) => function_call {$code=$function_call.code;}*/
     ;
+
+
+/*
+Method calls are inverted functions
+obj.func(x, y, z) <--> func(obj, x, y, z)
+They can take any expression atom and transform it
+into a function call on that atom
+*/
 
 method_call returns [String code]
     : ( expression_atom PERIOD ID method_params) => obj=expression_atom PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.code + $method_params.code + ")"; }
-    /*| ( function_call PERIOD ID method_params) => call=function_call PERIOD func=ID method_params { $code = "(" + $func.text + " " + $call.code + $method_params.code + ")"; }*/
     ;
 
+
+/*
+An expression atom is an undividable component
+of an expression.  Each atom itself is an expression
+but can be composed with each other (using other sytax)
+to create more complicated expressions
+(The obvious exception is the final line, but that
+is present to make the code simpler)
+*/
 
 fragment
 expression_atom returns [String code]
@@ -186,7 +201,6 @@ expression_atom returns [String code]
     | for_loop {$code = $for_loop.code; }
     | conditional {$code = $conditional.code; }
     | let_statement {$code = $let_statement.code; }
-   /* | method_call_chain {$code = $method_call_chain.code; }*/
     | '(' expression ')' {$code = $expression.code; }
     ;
 
@@ -272,13 +286,6 @@ function_def returns [String code]
 function_call returns [String code]
     : ID method_params { $code = "(" + $ID.text + $method_params.code + ")"; }
     ;
-
-
-/*
-Method calls are inverted functions
-obj.func(x, y, z) <--> func(obj, x, y, z)
-*/
-
 
 
 /*
