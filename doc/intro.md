@@ -74,7 +74,15 @@ Jest uses the usual comparison operators, and comparison expressions return bool
     100 >= 300
     // false
     
+
+Double equals asserts that two expressions are equal to each other (where equality is determined by value, not by reference):
+
+    val x = 12;
+    val y = 12;
     
+    x == 12    
+    // true    
+
 
 ## Strings
 

@@ -39,3 +39,14 @@
   "10 + 20 + 1 > 30;"
   ["(> (+ (+ 10 20) 1) 30)"]
   true))
+
+
+(deftest comparison-test-6
+  (test-code-eval
+   "val x = 12;
+    val y = 12;
+    x == y;"
+   ["(def x 12)"
+    "(def y 12)"
+    "(= x y)"]
+   true))
