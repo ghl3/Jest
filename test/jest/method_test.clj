@@ -43,3 +43,8 @@
    "y.foobar(2).bar(10).baz();"
    ["(baz (bar (foobar y 2) 10))"]))
 
+(deftest method-chain-test-5
+  (test-code
+   "y.foobar(2).bar(10, 20, 15).baz(true);"
+   ["(baz (bar (foobar y 2) 10 20 15) true)"]))
+
