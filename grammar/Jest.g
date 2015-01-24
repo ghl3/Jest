@@ -285,7 +285,8 @@ method_call_chain returns [String code]
 
 
 method_call returns [String code]
-    : ( ID PERIOD ID '(' ')') =>  obj=ID PERIOD func=ID '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }
+    : ( ID PERIOD ID method_params) => obj=ID PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.text + $method_params.code + ")"; }
+/*
     | ( ID PERIOD ID '(' expression COMMA ) =>  obj=ID PERIOD func=ID '(' expression_list ')' {
             $code = "(" + $func.text + " " + $obj.text;
             for(int i=0; i < $expression_list.code_list.size(); ++i) {
@@ -294,6 +295,7 @@ method_call returns [String code]
             $code += ")";
         }
     | obj=ID PERIOD func=ID '(' expression ')' { $code = "(" + $func.text + " " + $obj.text + " " + $expression.code + ")"; }
+*/
     ;
 
 method_params returns [String code]
@@ -301,11 +303,10 @@ method_params returns [String code]
     | ( '(' expression COMMA ) => '(' expression_list ')' {
             $code = "";
             for(int i=0; i < $expression_list.code_list.size(); ++i) {
-                if (i != 0) $code += " ";
-                $code += $expression_list.code_list.get(i);
+                $code += " " +$expression_list.code_list.get(i);
             }
         }
-    | '(' expression ')' { $code = $expression.code; }
+    | '(' expression ')' { $code = " " + $expression.code; }
 ;
 
 
