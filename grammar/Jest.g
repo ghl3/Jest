@@ -156,7 +156,7 @@ arithmetic_term returns [String code]
 
 fragment
 expression_composed returns [String code]
-    : (expression_atom PERIOD) => method_call_chain{$code=$method_call_chain.code;}
+    : (expression_atom (PERIOD|ARROW)) => method_call_chain{$code=$method_call_chain.code;}
     | expression_atom {$code=$expression_atom.code;}
     ;
 
@@ -178,7 +178,7 @@ into a function call on that atom
 
 method_call returns [String code]
     : ( expression_atom PERIOD ID method_params) => obj=expression_atom PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.code + $method_params.code + ")"; }
-    | ( expression_atom ARROW ID method_params) => obj=expression_atom ARROW func=ID method_params { $code = "(" + $func.text + $method_params.code+ " " + $obj.code + ")"; }
+    | ( expression_atom ARROW ID method_params) => obj=expression_atom ARROW func=ID method_params { $code = "(" + $func.text + $method_params.code + " " + $obj.code + ")"; }
     ;
 
 

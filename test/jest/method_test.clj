@@ -50,6 +50,19 @@
 
  (deftest method-chain-test-6
    (test-code
-    "range(0, 100).filter(even?);"
-    ["(filter (range 0 100) even?)"]))
+    "range(0, 100).first();"
+    ["(first (range 0 100))"]))
+
+
+ (deftest method-chain-test-7
+   (test-code
+    "[1, 2, 3].get(1);"
+    ["(get [1, 2, 3] 1)"]))
+
+
+ (deftest method-pipe-test-1
+   (test-code
+    "y->filter(even?);"
+    ["(filter even? y)"]))
+
 
