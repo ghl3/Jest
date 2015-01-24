@@ -67,7 +67,7 @@ LTEQ: '<=' ;
 CPEQ: '==';
 
 /* Names of variables and functions */
-ID: ('a'..'z' | 'A'..'Z')+;
+ID: ('a'..'z' | 'A'..'Z')+('?')?;
 
 SYMBOL: ':' ID;
 
@@ -266,9 +266,15 @@ Method calls are inverted functions
 obj.func(x, y, z) <--> func(obj, x, y, z)
 */
 
+
+method_call_chain returns [String code]
+    : method_call {$code=$method_call.code;}
+    | (method_call PERIOD) => method_call PERIOD ID '(' expression ')' {$code="("+$ID.text+" "+$method_call.code+")";}
+    ;
+
 method_call returns [String code]
-    : (ID PERIOD ID '(' ')') => obj=ID PERIOD func=ID '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }
-    | (ID PERIOD ID '(' expression COMMA ) => obj=ID PERIOD func=ID '(' expression_list ')' {
+    : ( ID PERIOD ID '(' ')') =>  obj=ID PERIOD func=ID '(' ')' { $code = "(" + $func.text + " " + $obj.text + ")"; }
+    | ( ID PERIOD ID '(' expression COMMA ) =>  obj=ID PERIOD func=ID '(' expression_list ')' {
             $code = "(" + $func.text + " " + $obj.text;
             for(int i=0; i < $expression_list.code_list.size(); ++i) {
                 $code += " " + $expression_list.code_list.get(i);
