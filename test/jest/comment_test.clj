@@ -4,45 +4,53 @@
 
 
 (deftest comment-test-1
+  (test-code-eval
   "// COMMENT
-  10"
+  10;"
   ["10"]
-  10)
+  10))
 
 
 (deftest comment-test-2
+  (test-code-eval
   "/* COMMENT
   OTHER COMMENTS
   */
-  10"
+  10;"
   ["10"]
-  10)
+  10))
+
 
 (deftest comment-test-3
+  (test-code-eval
   "/*
   COMMENT
   OTHER COMMENTS
   STUFF */
-  10"
+  10;"
   ["10"]
-  10)
+  10))
+
 
 (deftest comment-test-4
+  (test-code-eval
   "10
   /*
   COMMENT
   OTHER COMMENTS
   STUFF */
-  "
+  ;"
   ["10"]
-  10)
+  10))
+
 
 (deftest comment-test-5
-  "10
+  (test-code-eval
+  "10;
   /* /*
   // COMMENT
   OTHER COMMENTS
   STUFF */
   "
   ["10"]
-  10)
+  10))
