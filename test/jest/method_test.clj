@@ -66,3 +66,9 @@
     ["(filter even? y)"]))
 
 
+ (deftest method-pipe-test-2
+   (test-code
+    "range(0, 10)->filter(even?)->apply(sum);"
+    ["(apply sum (filter even? (range 0 10)))"]))
+
+
