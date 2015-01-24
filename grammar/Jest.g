@@ -43,6 +43,8 @@ STRING : '"' ~('\r' | '\n' | '"')* '"' ;
 
 VAL: 'val';
 
+LET: 'let';
+
 DEFN: 'defn';
 
 FOR: 'for';
@@ -144,6 +146,7 @@ expression_atom returns [String code]
     | clojure_get {$code = $clojure_get.code; }
     | for_loop {$code = $for_loop.code; }
     | conditional {$code = $conditional.code; }
+    | let_statement {$code = $let_statement.code; }
     | '(' expression ')' {$code = $expression.code; }
     ;
 
@@ -183,6 +186,20 @@ val_assignment returns [String code]
       (COLON type=type_annotation {annotation = "(t/ann " + $name.text + " " + $type.code +  ")\n";})?
       '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     ;
+
+
+let_statement returns [String code]
+@init{
+    String annotation = "";
+}
+@after {
+    $code = annotation + $code;
+}
+    : LET '(' VAL name=ID '=' exp=expression {$code="(let [" + $name.text + " " + $exp.code;}
+           (SEMICOLON VAL next_name=ID '=' next_exp=expression {$code += "\n" + $next_name.text + " " + $next_exp.code;})*
+           ')' block {$code += "] \n" + $block.code + ")";}
+    ;
+
 
 function_def_params returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
