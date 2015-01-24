@@ -196,7 +196,7 @@ let_statement returns [String code]
     $code = annotation + $code;
 }
     : LET '(' VAL name=ID '=' exp=expression {$code="(let [" + $name.text + " " + $exp.code;}
-           (SEMICOLON VAL next_name=ID '=' next_exp=expression {$code += "\n" + $next_name.text + " " + $next_exp.code;})*
+           (SEMICOLON VAL next_name=ID '=' next_exp=expression {$code += "\n" + $next_name.text + " " + $next_exp.code;})* (SEMICOLON)?
            ')' block {$code += "] \n" + $block.code + ")";}
     ;
 
