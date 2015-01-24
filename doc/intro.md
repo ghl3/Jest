@@ -33,12 +33,34 @@ This will print the Clojure source to standard out.  Use the "-h" or "--help" fl
 
 ## Variables
 
-Variables are declared using the "val" keyword, an equals sign, and an expression:
+Global variables are declared using the "val" keyword, an equals sign, and an expression:
 
     val x = 10;
     val y = x*x;
     
 Variable declaration statements must terminate with a semi-colon.  Variable names may not be re-used (currently the language implementation allows this, but future iterations will remove this, so programs should not depend on it as a property).
+
+
+## Scope
+
+Scoped variables in Jest are created the "let" keyword to form a let expression:
+
+    let (val x = 10) {
+        x+5;
+    }
+
+Let expressions are indeed expressions and they evaluate to the value of the final line of their body.  A variable declared in the heading of a let expression will be scoped and will exist only in the body of the let block.  A variable declared in the head will shadow any existing variables declared outside of the let expression.  One can declare multiple variables in the header of a let expression:
+
+    val x = 100;
+    
+    val res = let (val x = 10; val y = 20) {
+        x + y;
+    }
+
+    println(res);
+    
+    // Prints "30", not "120"
+
 
 ## Strings
 
