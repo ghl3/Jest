@@ -33,3 +33,13 @@
    "y.foobar().bar().baz();"
    ["(baz (bar (foobar y)))"]))
 
+(deftest method-chain-test-3
+  (test-code
+   "y.foobar().bar(10).baz();"
+   ["(baz (bar (foobar y) 10))"]))
+
+(deftest method-chain-test-4
+  (test-code
+   "y.foobar(2).bar(10).baz();"
+   ["(baz (bar (foobar y 2) 10))"]))
+

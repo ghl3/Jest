@@ -250,6 +250,8 @@ function_def returns [String code]
 
 
 function_call returns [String code]
+    : ID method_params { $code = "(" + $ID.text + $method_params.code + ")"; }
+/*
     : (ID '(' ')') => ID '(' ')' { $code = "(" + $ID.text + ")"; }
     | (ID '(' expression COMMA!) => ID '(' expression_list ')' {
             $code = "(" + $ID.text;
@@ -259,6 +261,7 @@ function_call returns [String code]
             $code += ")";
         }
     | ID '(' expression ')' { $code = "(" + $ID.text + " " + $expression.code + ")"; }
+*/
     ;
 
 /*
@@ -268,34 +271,13 @@ obj.func(x, y, z) <--> func(obj, x, y, z)
 
 method_call_chain returns [String code]
     : (method_call PERIOD) => method_call {$code=$method_call.code;}
-      (
-        PERIOD ID '(' ')' {$code="("+$ID.text+" "+$code+")";} /*|
-        PERIOD ID '(' expression_list ')' {
-            $code = "(" + $ID.text + " " + $code
-            for(int i=0; i < $expression_list.code_list.size(); ++i) {
-                $code += " " + $expression_list.code_list.get(i);
-            }
-            $code += ")";
-        } |
-        PERIOD ID '(' expression ')' { $code = "(" + $ID.text + " " + $code + " " + $expression.code + ")"; }
-*/
-      )+
+      ( PERIOD ID method_params {$code="("+$ID.text+" "+$code+$method_params.code+")";} )+
     | method_call {$code=$method_call.code;}
     ;
 
 
 method_call returns [String code]
     : ( ID PERIOD ID method_params) => obj=ID PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.text + $method_params.code + ")"; }
-/*
-    | ( ID PERIOD ID '(' expression COMMA ) =>  obj=ID PERIOD func=ID '(' expression_list ')' {
-            $code = "(" + $func.text + " " + $obj.text;
-            for(int i=0; i < $expression_list.code_list.size(); ++i) {
-                $code += " " + $expression_list.code_list.get(i);
-            }
-            $code += ")";
-        }
-    | obj=ID PERIOD func=ID '(' expression ')' { $code = "(" + $func.text + " " + $obj.text + " " + $expression.code + ")"; }
-*/
     ;
 
 method_params returns [String code]
