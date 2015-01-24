@@ -17,10 +17,9 @@ package jest.grammar;
 }
 
 // or a python style hash comment
-LineComment
-    :   '[//,#]' ~('\n'|'\r')* //NEWLINE
-        {System.out.println("lc > " + getText());
-        skip();}
+Comment
+    :   '//' ~('\n'|'\r')* ('\n'|'\r') {skip();}
+    |  '/*' .* '*/' {skip();}
     ;
 
 WS  :   (' '
