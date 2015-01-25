@@ -44,6 +44,8 @@ VAL: 'val';
 
 LET: 'let';
 
+NEW: 'new';
+
 RECORD: 'record';
 
 DEFN: 'defn';
@@ -168,6 +170,14 @@ expression_composed returns [String code]
     | expression_atom {$code=$expression_atom.code;}
     ;
 
+
+/*
+Method calls are inverted functions
+obj.func(x, y, z) <--> func(obj, x, y, z)
+They can take any expression atom and transform it
+into a function call on that atom
+*/
+
 method_call_chain returns [String code]
     : (method_call (PERIOD|ARROW)) => method_call {$code=$method_call.code;}
         (
@@ -176,14 +186,6 @@ method_call_chain returns [String code]
         )+
     | method_call {$code=$method_call.code;}
     ;
-
-
-/*
-Method calls are inverted functions
-obj.func(x, y, z) <--> func(obj, x, y, z)
-They can take any expression atom and transform it
-into a function call on that atom
-*/
 
 method_call returns [String code]
     : ( expression_atom PERIOD ID method_params) => obj=expression_atom PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.code + $method_params.code + ")"; }
@@ -214,8 +216,21 @@ expression_atom returns [String code]
     | conditional {$code = $conditional.code; }
     | let_statement {$code = $let_statement.code; }
     | lambda {$code=$lambda.code;}
+    | member_get {$code=$member_get.code;}
+    | record_constructor {$code=$record_constructor.code;}
     | '(' expression ')' {$code = $expression.code; }
     ;
+
+
+member_get returns [String code]
+    : (ID PERIOD ID) => record=ID PERIOD member=ID { $code = "(:" + $member.text + " " + $record.text + ")";}
+    ;
+
+
+record_constructor returns [String code]
+    : NEW ID method_params {$code="(->"+$ID.text+$method_params.code+")";}
+    ;
+
 
 expression_list returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
