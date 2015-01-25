@@ -269,6 +269,10 @@ In Jest, one can create structures of data using the "record" keyword:
   
     val bob = new Student("Bob", "History");
    
+One can alternatively create a record by naming the fields:
+
+    val bob = new Student(name: "Bob", class: "History");
+   
 Fields of a record can be accessed using a "dot" accessor:
 
     val class = bob.class;
