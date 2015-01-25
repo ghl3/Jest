@@ -43,6 +43,18 @@ Global variables are declared using the "val" keyword, an equals sign, and an ex
 Variable declaration statements must terminate with a semi-colon.  Variable names may not be re-used (currently the language implementation allows this, but future iterations will remove this, so programs should not depend on it as a property).
 
 
+## Comments
+
+Jest uses c-style comments
+
+    // This is a comment
+    
+    /* These are comments too
+    comment
+    comment
+    */
+
+
 ## Scope
 
 Scoped variables in Jest are created the "let" keyword to form a let expression:
@@ -129,21 +141,6 @@ As discussed earlier, symbols are useful as keys to maps:
     val x = mp[:a];
 
 
-## Functions
-
-Functions in Jest are first class objects.  They can be created using the "defn" keyword:
-
-    defn function(a, b, c) {
-        a + b + c;
-    }
-
-The value of a function is the value of the last expression in the body of the function when evaluated with the input parameters.  Function bodies must include curly braces and the body between the braces must consist of one or more statements or expressions (each ending in a semi-colon).
-
-Functions are called by passing arguments to the name bound to the function in the standard way:
-
-    val result = function(1.0, 2.0, 3.0); 
-
-
 ## Conditionals
 
 In Jest, if statements are expressions, meaning they evaluate to a value.  The value of an if statement is the value of the final like of the block that is conditionally selected or 'nil' if no block is conditionally selected.
@@ -185,6 +182,36 @@ Or, more elegantly
     } else {
         "That ship has sailed"
     });
+
+
+## Functions
+
+Functions in Jest are first class objects.  They can be created using the "defn" keyword:
+
+    defn function(a, b, c) {
+        a + b + c;
+    }
+
+The value of a function is the value of the last expression in the body of the function when evaluated with the input parameters.  Function bodies must include curly braces and the body between the braces must consist of one or more statements or expressions (each ending in a semi-colon).
+
+Functions are called by passing arguments to the name bound to the function in the standard way:
+
+    val result = function(1.0, 2.0, 3.0); 
+
+
+## Lambdas
+
+One can create anonymous functions, or Lambdas, in Jest using hash notation:
+
+    val myFunc = #(% * %);
+    myFunc(2):
+    // evaluates to 4
+    
+Inside the hash, a '%' represents the (single) argument to the lambda function and the result will be a callable function of one argument.  One can create functions of more than one argument by indexing the '%' keywords:
+
+    val myFunc = #(%1 + (%2*%3));
+	myFunc(10, 2, 5);
+	// evaluates to 15 + (2*5) = 25
 
 
 ## For Loop
@@ -248,17 +275,65 @@ Let expressions are indeed expressions and will evaluate to the value of the las
 	
 	// Prints 30 (not 120)
 
+## Methods
 
-## Comments
+Jest doesn't have classes.  However, Jest does have syntax that allows one to call a function on an object in a familiar way.  One can call a "method" on an object in Jest by using the dot operator:
 
-Jest uses c-style comments
-
-    // This is a comment
+    val myVec = [1, 2, 3, 4, 5];
+    myVec.get(2);
     
-    /* These are comments too
-    comment
-    comment
-    */
+There, "myVec" is a vector, which is not a class, but one can use the dot notation to apply a function to it that mimics a method call in other languages.  Specifically, doing:
+
+    obj.func(arg, arg)
+    
+is completely equivalent to doing:
+
+    func(obj, arg, arg)
+
+This is nice because it means that any function that takes a particular object as its first parameter can be interpreted as a method on that object.  This means that all Jest objects are extendable; anyone can create any new methods on that object just by defining new functions.
+
+    defn bookend(vec) {
+    	vec.first() + vec.last();
+    }
+    
+    val myVec = [1, 2, 3, 4, 5];
+    myVec.bookend();
+    
+    // Evaluates to 1+5 = 6
+    
+
+## Pipeing
+
+An elegant way to process data in Jest is to leverage Jest's piping functionality.  Chaining together multiple function calls is a common procedure in a data processing pipeline and Jest makes this easy.  
+
+Piping is enabled using the piping operator '->' which causes function calls to be chained together.  This is easiest to explain with an example:
+
+    range(0, 100)
+        ->filter(even?)
+        ->map( #(%+%) )
+        ->take(10);
+         
+    // Evaluates to: (0 4 8 12 16 20 24 28 32 36)
+
+To explain the above, when an expression is piped into a function, it is placed as an argument to that function (at the END of the argument list).  So, for example:
+
+    range(0, 100)
+        ->filter(even?)
+        
+is equivalent to:
+
+    filter(even?, range(0, 100))
+
+which takes the range of all numbers from 0 to 100 and filters it to retain only the even ones.  Using multiple pipes in succession puts the result of the previous part of the chain into the next function.
+
+Note that this can also be combined with method calls to produce even more possibilities:
+
+     range(0, 100)
+        ->filter(even?)
+        ->map( #(%+%) )
+        .get(5);
+
+The above returns the 5th item in the list.
 
 
 ## Type Checking (Experimental!)
