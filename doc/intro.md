@@ -259,6 +259,20 @@ The value of a loop is an eager sequence, but one may return a lazy sequence by 
     
 Note, of course, that any side effects executed in a lazy for loop (such as printing) won't happen until the lazy sequence is realized (which may never happen).
 
+## Records
+
+In Jest, one can create structures of data using the "record" keyword:
+
+    record Student{ name; class; }
+
+  These are not classes as they have no methods and their data is immutable.  One can create an instance of a record using the "new" keyword:
+  
+    val bob = new Student("Bob", "History");
+   
+Fields of a record can be accessed using a "dot" accessor:
+
+    val class = bob.class;
+
 
 ## Methods
 
