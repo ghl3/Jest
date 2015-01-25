@@ -238,8 +238,22 @@ func_type_annotation returns [String code]
     ;
 
 
+/*
+Lambda must have a '%' somewhere in the expression
+If the expression is a function call, we unwrap the
+external paranthese so it is:
+#(func % %)
+and not
+#((func % %))
+*/
 lambda returns [String code]
-    : '#(' expression ')' {$code="#("+$expression.code+")";}
+    : ('#(' .* '%' .* ')')=> '#(' expression ')' {
+            if ($expression.code.length() > 2 && $expression.code.matches("[(].*[)]")) { //get(0)=="(" && $expression.code.get(expressions.length()-1)==")") {
+                $code="#"+$expression.code;
+            } else {
+                $code="#("+$expression.code+")";
+            }
+        }
     ;
 
 val_assignment returns [String code]
