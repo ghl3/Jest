@@ -1,7 +1,7 @@
 
-range(0, 100)
+val x = range(0, 100)
          ->filter(even?)
-         .first();
+         ->map( #(%+%) )
+         ->take(20);
 
-//         ->map(#(= (mod % 3) 0))
 println(x);

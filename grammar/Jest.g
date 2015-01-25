@@ -69,7 +69,7 @@ CPEQ: '==';
 /* Names of variables and functions */
 ID
     : ('a'..'z' | 'A'..'Z')+('?')?
-    | '%'
+    | '%'(INTEGER)?
     ;
 
 SYMBOL: ':' ID;
