@@ -44,6 +44,8 @@ VAL: 'val';
 
 LET: 'let';
 
+RECORD: 'record';
+
 DEFN: 'defn';
 
 FOR: 'for';
@@ -55,6 +57,8 @@ IF: 'if';
 ELSE: 'else';
 
 ELIF: 'elif';
+
+IMPORT: 'import';
 
 GT: '>' ;
 
@@ -117,6 +121,7 @@ statement_list returns [List<String> code_list]
 statement_term returns [String code]
     : statement SEMICOLON {$code = $statement.code;}
     | function_def {$code = $function_def.code; }
+    | record_def {$code = $record_def.code; }
     ;
 
 statement returns [String code]
@@ -128,7 +133,7 @@ statement returns [String code]
 import_statement returns [String code]
 @init{$code = "(import '"; }
 @after{$code += ")"; }
-    : 'import ' a=ID {$code += $a.text;} (PERIOD b=ID {$code += "." + $b.text;} )*
+    : IMPORT a=ID {$code += $a.text;} (PERIOD b=ID {$code += "." + $b.text;} )*
     ;
 
 expression returns [String code]
@@ -314,6 +319,12 @@ function_call returns [String code]
     : ID method_params { $code = "(" + $ID.text + $method_params.code + ")"; }
     ;
 
+
+record_def returns [String code]
+    : RECORD name=ID '{' {$code="(defrecord " + $name.text + " [";}
+        first=ID SEMICOLON {$code += $first.text;} (field=ID SEMICOLON{$code += " "+$field.text;})*
+        '}' {$code += "])";}
+    ;
 
 /*
  Parameter for a function or method call
