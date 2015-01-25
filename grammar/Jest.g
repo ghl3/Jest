@@ -216,9 +216,16 @@ expression_atom returns [String code]
     | conditional {$code = $conditional.code; }
     | let_statement {$code = $let_statement.code; }
     | lambda {$code=$lambda.code;}
-    | member_get {$code=$member_get.code;}
+    | member_get_chain {$code=$member_get_chain.code;}
     | record_constructor {$code=$record_constructor.code;}
     | '(' expression ')' {$code = $expression.code; }
+    ;
+
+
+
+member_get_chain returns [String code]
+    : (member_get PERIOD ID) => member_get {$code=$member_get.code;} (PERIOD a=ID {$code="(:"+$a.text+" "+$code+")";})+
+    | member_get {$code=$member_get.code;}
     ;
 
 

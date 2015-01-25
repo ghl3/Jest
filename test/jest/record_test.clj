@@ -17,3 +17,17 @@
       "(def bob (->Student \"Bob\" \"History\"))"
       "(:name bob)"]
      "Bob"))
+
+(deftest record-test-3
+    (test-code-eval
+     "record Student{ name; class; }
+      record CollegeClass{ time; day; }
+      val history = new CollegeClass(\"Noon\", \"Wednesday\");
+      val bob = new Student(\"Bob\", history);
+      bob.class.time;"
+     ["(defrecord Student [name class])"
+      "(defrecord CollegeClass [time day])"
+      "(def history (->CollegeClass \"Noon\" \"Wednesday\"))"
+      "(def bob (->Student \"Bob\" history))"
+      "(:time (:class bob))"]
+     "Noon"))
