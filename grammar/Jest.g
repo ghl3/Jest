@@ -67,7 +67,10 @@ LTEQ: '<=' ;
 CPEQ: '==';
 
 /* Names of variables and functions */
-ID: ('a'..'z' | 'A'..'Z')+('?')?;
+ID
+    : ('a'..'z' | 'A'..'Z')+('?')?
+    | '%'
+    ;
 
 SYMBOL: ':' ID;
 
@@ -205,6 +208,7 @@ expression_atom returns [String code]
     | for_loop {$code = $for_loop.code; }
     | conditional {$code = $conditional.code; }
     | let_statement {$code = $let_statement.code; }
+    | lambda {$code=$lambda.code;}
     | '(' expression ')' {$code = $expression.code; }
     ;
 
@@ -231,6 +235,11 @@ type_annotation returns [String code]
 
 func_type_annotation returns [String code]
     : first=type_annotation {$code = $first.code;} (next=type_annotation {$code += " " + $next.code;})*
+    ;
+
+
+lambda returns [String code]
+    : '#(' expression ')' {$code="#("+$expression.code+")";}
     ;
 
 val_assignment returns [String code]
