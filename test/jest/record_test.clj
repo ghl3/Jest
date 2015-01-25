@@ -31,3 +31,13 @@
       "(def bob (->Student \"Bob\" history))"
       "(:time (:class bob))"]
      "Noon"))
+
+(deftest record-test-4
+    (test-code-eval
+     "record Student{ name; class; }
+      val bob = new Student(name: \"Bob\", class: \"History\");
+      bob.name;"
+     ["(defrecord Student [name class])"
+      "(def bob (map->Student {:name \"Bob\" :class \"History\"}))"
+      "(:name bob)"]
+     "Bob"))

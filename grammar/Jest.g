@@ -236,6 +236,9 @@ member_get returns [String code]
 
 record_constructor returns [String code]
     : NEW ID method_params {$code="(->"+$ID.text+$method_params.code+")";}
+    | NEW name=ID {$code="(map->"+$name.text+" {";}
+         '(' first_key=ID COLON first_exp=expression {$code+=":"+$first_key.text+" "+$first_exp.code;} (COMMA key=ID COLON exp=expression {$code+=" :"+$key.text+" "+$exp.code;})+ ')'
+          {$code+="})";}
     ;
 
 
