@@ -57,13 +57,17 @@ Jest uses c-style comments
 
 ## Scope
 
-Scoped variables in Jest are created the "let" keyword to form a let expression:
+Variables declared in Jest are global unless they are declared in a let expression:
+
+    let(val x=0) {
+        x + 10;
+    }
+
+Let expressions are indeed expressions and they evaluate to the value of the final line of their body.  A variable declared in the heading of a let expression will be scoped and will exist only within the body of the let block.  A variable declared in the head will shadow any existing variables declared outside of the let expression.  One can declare multiple variables in the header of a let expression:
 
     let (val x = 10) {
         x+5;
     }
-
-Let expressions are indeed expressions and they evaluate to the value of the final line of their body.  A variable declared in the heading of a let expression will be scoped and will exist only in the body of the let block.  A variable declared in the head will shadow any existing variables declared outside of the let expression.  One can declare multiple variables in the header of a let expression:
 
     val x = 100;
     
@@ -255,25 +259,6 @@ The value of a loop is an eager sequence, but one may return a lazy sequence by 
     
 Note, of course, that any side effects executed in a lazy for loop (such as printing) won't happen until the lazy sequence is realized (which may never happen).
 
-
-## Scope
-
-Variables declared in Jest are global unless they are declared in a let expression:
-
-    let(val x=0) {
-        x + 10;
-    }
-
-Let expressions are indeed expressions and will evaluate to the value of the last line in the block. One can declare multiple variables in a let expression.  Each variable declared in the let expression has scope only until the end of the let expression's block.  Variables declared in the let expression will shadow any earlier declared variables.
-
-    val x = 100;
-    val res = let(val x=10; val y=20) {
-        x+y;
-    }
-
-	println(res);
-	
-	// Prints 30 (not 120)
 
 ## Methods
 
