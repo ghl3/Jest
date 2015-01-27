@@ -41,3 +41,20 @@
       "(def bob (map->Student {:name \"Bob\" :class \"History\"}))"
       "(:name bob)"]
      "Bob"))
+
+
+
+(deftest implements-test-1
+    (test-code
+     "record Student{
+         name;
+         class;
+         implements foo {
+           defn sit(this) {
+             println(this);
+           }
+         }
+     }"
+     ["(defrecord Student [name class]
+        foo
+          (sit [ this ] (println this)))"]))

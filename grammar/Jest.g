@@ -48,6 +48,8 @@ NEW: 'new';
 
 RECORD: 'record';
 
+IMPLEMENTS: 'implements';
+
 DEFN: 'defn';
 
 FOR: 'for';
@@ -311,35 +313,32 @@ let_statement returns [String code]
            ')' block {$code += "] \n" + $block.code + ")";}
     ;
 
-
-function_def_params returns [List<String> code_list]
-@init{$code_list = new ArrayList<String>();}
-    :  (a=ID COMMA! {$code_list.add($a.text);})* b=ID { $code_list.add($b.text);}
-    ;
-
 function_def returns [String code]
 @init{
     String annotation = "";
-    $code = "(defn ";}
+}
 @after{
-    $code += ")";
     $code = annotation + $code;
 }
     : DEFN name=ID {$code="(defn "+$name.text;}
             method_params {$code += " ["+$method_params.code+" ]";}
-/*
- "(defn " + $name.text '(' function_def_params ')' {
-            $code = "(defn " + $name.text;
-            $code += " [";
-            for(int i=0; i < $function_def_params.code_list.size(); ++i) {
-                $code += " " + $function_def_params.code_list.get(i);
-            }
-            $code += " ]";
-      }
-*/
         (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
          ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
-         block {$code+=$block.code;} (SEMICOLON)?
+         block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
+    ;
+
+method_def returns [String code]
+@init{
+    String annotation = "";
+}
+@after{
+    $code = annotation + $code;
+}
+    : DEFN name=ID {$code="("+$name.text;}
+            method_params {$code += " ["+$method_params.code+" ]";}
+        (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
+         ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
+         block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
     ;
 
 
@@ -350,8 +349,12 @@ function_call returns [String code]
 
 record_def returns [String code]
     : RECORD name=ID '{' {$code="(defrecord " + $name.text + " [";}
-        first=ID SEMICOLON {$code += $first.text;} (field=ID SEMICOLON{$code += " "+$field.text;})*
-        '}' {$code += "])";}
+        first=ID SEMICOLON {$code += $first.text;} (field=ID SEMICOLON{$code += " "+$field.text;})* {$code += "]";}
+
+
+        (IMPLEMENTS protocol=ID {$code += "\n"+$protocol.text;} '{'(method=method_def {$code += "\n"+$method.code;})*'}')*
+
+        '}' {$code += ")";}
     ;
 
 /*
