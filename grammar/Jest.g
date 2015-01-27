@@ -325,18 +325,21 @@ function_def returns [String code]
     $code += ")";
     $code = annotation + $code;
 }
-    : DEFN name=ID '(' function_def_params ')' {
+    : DEFN name=ID {$code="(defn "+$name.text;}
+            method_params {$code += " ["+$method_params.code+" ]";}
+/*
+ "(defn " + $name.text '(' function_def_params ')' {
             $code = "(defn " + $name.text;
             $code += " [";
             for(int i=0; i < $function_def_params.code_list.size(); ++i) {
                 $code += " " + $function_def_params.code_list.get(i);
             }
             $code += " ]";
-        }
+      }
+*/
         (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
          ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
-         block {$code+=$block.code;} /*
-        '{' (statement_term { $code += "\n\t" + $statement_term.code; } )+ '}'*/ (SEMICOLON)?
+         block {$code+=$block.code;} (SEMICOLON)?
     ;
 
 
