@@ -1,7 +1,8 @@
 (ns jest.jest
   (:require [clojure.tools.cli :refer [parse-opts]]
             [clojure.string :as str]
-            [jest.parser :refer :all])
+            [jest.parser :refer :all]
+            [cljfmt.core :as cljfmt])
   (:gen-class))
 
 
@@ -38,6 +39,10 @@
   (str/join (repeat n "=")))
 
 
+(defn pretty-print-clojure [src]
+  (cljfmt/reformat-string src))
+
+
 (defn verbose-print-jest-source [source-code]
   "Print helpful information based on the
   input source code we're running"
@@ -70,7 +75,7 @@
       ;; Print some helpful output for testing/debugging
       (cond
        (:verbose options) (exit 0 (verbose-print-jest-source source-code))
-       (:clojure options) (exit 0 (get-clojure source-code))
+       (:clojure options) (exit 0 (-> source-code get-clojure pretty-print-clojure))
        (:type-check options) (exit 0 (do (println "Using Type Checking") (type-check-jest source-code))))
 
       ;; Run all the things!
