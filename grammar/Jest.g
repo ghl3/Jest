@@ -19,16 +19,18 @@ package jest.grammar;
 // A file is a list of statements
 // followed by an EOF
 source_code returns [List<String> code_list]
-@init{$code_list = new ArrayList<String>();}
-    : statement_list {for (String str: $statement_list.code_list) { $code_list.add(str); }} EOF
+@init{
+    $code_list = new ArrayList<String>();
+}
+    : (import_statement SEMICOLON {$code_list.add($import_statement.code);} WS?)*
+      (statement_term {$code_list.add($statement_term.code);} WS?)*
+        EOF
     ;
 
-/** Parser Rules **/
-
-
-statement_list returns [List<String> code_list]
-@init{$code_list = new ArrayList<String>();}
-    : ( statement_term {$code_list.add($statement_term.code);} )* (WS)?
+import_statement returns [String code]
+@init{$code = "(import '"; }
+@after{$code += ")"; }
+    : IMPORT a=ID {$code += $a.text;} (PERIOD b=ID {$code += "." + $b.text;} )*
     ;
 
 // A statement_term is a statement followed
@@ -41,15 +43,21 @@ statement_term returns [String code]
 
 statement returns [String code]
     : val_assignment {$code = $val_assignment.code; }
-    | import_statement {$code = $import_statement.code; }
     | expression {$code = $expression.code; }
     ;
 
-import_statement returns [String code]
-@init{$code = "(import '"; }
-@after{$code += ")"; }
-    : IMPORT a=ID {$code += $a.text;} (PERIOD b=ID {$code += "." + $b.text;} )*
+val_assignment returns [String code]
+@init{
+    String annotation = "";
+}
+@after {
+    $code = annotation + $code;
+}
+    : VAL name=ID
+      (COLON type=type_annotation {annotation = "(t/ann " + $name.text + " " + $type.code +  ")\n";})?
+      '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     ;
+
 
 expression returns [String code]
     : comparison_expression {$code = $comparison_expression.code; }
@@ -196,17 +204,6 @@ lambda returns [String code]
         }
     ;
 
-val_assignment returns [String code]
-@init{
-    String annotation = "";
-}
-@after {
-    $code = annotation + $code;
-}
-    : VAL name=ID
-      (COLON type=type_annotation {annotation = "(t/ann " + $name.text + " " + $type.code +  ")\n";})?
-      '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
-    ;
 
 
 let_statement returns [String code]
