@@ -43,8 +43,8 @@ statement_term returns [String code]
     ;
 
 statement returns [String code]
-    : val_assignment {$code = $val_assignment.code; }
-    | expression {$code = $expression.code; }
+    /*: val_assignment {$code = $val_assignment.code; }*/
+    : expression {$code = $expression.code; }
     ;
 
 val_assignment returns [String code]
@@ -314,15 +314,19 @@ for_loop returns [String code]
 }
     : FOR '(' a=ID {func += "[ " + $a.text;} (COMMA b=ID {func += " " + $b.text;})* {func += " ]";}
       COLON c=expression {iterator = "(seq " + $c.code + ")";} (COMMA d=expression {iterator += " (seq " + $d.code + ")";})* ')'
-      (LAZY {lazy=true;})? block { func += $block.code;} /*'{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'*/
+      (LAZY {lazy=true;})? block { func += $block.code;}
     ;
 
 /* NEW SCOPE */
 block returns [String code]
     : '{' expression {$code=$expression.code;} '}'
-    | '{' {$code="";} (statement_term {$code += "\n\t" + $statement_term.code;})+ '}'
+    | '{' (statement_term)+ '}' {$code="BAR";}
+    | '{' (var_scope)+ '}' {$code="BAR";}
     ;
 
+var_scope returns [String code]
+    :  (val_assignment SEMICOLON)+ (statement_term)* {$code="FOOBAR";}
+    ;
 
 /* NEW SCOPE */
 conditional returns [String code]
