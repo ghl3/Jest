@@ -21,8 +21,10 @@
                  [environ "1.0.0"]
 
                  ;; https://github.com/alexhall/lein-antlr
-                 [org.antlr/antlr "3.5.2"]
-                 [org.antlr/antlr-runtime "3.5.2"]
+                 [org.antlr/antlr4 "4.5"]
+                 [org.antlr/antlr4-runtime "4.5"]
+                 ;;[org.antlr/antlr "3.5.2"]
+                 ;;[org.antlr/antlr-runtime "3.5.2"]
                  [lein-cljfmt "0.1.4"]]
 
   :main jest.jest

@@ -5,7 +5,7 @@ options
   // antlr will generate java lexer and parser
   language = Java;
   // generated parser should create abstract syntax tree
-  output = AST;
+  //output = AST;
 }
 
 @lexer::header {
@@ -16,104 +16,15 @@ options
 package jest.grammar;
 }
 
-// or a python style hash comment
-Comment
-    :   '//' ~('\n'|'\r')* ('\n'|'\r') {skip();}
-    |  '/*' .* '*/' {skip();}
-    ;
-
-WS  :   (' '
-        |   '\t'
-        |   ('\n'|'\r'('\n'))
-        )+
-        {$channel=HIDDEN;}
-    ;
-
-/** Lexer Rules **/
-
-ARROW: '->' ;
-
-PLUS:     '+' ;
-MINUS:    '-' ;
-MULT:     '*' ;
-DIV:      '/' ;
-
-STRING : '"' ~('\r' | '\n' | '"')* '"' ;
-
-VAL: 'val';
-
-LET: 'let';
-
-NEW: 'new';
-
-RECORD: 'record';
-
-IMPLEMENTS: 'implements';
-
-DEFN: 'defn';
-
-FOR: 'for';
-
-LAZY: 'lazy';
-
-IF: 'if';
-
-ELSE: 'else';
-
-ELIF: 'elif';
-
-IMPORT: 'import';
-
-GT: '>' ;
-
-GTEQ: '>=' ;
-
-LT: '<' ;
-
-LTEQ: '<=' ;
-
-CPEQ: '==';
-
-/* Names of variables and functions */
-ID
-    : ('a'..'z' | 'A'..'Z')+('?')?
-    | '%'(INTEGER)?
-    ;
-
-SYMBOL: ':' ID;
-
-fragment
-DIGIT : '0'..'9';
-
-fragment
-INTEGER : (DIGIT)+;
-
-fragment
-DOUBLE : '0'..'9'+'.''0'..'9'+ ;
-
-NUMBER
-    : INTEGER
-    | DOUBLE
-    ;
-
-SEMICOLON : ';';
-
-COMMA : ',';
-
-COLON : ':';
-
-PERIOD : '.';
-
-HASH : '#';
-
-/** Parser Rules **/
-
 // A file is a list of statements
 // followed by an EOF
 source_code returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
-    : statement_list {for (String str: $statement_list.code_list) { $code_list.add(str); }} EOF!
+    : statement_list {for (String str: $statement_list.code_list) { $code_list.add(str); }} EOF
     ;
+
+/** Parser Rules **/
+
 
 statement_list returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
@@ -146,12 +57,12 @@ expression returns [String code]
 
 
 comparison_expression returns [String code]
-    : (arithmetic_expression GT) => a=arithmetic_expression {$code=$a.code;} (GT b=arithmetic_expression {$code="(> "+$a.code+" "+$b.code+")";})?
-    | (arithmetic_expression LT) => a=arithmetic_expression {$code=$a.code;} (LT b=arithmetic_expression {$code="(< "+$a.code+" "+$b.code+")";})?
-    | (arithmetic_expression GTEQ) => a=arithmetic_expression {$code=$a.code;} (GTEQ b=arithmetic_expression {$code="(>= "+$a.code+" "+$b.code+")";})?
-    | (arithmetic_expression LTEQ) => a=arithmetic_expression {$code=$a.code;} (LTEQ b=arithmetic_expression {$code="(<= "+$a.code+" "+$b.code+")";})?
-    | (arithmetic_expression CPEQ) => a=arithmetic_expression {$code=$a.code;} (CPEQ b=arithmetic_expression {$code="(= "+$a.code+" "+$b.code+")";})?
-    | (arithmetic_expression)=> a=arithmetic_expression {$code=$a.code;}
+    : a=arithmetic_expression {$code=$a.code;} (GT b=arithmetic_expression {$code="(> "+$a.code+" "+$b.code+")";})?
+    | a=arithmetic_expression {$code=$a.code;} (LT b=arithmetic_expression {$code="(< "+$a.code+" "+$b.code+")";})?
+    | a=arithmetic_expression {$code=$a.code;} (GTEQ b=arithmetic_expression {$code="(>= "+$a.code+" "+$b.code+")";})?
+    | a=arithmetic_expression {$code=$a.code;} (LTEQ b=arithmetic_expression {$code="(<= "+$a.code+" "+$b.code+")";})?
+    | a=arithmetic_expression {$code=$a.code;} (CPEQ b=arithmetic_expression {$code="(= "+$a.code+" "+$b.code+")";})?
+    | a=arithmetic_expression {$code=$a.code;}
     ;
 
 
@@ -165,10 +76,8 @@ arithmetic_term returns [String code]
     : a=expression_composed {$code = $a.code;} ( ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expression_composed {$code += $b.code + ")";} )*
     ;
 
-
-fragment
 expression_composed returns [String code]
-    : (expression_atom (PERIOD|ARROW)) => method_call_chain{$code=$method_call_chain.code;}
+    : method_call_chain{$code=$method_call_chain.code;}
     | expression_atom {$code=$expression_atom.code;}
     ;
 
@@ -181,7 +90,7 @@ into a function call on that atom
 */
 
 method_call_chain returns [String code]
-    : (method_call (PERIOD|ARROW)) => method_call {$code=$method_call.code;}
+    : method_call {$code=$method_call.code;}
         (
             PERIOD a=ID b=method_params {$code="("+$a.text+" "+$code+$b.code+")";} |
             ARROW c=ID d=method_params {$code="("+$c.text+$d.code+" "+$code+")";}
@@ -190,8 +99,8 @@ method_call_chain returns [String code]
     ;
 
 method_call returns [String code]
-    : ( expression_atom PERIOD ID method_params) => obj=expression_atom PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.code + $method_params.code + ")"; }
-    | ( expression_atom ARROW ID method_params) => obj=expression_atom ARROW func=ID method_params { $code = "(" + $func.text + $method_params.code + " " + $obj.code + ")"; }
+    : obj=expression_atom PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.code + $method_params.code + ")"; }
+    | obj=expression_atom ARROW func=ID method_params { $code = "(" + $func.text + $method_params.code + " " + $obj.code + ")"; }
     ;
 
 
@@ -204,7 +113,6 @@ to create more complicated expressions
 is present to make the code simpler)
 */
 
-fragment
 expression_atom returns [String code]
     : NUMBER {$code = $NUMBER.text;}
     | ID {$code = $ID.text; }
@@ -226,13 +134,13 @@ expression_atom returns [String code]
 
 
 member_get_chain returns [String code]
-    : (member_get PERIOD ID) => member_get {$code=$member_get.code;} (PERIOD a=ID {$code="(:"+$a.text+" "+$code+")";})+
+    : member_get {$code=$member_get.code;} (PERIOD a=ID {$code="(:"+$a.text+" "+$code+")";})+
     | member_get {$code=$member_get.code;}
     ;
 
 
 member_get returns [String code]
-    : (ID PERIOD ID) => record=ID PERIOD member=ID { $code = "(:" + $member.text + " " + $record.text + ")";}
+    : record=ID PERIOD member=ID { $code = "(:" + $member.text + " " + $record.text + ")";}
     ;
 
 
@@ -246,7 +154,7 @@ record_constructor returns [String code]
 
 expression_list returns [List<String> code_list]
 @init{$code_list = new ArrayList<String>();}
-    :  a=expression {$code_list.add($a.code);} (COMMA! b=expression { $code_list.add($b.code);})+
+    :  a=expression {$code_list.add($a.code);} (COMMA b=expression { $code_list.add($b.code);})+
     ;
 
 /* Consider adding '/t' as a prefix to all of these
@@ -254,7 +162,7 @@ expression_list returns [List<String> code_list]
 
 type_annotation returns [String code]
     : type=ID  {$code=$type.text;}
-    | ('#' ID) => '#' type=ID  {$code="t/" + $type.text;}
+    | '#' type=ID  {$code="t/" + $type.text;}
     | typeleft=ID num=NUMBER  {$code=$typeleft.text + " " + $num.text;}
     | '(' thing=type_annotation ')'  {$code = "(" + $thing.code + ")";}
     | container=ID {$code = "(t/" + $container.text;} '[' (inner=type_annotation {$code += " " + $inner.code;})+ ']' {$code += ")";}
@@ -279,7 +187,7 @@ and not
 #((func % %))
 */
 lambda returns [String code]
-    : ('#(' .* '%' .* ')')=> '#(' expression ')' {
+    : '#(' expression ')' {
             if ($expression.code.length() > 2 && $expression.code.matches("[(].*[)]")) { //get(0)=="(" && $expression.code.get(expressions.length()-1)==")") {
                 $code="#"+$expression.code;
             } else {
@@ -365,8 +273,8 @@ record_def returns [String code]
 */
 
 method_params returns [String code]
-    : ( '(' ')') => '(' ')' { $code = "";}
-    | ( '(' expression COMMA ) => '(' expression_list ')' {
+    : '(' ')' { $code = "";}
+    | '(' expression_list ')' {
             $code = "";
             for(int i=0; i < $expression_list.code_list.size(); ++i) {
                 $code += " " +$expression_list.code_list.get(i);
@@ -401,7 +309,7 @@ for_loop returns [String code]
     ;
 
 block returns [String code]
-    : ('{' expression '}') => '{' expression {$code=$expression.code;} '}'
+    : '{' expression {$code=$expression.code;} '}'
     | '{' {$code="";} (statement_term {$code += "\n\t" + $statement_term.code;})+ '}'
     ;
 
@@ -462,3 +370,98 @@ clojure_map returns [String code]
 clojure_get returns [String code]
     : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";}
     ;
+
+
+
+// LEXER RULES
+
+
+// or a python style hash comment
+Comment
+    :   '//' ~('\n'|'\r')* ('\n'|'\r') {skip();}
+    |  '/*' .*? '*/' {skip();}
+    ;
+
+WS  :   (' '
+        |   '\t'
+        |   ('\n'|'\r'('\n'))
+        )+ -> channel(HIDDEN)
+    ;
+
+/** Lexer Rules **/
+
+ARROW: '->' ;
+
+PLUS:     '+' ;
+MINUS:    '-' ;
+MULT:     '*' ;
+DIV:      '/' ;
+
+STRING : '"' ~('\r' | '\n' | '"')* '"' ;
+
+VAL: 'val';
+
+LET: 'let';
+
+NEW: 'new';
+
+RECORD: 'record';
+
+IMPLEMENTS: 'implements';
+
+DEFN: 'defn';
+
+FOR: 'for';
+
+LAZY: 'lazy';
+
+IF: 'if';
+
+ELSE: 'else';
+
+ELIF: 'elif';
+
+IMPORT: 'import';
+
+GT: '>' ;
+
+GTEQ: '>=' ;
+
+LT: '<' ;
+
+LTEQ: '<=' ;
+
+CPEQ: '==';
+
+/* Names of variables and functions */
+ID
+    : ('a'..'z' | 'A'..'Z')+('?')?
+    | '%'(INTEGER)?
+    ;
+
+SYMBOL: ':' ID;
+
+fragment
+DIGIT : '0'..'9';
+
+fragment
+INTEGER : (DIGIT)+;
+
+fragment
+DOUBLE : '0'..'9'+'.''0'..'9'+ ;
+
+NUMBER
+    : INTEGER
+    | DOUBLE
+    ;
+
+SEMICOLON : ';';
+
+COMMA : ',';
+
+COLON : ':';
+
+PERIOD : '.';
+
+HASH : '#';
+

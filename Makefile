@@ -12,11 +12,13 @@ test: $(DEPENDENCIES)
 jar:
 	lein uberjar
 
-src/java/grammar/JestLexer.java: grammar/jest.g
-	lein antlr
+antlr:
+	java -jar antlr4-4.5.jar -o src/java grammar/Jest.g
 
-src/java/grammar/JestParser.java: grammar/jest.g
-	lein antlr
+
+src/java/grammar/JestLexer.java: antlr
+
+src/java/grammar/JestParser.java: antlr
 
 target/jest-0.1.0-SNAPSHOT-standalone.jar: $(DEPENDENCIES)
 	lein uberjar
