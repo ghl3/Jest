@@ -1,30 +1,44 @@
 
 package jest.grammar;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.TokenStream;
-import org.antlr.runtime.tree.CommonTree;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.TokenStream;
+//import org.antlr.v4.runtime.tree.CommonTree;
 //import org.antlr.CommonAST;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 import jest.grammar.*;
 
 public class JestCompiler {
 
-    public static CommonTree compile(String expression) {
+    public static ParseTree compile(String expression) {
         try {
             //lexer splits input into tokens
-            ANTLRStringStream input = new ANTLRStringStream(expression);
-            TokenStream tokens = new CommonTokenStream(new JestLexer(input));
+            //ANTLRStringStream input = new ANTLRStringStream(expression);
+            //TokenStream tokens = new CommonTokenStream(new JestLexer(input));
+            //CharStream stream = new ANTLRStringStream(expression);
+            //TokenStream tokens = new CommonTokenStream(new JestLexer(stream)); //expression)); //input));
+
+            JestLexer lexer = new JestLexer(new ANTLRInputStream(expression));
+
+            // Get a list of matched tokens
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
 
             //parser generates abstract syntax tree
             JestParser parser = new JestParser(tokens);
+            ParseTree tree = parser.source_code(); //compilationUnit();
+
+            return tree;
+            /*
             JestParser.source_code_return ret = parser.source_code();
 
             //acquire parse result
             CommonTree ast = (CommonTree) ret.tree;
             return ast;
+            */
 
         } catch (RecognitionException e) {
             throw new IllegalStateException("Recognition exception is never thrown, only declared.");
@@ -33,10 +47,11 @@ public class JestCompiler {
 
 
     public static java.util.List<String> parseSourceFile(String source)
-        throws org.antlr.runtime.RecognitionException{
+        throws org.antlr.v4.runtime.RecognitionException{
 
         // create an instance of the lexer
-        JestLexer lexer = new JestLexer(new ANTLRStringStream(source));
+        //JestLexer lexer = new JestLexer(new ANTLRStringStream(source));
+        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
 
         // wrap a token-stream around the lexer
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -45,7 +60,8 @@ public class JestCompiler {
         JestParser parser = new JestParser(tokens);
 
         // invoke the entry point of our grammar
-        JestParser.source_code_return code = parser.source_code();
+        /*
+        JestParser.source_code code = parser.source_code();
         java.util.List<String> data = new java.util.ArrayList<String>();
 
         for (int i=0; i < code.code_list.size(); ++i) {
@@ -53,13 +69,18 @@ public class JestCompiler {
         }
 
         return data;
+        */
+        return parser.source_code().code_list;
+
+
     }
 
     public static String parseExpression(String source)
-        throws org.antlr.runtime.RecognitionException{
+        throws org.antlr.v4.runtime.RecognitionException{
 
         // create an instance of the lexer
-        JestLexer lexer = new JestLexer(new ANTLRStringStream(source));
+        //JestLexer lexer = new JestLexer(new ANTLRStringStream(source));
+        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
 
         // wrap a token-stream around the lexer
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -72,12 +93,13 @@ public class JestCompiler {
     }
 
 
-    private static void printTree(CommonTree ast) {
+    /*
+    private static void printTree(ParseTree ast) {
         print(ast, 0);
     }
 
 
-    private static void print(CommonTree tree, int level) {
+    private static void print(ParseTree tree, int level) {
         //indent level
         for (int i = 0; i < level; i++)
             System.out.print("--");
@@ -129,4 +151,5 @@ public class JestCompiler {
             }
         }
     }
+    */
 }
