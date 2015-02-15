@@ -4,7 +4,7 @@
             [jest.parser :refer [create-ast]]))
 
 (import 'jest.grammar.JestParser)
-(import 'jest.grammar.JestCompiler)
+(import 'jest.compiler.JestCompiler)
 
 ;; (deftest compile-assignment-test
 ;;   (let [program "val foo = 10;"

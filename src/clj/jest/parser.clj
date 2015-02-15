@@ -2,7 +2,7 @@
   (:require [clojure.core.typed :as t]
             [clojure.string :as str]))
 
-(import 'jest.grammar.JestCompiler)
+(import 'jest.compiler.JestCompiler)
 
 (defn parse-source-file
   "Parse a string representing a full
