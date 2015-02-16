@@ -30,13 +30,13 @@ public class JestCompiler {
     }
 
 
-    public static JestParser.Source_codeContext compileSourceCodeToAst(String source)
+    public static JestParser.SourceCodeContext compileSourceCodeToAst(String source)
         throws org.antlr.v4.runtime.RecognitionException {
 
         JestParser parser = createParser(source);
 
         // Generate the AST of the source code
-        JestParser.Source_codeContext sourceTree = parser.source_code();
+        JestParser.SourceCodeContext sourceTree = parser.sourceCode();
 
         return sourceTree;
     }
@@ -51,7 +51,7 @@ public class JestCompiler {
         throws org.antlr.v4.runtime.RecognitionException {
 
         // Generate the AST of the source code
-        JestParser.Source_codeContext sourceTree = compileSourceCodeToAst(source);
+        JestParser.SourceCodeContext sourceTree = compileSourceCodeToAst(source);
 
         if (validate) {
             boolean valid = validateAst(sourceTree);
@@ -60,7 +60,7 @@ public class JestCompiler {
             }
         }
 
-        return sourceTree.code_list;
+        return sourceTree.codeList;
     }
 
     /**

@@ -66,7 +66,7 @@ public class Validator extends JestBaseListener {
 
 
     @Override
-    public void enterFunction_def(JestParser.Function_defContext ctx) {
+    public void enterFunctionDef(JestParser.FunctionDefContext ctx) {
         if (currentScope().isInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
         } else {
@@ -76,7 +76,7 @@ public class Validator extends JestBaseListener {
         Scope functionScope = createNewScope(scopes);
 
         // TODO: Include the function parameters in the current scope
-        JestParser.Function_def_paramsContext params = ctx.function_def_params;
+        JestParser.FunctionDefParamsContext params = ctx.functionDefParams;
 
         for (TerminalNode node: params.ID()) {
             currentScope().addToScope(node.getText(), node);
@@ -86,13 +86,13 @@ public class Validator extends JestBaseListener {
 
 
     @Override
-    public void exitFunction_def(JestParser.Function_defContext ctx) {
+    public void exitFunctionDef(JestParser.FunctionDefContext ctx) {
         dropCurrentScope(scopes);
     }
 
 
     @Override
-    public void enterFor_loop(JestParser.For_loopContext ctx) {
+    public void enterForLoop(JestParser.ForLoopContext ctx) {
         Scope loopScope = createNewScope(scopes);
         // TODO: Include the loop parameters in the current scope
 
@@ -102,13 +102,13 @@ public class Validator extends JestBaseListener {
     }
 
     @Override
-    public void exitFor_loop(JestParser.For_loopContext ctx) {
+    public void exitForLoop(JestParser.ForLoopContext ctx) {
         dropCurrentScope(scopes);
     }
 
 
     @Override
-    public void enterMethod_def(JestParser.Method_defContext ctx) {
+    public void enterMethodDef(JestParser.MethodDefContext ctx) {
         if (currentScope().isInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
         } else {
@@ -118,7 +118,7 @@ public class Validator extends JestBaseListener {
         Scope functionScope = createNewScope(scopes);
 
         // TODO: Include the function parameters in the current scope
-        JestParser.Function_def_paramsContext params = ctx.function_def_params;
+        JestParser.FunctionDefParamsContext params = ctx.functionDefParams;
 
         for (TerminalNode node: params.ID()) {
             currentScope().addToScope(node.getText(), node);
@@ -126,7 +126,7 @@ public class Validator extends JestBaseListener {
     }
 
     @Override
-    public void exitMethod_def(JestParser.Method_defContext ctx) {
+    public void exitMethodDef(JestParser.MethodDefContext ctx) {
         dropCurrentScope(scopes);
     }
 
@@ -163,7 +163,7 @@ public class Validator extends JestBaseListener {
     // Require variables to be defined
 
     @Override
-    public void enterDef_assignment(JestParser.Def_assignmentContext ctx) {
+    public void enterDefAssignment(JestParser.DefAssignmentContext ctx) {
         if (currentScope().isInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
         } else {
@@ -172,7 +172,7 @@ public class Validator extends JestBaseListener {
     }
 
     @Override
-    public void enterExpression_atom(JestParser.Expression_atomContext ctx) {
+    public void enterExpressionAtom(JestParser.ExpressionAtomContext ctx) {
 
         // If the expression is a variable, ensure the variable
         // has been declared
@@ -184,7 +184,7 @@ public class Validator extends JestBaseListener {
     }
 
     @Override
-    public void enterFunction_call(JestParser.Function_callContext ctx) {
+    public void enterFunctionCall(JestParser.FunctionCallContext ctx) {
         if (!currentScope().isInScope(ctx.ID.getText())) {
             throw new NotDeclared(ctx.ID);
         }

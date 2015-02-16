@@ -18,37 +18,37 @@ package jest.grammar;
 
 // A file is a list of statements
 // followed by an EOF
-source_code returns [List<String> code_list]
+sourceCode returns [List<String> codeList]
 @init{
-    $code_list = new ArrayList<String>();
+    $codeList = new ArrayList<String>();
 }
-    : (import_statement SEMICOLON {$code_list.add($import_statement.code);} WS?)*
-      (statement_term {$code_list.add($statement_term.code);} WS?)*
+    : (importStatement SEMICOLON {$codeList.add($importStatement.code);} WS?)*
+      (statementTerm {$codeList.add($statementTerm.code);} WS?)*
         EOF
     ;
 
-import_statement returns [String code]
+importStatement returns [String code]
 @init{$code = "(import '"; }
 @after{$code += ")"; }
     : IMPORT a=ID {$code += $a.text;} (PERIOD b=ID {$code += "." + $b.text;} )*
     ;
 
-// A statement_term is a statement followed
+// A statementTerm is a statement followed
 // by a semicolon
-statement_term returns [String code]
+statementTerm returns [String code]
     : statement SEMICOLON {$code = $statement.code;}
-    | function_def {$code = $function_def.code; }
-    | record_def {$code = $record_def.code; }
+    | functionDef {$code = $functionDef.code; }
+    | recordDef {$code = $recordDef.code; }
     | block {$code = $block.code; }
-    | var_scope {$code = $var_scope.code; }
+    | varScope {$code = $varScope.code; }
     ;
 
 statement returns [String code]
     : expression {$code = $expression.code; }
-    | def_assignment {$code = $def_assignment.code; }
+    | defAssignment {$code = $defAssignment.code; }
     ;
 
-def_assignment returns [String code]
+defAssignment returns [String code]
 @init{
     String annotation = "";
 }
@@ -56,39 +56,39 @@ def_assignment returns [String code]
     $code = annotation + $code;
 }
     : DEF name=ID
-      (COLON type=type_annotation {annotation = "(t/ann " + $name.text + " " + $type.code +  ")\n";})?
+      (COLON type=typeAnnotation {annotation = "(t/ann " + $name.text + " " + $type.code +  ")\n";})?
       '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     ;
 
 
 expression returns [String code]
-    : comparison_expression {$code = $comparison_expression.code; }
+    : comparisonExpression {$code = $comparisonExpression.code; }
     ;
 
 
-comparison_expression returns [String code]
-    : a=arithmetic_expression {$code=$a.code;} (GT b=arithmetic_expression {$code="(> "+$a.code+" "+$b.code+")";})?
-    | a=arithmetic_expression {$code=$a.code;} (LT b=arithmetic_expression {$code="(< "+$a.code+" "+$b.code+")";})?
-    | a=arithmetic_expression {$code=$a.code;} (GTEQ b=arithmetic_expression {$code="(>= "+$a.code+" "+$b.code+")";})?
-    | a=arithmetic_expression {$code=$a.code;} (LTEQ b=arithmetic_expression {$code="(<= "+$a.code+" "+$b.code+")";})?
-    | a=arithmetic_expression {$code=$a.code;} (CPEQ b=arithmetic_expression {$code="(= "+$a.code+" "+$b.code+")";})?
-    | a=arithmetic_expression {$code=$a.code;}
+comparisonExpression returns [String code]
+    : a=arithmeticExpression {$code=$a.code;} (GT b=arithmeticExpression {$code="(> "+$a.code+" "+$b.code+")";})?
+    | a=arithmeticExpression {$code=$a.code;} (LT b=arithmeticExpression {$code="(< "+$a.code+" "+$b.code+")";})?
+    | a=arithmeticExpression {$code=$a.code;} (GTEQ b=arithmeticExpression {$code="(>= "+$a.code+" "+$b.code+")";})?
+    | a=arithmeticExpression {$code=$a.code;} (LTEQ b=arithmeticExpression {$code="(<= "+$a.code+" "+$b.code+")";})?
+    | a=arithmeticExpression {$code=$a.code;} (CPEQ b=arithmeticExpression {$code="(= "+$a.code+" "+$b.code+")";})?
+    | a=arithmeticExpression {$code=$a.code;}
     ;
 
 
-arithmetic_expression returns [String code]
+arithmeticExpression returns [String code]
 @init{$code = ""; }
-    : a=arithmetic_term {$code = $a.code;} ( ( PLUS {$code = "(+ " + $code + " ";} | MINUS {$code = "(- " + $code + " ";} ) b=arithmetic_term {$code += $b.code + ")";} )*
+    : a=arithmeticTerm {$code = $a.code;} ( ( PLUS {$code = "(+ " + $code + " ";} | MINUS {$code = "(- " + $code + " ";} ) b=arithmeticTerm {$code += $b.code + ")";} )*
     ;
 
-arithmetic_term returns [String code]
+arithmeticTerm returns [String code]
 @init{$code = ""; }
-    : a=expression_composed {$code = $a.code;} ( ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expression_composed {$code += $b.code + ")";} )*
+    : a=expressionComposed {$code = $a.code;} ( ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expressionComposed {$code += $b.code + ")";} )*
     ;
 
-expression_composed returns [String code]
-    : method_call_chain{$code=$method_call_chain.code;}
-    | expression_atom {$code=$expression_atom.code;}
+expressionComposed returns [String code]
+    : methodCallChain{$code=$methodCallChain.code;}
+    | expressionAtom {$code=$expressionAtom.code;}
     ;
 
 
@@ -99,18 +99,18 @@ They can take any expression atom and transform it
 into a function call on that atom
 */
 
-method_call_chain returns [String code]
-    : method_call {$code=$method_call.code;}
+methodCallChain returns [String code]
+    : methodCall {$code=$methodCall.code;}
         (
-            PERIOD a=ID b=method_params {$code="("+$a.text+" "+$code+$b.code+")";} |
-            ARROW c=ID d=method_params {$code="("+$c.text+$d.code+" "+$code+")";}
+            PERIOD a=ID b=methodParams {$code="("+$a.text+" "+$code+$b.code+")";} |
+            ARROW c=ID d=methodParams {$code="("+$c.text+$d.code+" "+$code+")";}
         )+
-    | method_call {$code=$method_call.code;}
+    | methodCall {$code=$methodCall.code;}
     ;
 
-method_call returns [String code]
-    : obj=expression_atom PERIOD func=ID method_params { $code = "(" + $func.text + " " + $obj.code + $method_params.code + ")"; }
-    | obj=expression_atom ARROW func=ID method_params { $code = "(" + $func.text + $method_params.code + " " + $obj.code + ")"; }
+methodCall returns [String code]
+    : obj=expressionAtom PERIOD func=ID methodParams { $code = "(" + $func.text + " " + $obj.code + $methodParams.code + ")"; }
+    | obj=expressionAtom ARROW func=ID methodParams { $code = "(" + $func.text + $methodParams.code + " " + $obj.code + ")"; }
     ;
 
 
@@ -123,7 +123,7 @@ to create more complicated expressions
 is present to make the code simpler)
 */
 
-expression_atom returns [String code]
+expressionAtom returns [String code]
     : NUMBER {$code = $NUMBER.text;}
     | TRUE {$code = $TRUE.text; }
     | FALSE {$code = $FALSE.text; }
@@ -131,62 +131,62 @@ expression_atom returns [String code]
     | ID {$code = $ID.text; }
     | STRING {$code = $STRING.text; }
     | SYMBOL {$code = $SYMBOL.text; }
-    | clojure_vector {$code = $clojure_vector.code; }
-    | clojure_map {$code = $clojure_map.code; }
-    | function_call {$code = $function_call.code; }
-    | clojure_get {$code = $clojure_get.code; }
-    | for_loop {$code = $for_loop.code; }
+    | clojureVector {$code = $clojureVector.code; }
+    | clojureMap {$code = $clojureMap.code; }
+    | functionCall {$code = $functionCall.code; }
+    | clojureGet {$code = $clojureGet.code; }
+    | forLoop {$code = $forLoop.code; }
     | conditional {$code = $conditional.code; }
     | lambda {$code=$lambda.code;}
-    | member_get_chain {$code=$member_get_chain.code;}
-    | record_constructor {$code=$record_constructor.code;}
+    | memberGetChain {$code=$memberGetChain.code;}
+    | recordConstructor {$code=$recordConstructor.code;}
     | '(' expression ')' {$code = $expression.code; }
     ;
 
 
 
-member_get_chain returns [String code]
-    : member_get {$code=$member_get.code;} (PERIOD a=ID {$code="(:"+$a.text+" "+$code+")";})+
-    | member_get {$code=$member_get.code;}
+memberGetChain returns [String code]
+    : memberGet {$code=$memberGet.code;} (PERIOD a=ID {$code="(:"+$a.text+" "+$code+")";})+
+    | memberGet {$code=$memberGet.code;}
     ;
 
 
-member_get returns [String code]
+memberGet returns [String code]
     : record=ID PERIOD member=ID { $code = "(:" + $member.text + " " + $record.text + ")";}
     ;
 
 
-record_constructor returns [String code]
-    : NEW ID method_params {$code="(->"+$ID.text+$method_params.code+")";}
+recordConstructor returns [String code]
+    : NEW ID methodParams {$code="(->"+$ID.text+$methodParams.code+")";}
     | NEW name=ID {$code="(map->"+$name.text+" {";}
-         '(' first_key=ID COLON first_exp=expression {$code+=":"+$first_key.text+" "+$first_exp.code;} (COMMA key=ID COLON exp=expression {$code+=" :"+$key.text+" "+$exp.code;})+ ')'
+         '(' firstKey=ID COLON firstExp=expression {$code+=":"+$firstKey.text+" "+$firstExp.code;} (COMMA key=ID COLON exp=expression {$code+=" :"+$key.text+" "+$exp.code;})+ ')'
           {$code+="})";}
     ;
 
 
-expression_list returns [List<String> code_list]
-@init{$code_list = new ArrayList<String>();}
-    :  a=expression {$code_list.add($a.code);} (COMMA b=expression { $code_list.add($b.code);})+
+expressionList returns [List<String> codeList]
+@init{$codeList = new ArrayList<String>();}
+    :  a=expression {$codeList.add($a.code);} (COMMA b=expression { $codeList.add($b.code);})+
     ;
 
 /* Consider adding '/t' as a prefix to all of these
    and remove the hash notation to prefix that by hand*/
 
-type_annotation returns [String code]
+typeAnnotation returns [String code]
     : type=ID  {$code=$type.text;}
     | '#' type=ID  {$code="t/" + $type.text;}
     | typeleft=ID num=NUMBER  {$code=$typeleft.text + " " + $num.text;}
-    | '(' thing=type_annotation ')'  {$code = "(" + $thing.code + ")";}
-    | container=ID {$code = "(t/" + $container.text;} '[' (inner=type_annotation {$code += " " + $inner.code;})+ ']' {$code += ")";}
+    | '(' thing=typeAnnotation ')'  {$code = "(" + $thing.code + ")";}
+    | container=ID {$code = "(t/" + $container.text;} '[' (inner=typeAnnotation {$code += " " + $inner.code;})+ ']' {$code += ")";}
         /* This is a bit of a hack to get nested containers to work */
         /* The issue is that in jest: HVec[[(?) (?) (?)]] coudl be parsed */
-        /* by allowing a '[' type_annotation ']' branch, but this breaks */
+        /* by allowing a '[' typeAnnotation ']' branch, but this breaks */
         /* the jest container branch style below */
-    | container=ID {$code = "(t/" + $container.text + " [";} '[[' (inner=type_annotation {$code += " " + $inner.code;})+ ']]' {$code += "])";}
+    | container=ID {$code = "(t/" + $container.text + " [";} '[[' (inner=typeAnnotation {$code += " " + $inner.code;})+ ']]' {$code += "])";}
     ;
 
-func_type_annotation returns [String code]
-    : first=type_annotation {$code = $first.code;} (next=type_annotation {$code += " " + $next.code;})*
+funcTypeAnnotation returns [String code]
+    : first=typeAnnotation {$code = $first.code;} (next=typeAnnotation {$code += " " + $next.code;})*
     ;
 
 
@@ -209,7 +209,7 @@ lambda returns [String code]
     ;
 
 /* NEW SCOPE */
-function_def returns [String code]
+functionDef returns [String code]
 @init{
     String annotation = "";
 }
@@ -217,14 +217,14 @@ function_def returns [String code]
     $code = annotation + $code;
 }
     : DEFN name=ID {$code="(defn "+$name.text;}
-            function_def_params {$code += " ["+$function_def_params.code+" ]";}
-        (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
-         ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
+            functionDefParams {$code += " ["+$functionDefParams.code+" ]";}
+        (COLON {annotation = "(t/ann " + $name.text + " [";} a=funcTypeAnnotation { annotation += $a.code + " ";}
+         ARROW c=typeAnnotation {annotation += "-> " + $c.code + "])\n";})?
          block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
     ;
 
 /* NEW SCOPE */
-method_def returns [String code]
+methodDef returns [String code]
 @init{
     String annotation = "";
 }
@@ -232,30 +232,30 @@ method_def returns [String code]
     $code = annotation + $code;
 }
     : DEFN name=ID {$code="("+$name.text;}
-            function_def_params {$code += " ["+$function_def_params.code+" ]";}
-        (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
-         ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
+            functionDefParams {$code += " ["+$functionDefParams.code+" ]";}
+        (COLON {annotation = "(t/ann " + $name.text + " [";} a=funcTypeAnnotation { annotation += $a.code + " ";}
+         ARROW c=typeAnnotation {annotation += "-> " + $c.code + "])\n";})?
          block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
     ;
 
 
-function_def_params returns [String code]
+functionDefParams returns [String code]
     : '(' ')' { $code = "";}
     | '(' first=ID {$code = " "+$first.text;} (COMMA rest=ID {$code += " " + $rest.text;})* ')'
     ;
 
 
-function_call returns [String code]
-    : ID method_params { $code = "(" + $ID.text + $method_params.code + ")"; }
+functionCall returns [String code]
+    : ID methodParams { $code = "(" + $ID.text + $methodParams.code + ")"; }
     ;
 
 
-record_def returns [String code]
+recordDef returns [String code]
     : RECORD name=ID '{' {$code="(defrecord " + $name.text + " [";}
         first=ID SEMICOLON {$code += $first.text;} (field=ID SEMICOLON{$code += " "+$field.text;})* {$code += "]";}
 
 
-        (IMPLEMENTS protocol=ID {$code += "\n"+$protocol.text;} '{'(method=method_def {$code += "\n"+$method.code;})*'}')*
+        (IMPLEMENTS protocol=ID {$code += "\n"+$protocol.text;} '{'(method=methodDef {$code += "\n"+$method.code;})*'}')*
 
         '}' {$code += ")";}
     ;
@@ -267,19 +267,19 @@ record_def returns [String code]
  directly added to any previous text
 */
 
-method_params returns [String code]
+methodParams returns [String code]
     : '(' ')' { $code = "";}
-    | '(' expression_list ')' {
+    | '(' expressionList ')' {
             $code = "";
-            for(int i=0; i < $expression_list.code_list.size(); ++i) {
-                $code += " " +$expression_list.code_list.get(i);
+            for(int i=0; i < $expressionList.codeList.size(); ++i) {
+                $code += " " +$expressionList.codeList.get(i);
             }
         }
     | '(' expression ')' { $code = " " + $expression.code; }
     ;
 
 /* NEW SCOPE */
-for_loop returns [String code]
+forLoop returns [String code]
 @init{
     String func = "(fn ";
     String iterator = "";
@@ -306,13 +306,13 @@ for_loop returns [String code]
 /* NEW SCOPE */
 block returns [String code]
     : '{' expression {$code=$expression.code;} '}'
-    | '{' {$code="";} (statement_term {$code+=" "+$statement_term.code;})+ '}'
-    | '{' {$code="";} (var_scope {$code+=" "+$var_scope.code;})+ '}'
+    | '{' {$code="";} (statementTerm {$code+=" "+$statementTerm.code;})+ '}'
+    | '{' {$code="";} (varScope {$code+=" "+$varScope.code;})+ '}'
     ;
 
-var_scope returns [String code]
+varScope returns [String code]
     :  {$code="(let [";} (LET name=ID '=' exp=expression SEMICOLON {$code+=" "+$name.text+" "+$exp.code;})+ {$code+=" ]";}
-        (statement_term {$code+=" "+$statement_term.code;})* {$code+=")";}
+        (statementTerm {$code+=" "+$statementTerm.code;})* {$code+=")";}
     ;
 
 
@@ -350,27 +350,27 @@ conditional returns [String code]
         $code = "WTF!!!";
     }
 }
-    : IF '(' if_condition=expression ')' iftrue=block {conditions.add($if_condition.code);results.add($iftrue.code);}
-      (ELIF '(' elif_expression=expression ')' elif_block=block {conditions.add($elif_expression.code);results.add($elif_block.code);})*
-       (ELSE else_block=block {results.add($else_block.code);})?
+    : IF '(' ifCondition=expression ')' iftrue=block {conditions.add($ifCondition.code);results.add($iftrue.code);}
+      (ELIF '(' elifExpression=expression ')' elifBlock=block {conditions.add($elifExpression.code);results.add($elifBlock.code);})*
+       (ELSE elseBlock=block {results.add($elseBlock.code);})?
     ;
 
 
-clojure_vector returns [String code]
+clojureVector returns [String code]
 @init{$code = "["; }
 @after{$code += "]"; }
     : '[' ']'
     | '[' a=expression {$code += $a.code;} (COMMA WS? b=expression {$code += ", " + $b.code;})* ']'
     ;
 
-clojure_map returns [String code]
+clojureMap returns [String code]
 @init{$code = "{"; }
 @after{$code += "}"; }
     : '{' '}'
     | '{' a=expression COLON b=expression {$code += $a.code + " " + $b.code;} (COMMA WS? c=expression COLON d=expression {$code += " " + $c.code + " " + $d.code;})* '}'
     ;
 
-clojure_get returns [String code]
+clojureGet returns [String code]
     : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";}
     ;
 
