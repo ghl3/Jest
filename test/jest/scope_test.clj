@@ -32,6 +32,10 @@
   (validate-code
    "val a = 10; defn foo(x, y, z) { x+y+z; } a;"))
 
+(deftest scope-func-def-test-5
+  (validate-code
+   "val a = 10; defn foo(x, y, z) { x+y+z; } x;" false))
+
 
 (deftest scope-loop-test-1
   (validate-code
@@ -62,7 +66,6 @@
 (deftest scope-block-test-1
   (validate-code
    "val a = 10; {val a = 20;} a;"))
-
 
 (deftest scope-block-test-2
   (validate-code
