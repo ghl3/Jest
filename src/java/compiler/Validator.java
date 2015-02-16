@@ -88,6 +88,10 @@ public class Validator extends JestBaseListener {
     public void enterFor_loop(JestParser.For_loopContext ctx) {
         Scope loopScope = createNewScope(scopes);
         // TODO: Include the loop parameters in the current scope
+
+        for (TerminalNode node: ctx.ID()) {
+            currentScope().addToScope(node.getText(), node);
+        }
     }
 
     @Override
