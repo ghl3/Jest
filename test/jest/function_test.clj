@@ -38,6 +38,4 @@
       val x = a + b + c;
       x * 2;
       };",
-   ["(defn myFunc [ a b c ]
-(def x (+ (+ a b) c))
-(* x 2))"]))
+   ["(defn myFunc [ a b c ] (def x (+ (+ a b) c)) (* x 2))"]))

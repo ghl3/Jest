@@ -45,6 +45,7 @@ statement_term returns [String code]
 
 statement returns [String code]
     : expression {$code = $expression.code; }
+    | val_assignment {$code = $val_assignment.code; }
     ;
 
 val_assignment returns [String code]
@@ -219,7 +220,7 @@ function_def returns [String code]
             function_def_params {$code += " ["+$function_def_params.code+" ]";}
         (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
          ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
-         block {$code+=" "+$block.code;} (SEMICOLON)? {$code+=")";}
+         block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
     ;
 
 /* NEW SCOPE */
@@ -305,8 +306,8 @@ for_loop returns [String code]
 /* NEW SCOPE */
 block returns [String code]
     : '{' expression {$code=$expression.code;} '}'
-    | '{' {$code="";} (statement_term {$code+=$statement_term.code;})+ '}'
-    | '{' {$code="";} (var_scope {$code+=$var_scope.code;})+ '}'
+    | '{' {$code="";} (statement_term {$code+=" "+$statement_term.code;})+ '}'
+    | '{' {$code="";} (var_scope {$code+=" "+$var_scope.code;})+ '}'
     ;
 
 var_scope returns [String code]

@@ -5,7 +5,7 @@
 (deftest assignment-scope-test-1
   (test-code
    "{let a = 10; a;}"
-   ["(let [ a 10 ] a)"]))
+   [" (let [ a 10 ] a)"]))
 
 (deftest assignment-scope-test-2
   (test-code
@@ -15,7 +15,7 @@
 (deftest assignment-scope-test-3
   (test-code
    "{let a = 10; a; let b = 20; b;}"
-   ["(let [ a 10 ] a (let [ b 20 ] b))"]))
+   [" (let [ a 10 ] a (let [ b 20 ] b))"]))
 
 (deftest assignment-scope-test-4
   (test-code
