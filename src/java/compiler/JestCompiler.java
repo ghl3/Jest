@@ -16,13 +16,9 @@ import jest.compiler.Validator;
 
 public class JestCompiler {
 
+
     public static ParseTree compile(String expression) {
         try {
-            //lexer splits input into tokens
-            //ANTLRStringStream input = new ANTLRStringStream(expression);
-            //TokenStream tokens = new CommonTokenStream(new JestLexer(input));
-            //CharStream stream = new ANTLRStringStream(expression);
-            //TokenStream tokens = new CommonTokenStream(new JestLexer(stream)); //expression)); //input));
 
             JestLexer lexer = new JestLexer(new ANTLRInputStream(expression));
 
@@ -34,22 +30,19 @@ public class JestCompiler {
             ParseTree tree = parser.source_code(); //compilationUnit();
 
             return tree;
-            /*
-            JestParser.source_code_return ret = parser.source_code();
-
-            //acquire parse result
-            CommonTree ast = (CommonTree) ret.tree;
-            return ast;
-            */
 
         } catch (RecognitionException e) {
             throw new IllegalStateException("Recognition exception is never thrown, only declared.");
         }
     }
 
-
     public static java.util.List<String> parseSourceFile(String source)
-        throws org.antlr.v4.runtime.RecognitionException{
+        throws org.antlr.v4.runtime.RecognitionException {
+        return parseSourceFile(source, false);
+    }
+
+    public static java.util.List<String> parseSourceFile(String source, boolean validate)
+        throws org.antlr.v4.runtime.RecognitionException {
 
         // create an instance of the lexer
         //JestLexer lexer = new JestLexer(new ANTLRStringStream(source));
@@ -61,22 +54,26 @@ public class JestCompiler {
         // create the parser
         JestParser parser = new JestParser(tokens);
 
-        // invoke the entry point of our grammar
-        /*
-        JestParser.source_code code = parser.source_code();
-        java.util.List<String> data = new java.util.ArrayList<String>();
+        // Generate the AST of the source code
+        JestParser.Source_codeContext sourceTree = parser.source_code();
 
-        for (int i=0; i < code.code_list.size(); ++i) {
-            data.add(code.code_list.get(i));
+        //ParseTree tree = parser.source_code();
+
+        if (validate) {
+            boolean valid = validateAst(sourceTree);
+            if (!valid) {
+                return new java.util.ArrayList<String>();
+            }
         }
 
-        return data;
-        */
-        return parser.source_code().code_list;
-
-
+        return sourceTree.code_list; //parser.source_code().code_list;
     }
 
+    /**
+       Parse a single jest expression into
+       a Clojure expression and return the
+       resulting Clojure code as a string.
+     */
     public static String parseExpression(String source)
         throws org.antlr.v4.runtime.RecognitionException{
 
@@ -95,12 +92,7 @@ public class JestCompiler {
     }
 
 
-    public static Boolean validateAst(String source) {
-
-        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
-        JestParser parser = new JestParser(new CommonTokenStream(lexer));
-        ParseTree tree = parser.source_code();
-
+    public static Boolean validateAst(ParseTree tree) {
         try {
             ParseTreeWalker.DEFAULT.walk(new Validator(), tree);
             return true;
@@ -111,63 +103,13 @@ public class JestCompiler {
     }
 
 
-    /*
-    private static void printTree(ParseTree ast) {
-        print(ast, 0);
+    public static Boolean validateSourceCode(String source) {
+
+        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
+        JestParser parser = new JestParser(new CommonTokenStream(lexer));
+        ParseTree tree = parser.source_code();
+
+        return validateAst(tree);
     }
 
-
-    private static void print(ParseTree tree, int level) {
-        //indent level
-        for (int i = 0; i < level; i++)
-            System.out.print("--");
-
-        //print node description: type code followed by token text
-        System.out.println(" " + tree.getType() + " " + tree.getClass().getSimpleName() + " " + tree.getText());
-
-        //print all children
-        if (tree.getChildren() != null)
-            for (Object ie : tree.getChildren()) {
-                print((CommonTree) ie, level + 1);
-            }
-    }
-
-
-    private static void printLisp(CommonTree tree, int level) {
-        //indent level
-        for (int i = 0; i < level; i++) {
-            System.out.print(" ");
-        }
-
-        //print node description: type code followed by token text
-        System.out.println("( " + tree.getText());
-
-        //print all children
-        if (tree.getChildren() != null) {
-            for (Object ie : tree.getChildren()) {
-                printChild((CommonTree) ie, level + 1);
-            }
-        }
-
-        System.out.println(") ");
-    }
-
-
-    private static void printChild(CommonTree tree, int level) {
-        //indent level
-        for (int i = 0; i < level; i++) {
-            System.out.print(" ");
-        }
-
-        //print node description: type code followed by token text
-        System.out.println(tree.getText());
-
-        //print all children
-        if (tree.getChildren() != null) {
-            for (Object ie : tree.getChildren()) {
-                print((CommonTree) ie, level + 1);
-            }
-        }
-    }
-    */
 }

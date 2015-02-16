@@ -4,19 +4,13 @@
 
 (import 'jest.compiler.JestCompiler)
 
+
 (defn parse-source-file
   "Parse a string representing a full
    jest source file and return a list of
    clojure expressions."
   [code]
   (. JestCompiler (parseSourceFile code)))
-
-  ;; ([code] (parse-source-file code false))
-  ;; ([code add-additional?]
-  ;;    (let [raw-clojure
-  ;;      (if add-additional
-  ;;        (add-additional-code raw-clojure)
-  ;;        raw-clojure)))
 
 
 (defn parse-expression [code]
@@ -44,7 +38,7 @@
 
 
 (defn get-clojure
-  "Converge the given jest code into clojure source.
+  "Convert the given jest code into clojure source.
   Optionally include any additional clojure source
   code to complete the Jest->Clojure translation"
   ([jest-code] (get-clojure jest-code false))

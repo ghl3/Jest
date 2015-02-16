@@ -10,7 +10,7 @@
   "Ensures that the code is valid"
   ([src] (validate-code src true))
   ([src should-be-valid?]
-  (let [is-valid? (. JestCompiler validateAst src)]
+  (let [is-valid? (. JestCompiler validateSourceCode src)]
     (if should-be-valid?
       (is is-valid?)
       (is (not is-valid?))))))
@@ -58,6 +58,6 @@
 
 (deftest scope-conditional-test-3
   (validate-code
-   "if (true) { val a = 10; a; } else {val b = 20; b;} a;" false))
+   "if (true) { val a = 10; a; } else {val b = 20; b;}; a;" false))
 
 
