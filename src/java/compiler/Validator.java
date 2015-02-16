@@ -56,6 +56,7 @@ public class Validator extends JestBaseListener {
         return scopes.peek();
     }
 
+
     @Override
     public void enterFunction_def(JestParser.Function_defContext ctx) {
         if (currentScope().isInCurrentScope(ctx.name.getText())) {
@@ -64,15 +65,54 @@ public class Validator extends JestBaseListener {
             currentScope().addToScope(ctx.name.getText(), ctx);
         }
 
-        // TODO: Include the function parameters in the current scope
-
         Scope functionScope = createNewScope(scopes);
+
+        // TODO: Include the function parameters in the current scope
+        JestParser.Method_paramsContext method_params = ctx.method_params;
     }
+
 
     @Override
     public void exitFunction_def(JestParser.Function_defContext ctx) {
         dropCurrentScope(scopes);
     }
+
+
+    @Override
+    public void enterFor_loop(JestParser.For_loopContext ctx) {
+        Scope loopScope = createNewScope(scopes);
+        // TODO: Include the loop parameters in the current scope
+    }
+
+    @Override
+    public void exitFor_loop(JestParser.For_loopContext ctx) {
+        dropCurrentScope(scopes);
+    }
+
+
+    @Override
+    public void enterLet_statement(JestParser.Let_statementContext ctx) {
+        Scope loopScope = createNewScope(scopes);
+    }
+
+    @Override
+    public void exitLet_statement(JestParser.Let_statementContext ctx) {
+        dropCurrentScope(scopes);
+    }
+
+
+    @Override
+    public void enterMethod_def(JestParser.Method_defContext ctx) {
+        Scope loopScope = createNewScope(scopes);
+    }
+
+    @Override
+    public void exitMethod_def(JestParser.Method_defContext ctx) {
+        dropCurrentScope(scopes);
+    }
+
+
+    // Require variables to be defined
 
     @Override
     public void enterVal_assignment(JestParser.Val_assignmentContext ctx) {
@@ -83,7 +123,7 @@ public class Validator extends JestBaseListener {
         }
     }
 
-
+    @Override
     public void enterExpression_atom(JestParser.Expression_atomContext ctx) {
 
         // If the expression is a variable, ensure the variable
@@ -93,6 +133,17 @@ public class Validator extends JestBaseListener {
                 throw new NotDeclared(ctx.ID);
             }
         }
+        if (ctx.SYMBOL != null) {
+            if (!currentScope().isInScope(ctx.SYMBOL.getText())) {
+                throw new NotDeclared(ctx.SYMBOL);
+            }
+        }
     }
 
+    @Override
+    public void enterFunction_call(JestParser.Function_callContext ctx) {
+        if (!currentScope().isInScope(ctx.ID.getText())) {
+            throw new NotDeclared(ctx.ID);
+        }
+    }
 }

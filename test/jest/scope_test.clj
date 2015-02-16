@@ -28,3 +28,13 @@
   (validate-code
    "val a = 10; defn foo() { val a = 20; a; } b;"
    false))
+
+
+(deftest scope-loop-test-1
+  (validate-code
+   "val a = 10; for (b: a) {val z = 10; z;}; a;"))
+
+(deftest scope-loop-test-2
+  (validate-code
+   "val a = 10; for (b: a) {val z = 10; z;}; z;"
+   false))
