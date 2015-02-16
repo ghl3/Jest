@@ -35,3 +35,12 @@
   (test-code
    "for (a: lst) lazy { println(a); };"
    ["(map (fn [ a ] (println a)) (seq lst))"]))
+
+
+;; TODO: Uncomment and fix
+;; (deftest for-loop-bug-1
+;;   (test-code
+;;    "val a = 10; for (b: a) {val z = 10; z;} a;"
+;;    ["(def a 10)"
+;;     "(doall (map (fn [b] (def z 10) z) (seq a)))"
+;;     "a"]))
