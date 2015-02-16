@@ -1,14 +1,13 @@
 package jest.compiler;
 
 import java.util.Stack;
-
 import jest.compiler.Scope;
 
 import jest.grammar.JestBaseListener;
-
 import jest.grammar.JestParser;
-    
+
 import org.antlr.v4.runtime.Token;
+
 
 public class Validator extends JestBaseListener {
 

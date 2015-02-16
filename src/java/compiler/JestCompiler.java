@@ -6,11 +6,13 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.TokenStream;
-//import org.antlr.v4.runtime.tree.CommonTree;
-//import org.antlr.CommonAST;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import jest.grammar.*;
+
+import jest.compiler.Validator;
+
 
 public class JestCompiler {
 
@@ -90,6 +92,25 @@ public class JestCompiler {
 
         // Return the parsed result as an expression
         return parser.expression().code;
+    }
+
+
+
+    public static Boolean validateAst(String source) {
+
+        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
+        JestParser parser = new JestParser(new CommonTokenStream(lexer));
+        ParseTree tree = parser.source_code();
+
+
+        try {
+            ParseTreeWalker.DEFAULT.walk(new Validator(), tree);
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+
     }
 
 
