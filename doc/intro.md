@@ -40,7 +40,7 @@ Global variables are declared using the "val" keyword, an equals sign, and an ex
     val x = 10;
     val y = x*x;
     
-Variable declaration statements must terminate with a semi-colon.  Variable names may not be re-used (currently the language implementation allows this, but future iterations will remove this, so programs should not depend on it as a property).
+Variable declaration statements must terminate with a semi-colon.  Variables cannot be reassigned, and variable names may not be re-used in the same scope, though a variable name in an inner scope is allowed to shadow a variable name in an outer scope.
 
 
 ## Comments
