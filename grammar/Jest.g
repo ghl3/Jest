@@ -226,7 +226,7 @@ function_def returns [String code]
     $code = annotation + $code;
 }
     : DEFN name=ID {$code="(defn "+$name.text;}
-            method_params {$code += " ["+$method_params.code+" ]";}
+            function_def_params {$code += " ["+$function_def_params.code+" ]";}
         (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
          ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
          block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
@@ -240,10 +240,16 @@ method_def returns [String code]
     $code = annotation + $code;
 }
     : DEFN name=ID {$code="("+$name.text;}
-            method_params {$code += " ["+$method_params.code+" ]";}
+            function_def_params {$code += " ["+$function_def_params.code+" ]";}
         (COLON {annotation = "(t/ann " + $name.text + " [";} a=func_type_annotation { annotation += $a.code + " ";}
          ARROW c=type_annotation {annotation += "-> " + $c.code + "])\n";})?
          block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
+    ;
+
+
+function_def_params returns [String code]
+    : '(' ')' { $code = "";}
+    | '(' first=ID {$code = " "+$first.text;} (COMMA rest=ID {$code += " " + $rest.text;})* ')'
     ;
 
 
