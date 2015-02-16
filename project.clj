@@ -20,6 +20,8 @@
 
                  [environ "1.0.0"]
 
+                 [com.google.guava/guava "18.0"]
+
                  ;; https://github.com/alexhall/lein-antlr
                  [org.antlr/antlr4 "4.5"]
                  [org.antlr/antlr4-runtime "4.5"]

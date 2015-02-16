@@ -21,8 +21,14 @@ public class Validator extends JestBaseListener {
 
     public Validator() {
         scopes = new Stack<Scope>();
+
         // Create the global scope
         scopes.push(new Scope(null));
+
+        // Add core functions to the scope
+        for (String func: Core.clojureCoreFunctions) {
+            scopes.peek().addToScope(func, null);
+        }
     }
 
     public class AlreadyDeclared extends RuntimeException {
@@ -44,9 +50,9 @@ public class Validator extends JestBaseListener {
      */
     public static Scope createNewScope(Stack<Scope> scopes) {
         Scope outerScope = scopes.peek();
-         Scope newScope = new Scope(outerScope);
-         scopes.push(newScope);
-         return newScope;
+        Scope newScope = new Scope(outerScope);
+        scopes.push(newScope);
+        return newScope;
     }
 
     /**
@@ -159,6 +165,15 @@ public class Validator extends JestBaseListener {
         dropCurrentScope(scopes);
     }
 
+
+    public void enterLambda(JestParser.LambdaContext ctx) {
+        Scope scope = createNewScope(scopes);
+        scope.addToScope("%", null);
+    }
+
+    public void exitLambda(JestParser.LambdaContext ctx) {
+        dropCurrentScope(scopes);
+    }
 
     // Require variables to be defined
 
