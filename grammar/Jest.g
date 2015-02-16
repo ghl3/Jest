@@ -39,6 +39,7 @@ statement_term returns [String code]
     : statement SEMICOLON {$code = $statement.code;}
     | function_def {$code = $function_def.code; }
     | record_def {$code = $record_def.code; }
+    | block {$code = $block.code; }
     ;
 
 statement returns [String code]

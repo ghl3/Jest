@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.Token;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+
 public class Validator extends JestBaseListener {
 
     private final Stack<Scope> scopes;

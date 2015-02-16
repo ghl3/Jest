@@ -46,7 +46,6 @@
    "val a = 10; for (b: a) {b;}; a;"))
 
 
-
 (deftest scope-conditional-test-1
   (validate-code
    "if (true) { val a = 10; a; } else {val b = 20; b;};"))
@@ -55,9 +54,18 @@
   (validate-code
    "if (true) { val a = 10; a; } else {a;};" false))
 
-
 (deftest scope-conditional-test-3
   (validate-code
    "if (true) { val a = 10; a; } else {val b = 20; b;}; a;" false))
+
+
+(deftest scope-block-test-1
+  (validate-code
+   "val a = 10; {val a = 20;} a;"))
+
+
+(deftest scope-block-test-2
+  (validate-code
+   "val a = 10; {val b = 20;} b;" false))
 
 
