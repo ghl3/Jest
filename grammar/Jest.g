@@ -45,10 +45,10 @@ statement_term returns [String code]
 
 statement returns [String code]
     : expression {$code = $expression.code; }
-    | val_assignment {$code = $val_assignment.code; }
+    | def_assignment {$code = $def_assignment.code; }
     ;
 
-val_assignment returns [String code]
+def_assignment returns [String code]
 @init{
     String annotation = "";
 }
@@ -314,6 +314,7 @@ var_scope returns [String code]
     :  {$code="(let [";} (LET name=ID '=' exp=expression SEMICOLON {$code+=" "+$name.text+" "+$exp.code;})+ {$code+=" ]";}
         (statement_term {$code+=" "+$statement_term.code;})* {$code+=")";}
     ;
+
 
 /* NEW SCOPE */
 conditional returns [String code]

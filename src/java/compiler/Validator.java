@@ -163,7 +163,7 @@ public class Validator extends JestBaseListener {
     // Require variables to be defined
 
     @Override
-    public void enterVal_assignment(JestParser.Val_assignmentContext ctx) {
+    public void enterDef_assignment(JestParser.Def_assignmentContext ctx) {
         if (currentScope().isInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
         } else {
