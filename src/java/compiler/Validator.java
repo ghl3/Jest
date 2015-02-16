@@ -26,7 +26,7 @@ public class Validator extends JestBaseListener {
         scopes.push(new Scope(null));
 
         // Add core functions to the scope
-        for (String func: Core.clojureCoreFunctions) {
+        for (String func: Core.clojureCore) {
             scopes.peek().addToScope(func, null);
         }
     }
