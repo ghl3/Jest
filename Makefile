@@ -14,7 +14,7 @@ jar:
 	lein uberjar
 
 antlr:
-	java -jar antlr4-4.5.jar -o src/java/jest grammar/Jest.g
+	java -jar antlr4-4.5.jar -o src/java/jest grammar/Jest.g -visitor
 
 
 src/java/grammar/JestLexer.java: antlr
