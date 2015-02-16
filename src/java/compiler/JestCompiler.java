@@ -17,24 +17,30 @@ import jest.compiler.Validator;
 public class JestCompiler {
 
 
-    public static ParseTree compile(String expression) {
-        try {
+    public static JestParser createParser(String source) {
+        // create an instance of the lexer
+        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
 
-            JestLexer lexer = new JestLexer(new ANTLRInputStream(expression));
+        // wrap a token-stream around the lexer
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-            // Get a list of matched tokens
-            CommonTokenStream tokens = new CommonTokenStream(lexer);
+        // create the parser
+        return new JestParser(tokens);
 
-            //parser generates abstract syntax tree
-            JestParser parser = new JestParser(tokens);
-            ParseTree tree = parser.source_code(); //compilationUnit();
-
-            return tree;
-
-        } catch (RecognitionException e) {
-            throw new IllegalStateException("Recognition exception is never thrown, only declared.");
-        }
     }
+
+
+    public static JestParser.Source_codeContext compileSourceCodeToAst(String source)
+        throws org.antlr.v4.runtime.RecognitionException {
+
+        JestParser parser = createParser(source);
+
+        // Generate the AST of the source code
+        JestParser.Source_codeContext sourceTree = parser.source_code();
+
+        return sourceTree;
+    }
+
 
     public static java.util.List<String> parseSourceFile(String source)
         throws org.antlr.v4.runtime.RecognitionException {
@@ -44,20 +50,8 @@ public class JestCompiler {
     public static java.util.List<String> parseSourceFile(String source, boolean validate)
         throws org.antlr.v4.runtime.RecognitionException {
 
-        // create an instance of the lexer
-        //JestLexer lexer = new JestLexer(new ANTLRStringStream(source));
-        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
-
-        // wrap a token-stream around the lexer
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-        // create the parser
-        JestParser parser = new JestParser(tokens);
-
         // Generate the AST of the source code
-        JestParser.Source_codeContext sourceTree = parser.source_code();
-
-        //ParseTree tree = parser.source_code();
+        JestParser.Source_codeContext sourceTree = compileSourceCodeToAst(source);
 
         if (validate) {
             boolean valid = validateAst(sourceTree);
@@ -66,7 +60,7 @@ public class JestCompiler {
             }
         }
 
-        return sourceTree.code_list; //parser.source_code().code_list;
+        return sourceTree.code_list;
     }
 
     /**
@@ -77,15 +71,7 @@ public class JestCompiler {
     public static String parseExpression(String source)
         throws org.antlr.v4.runtime.RecognitionException{
 
-        // create an instance of the lexer
-        //JestLexer lexer = new JestLexer(new ANTLRStringStream(source));
-        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
-
-        // wrap a token-stream around the lexer
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-        // create the parser
-        JestParser parser = new JestParser(tokens);
+        JestParser parser = createParser(source);
 
         // Return the parsed result as an expression
         return parser.expression().code;
@@ -104,11 +90,7 @@ public class JestCompiler {
 
 
     public static Boolean validateSourceCode(String source) {
-
-        JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
-        JestParser parser = new JestParser(new CommonTokenStream(lexer));
-        ParseTree tree = parser.source_code();
-
+        ParseTree tree = compileSourceCodeToAst(source);
         return validateAst(tree);
     }
 
