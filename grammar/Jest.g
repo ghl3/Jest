@@ -44,7 +44,6 @@ statement_term returns [String code]
     ;
 
 statement returns [String code]
-    /*: val_assignment {$code = $val_assignment.code; }*/
     : expression {$code = $expression.code; }
     ;
 
@@ -137,7 +136,6 @@ expression_atom returns [String code]
     | clojure_get {$code = $clojure_get.code; }
     | for_loop {$code = $for_loop.code; }
     | conditional {$code = $conditional.code; }
-    | let_statement {$code = $let_statement.code; }
     | lambda {$code=$lambda.code;}
     | member_get_chain {$code=$member_get_chain.code;}
     | record_constructor {$code=$record_constructor.code;}
@@ -207,20 +205,6 @@ lambda returns [String code]
                 $code="#("+$expression.code+")";
             }
         }
-    ;
-
-
-/* NEW SCOPE */
-let_statement returns [String code]
-@init{
-    String annotation = "";
-}
-@after {
-    $code = annotation + $code;
-}
-    : LET '(' VAL name=ID '=' exp=expression {$code="(let [" + $name.text + " " + $exp.code;}
-           (SEMICOLON VAL next_name=ID '=' next_exp=expression {$code += "\n" + $next_name.text + " " + $next_exp.code;})* (SEMICOLON)?
-           ')' block {$code += "] \n" + $block.code + ")";}
     ;
 
 /* NEW SCOPE */
@@ -326,7 +310,7 @@ block returns [String code]
     ;
 
 var_scope returns [String code]
-    :  {$code="(let [";} (VAL name=ID '=' exp=expression SEMICOLON {$code+=" "+$name.text+" "+$exp.code;})+ {$code+=" ]";}
+    :  {$code="(let [";} (LET name=ID '=' exp=expression SEMICOLON {$code+=" "+$name.text+" "+$exp.code;})+ {$code+=" ]";}
         (statement_term {$code+=" "+$statement_term.code;})* {$code+=")";}
     ;
 

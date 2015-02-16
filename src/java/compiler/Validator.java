@@ -108,21 +108,6 @@ public class Validator extends JestBaseListener {
 
 
     @Override
-    public void enterLet_statement(JestParser.Let_statementContext ctx) {
-        Scope loopScope = createNewScope(scopes);
-
-        for (TerminalNode valDec: ctx.ID()) {
-            currentScope().addToScope(valDec.getText(), valDec);
-        }
-    }
-
-    @Override
-    public void exitLet_statement(JestParser.Let_statementContext ctx) {
-        dropCurrentScope(scopes);
-    }
-
-
-    @Override
     public void enterMethod_def(JestParser.Method_defContext ctx) {
         if (currentScope().isInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
