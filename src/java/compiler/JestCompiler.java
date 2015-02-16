@@ -44,7 +44,7 @@ public class JestCompiler {
 
     public static java.util.List<String> parseSourceFile(String source)
         throws org.antlr.v4.runtime.RecognitionException {
-        return parseSourceFile(source, false);
+        return parseSourceFile(source, true);
     }
 
     public static java.util.List<String> parseSourceFile(String source, boolean validate)

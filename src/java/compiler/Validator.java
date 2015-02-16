@@ -104,6 +104,10 @@ public class Validator extends JestBaseListener {
     @Override
     public void enterLet_statement(JestParser.Let_statementContext ctx) {
         Scope loopScope = createNewScope(scopes);
+
+        for (TerminalNode valDec: ctx.ID()) {
+            currentScope().addToScope(valDec.getText(), valDec);
+        }
     }
 
     @Override
@@ -175,11 +179,6 @@ public class Validator extends JestBaseListener {
         if (ctx.ID != null) {
             if (!currentScope().isInScope(ctx.ID.getText())) {
                 throw new NotDeclared(ctx.ID);
-            }
-        }
-        if (ctx.SYMBOL != null) {
-            if (!currentScope().isInScope(ctx.SYMBOL.getText())) {
-                throw new NotDeclared(ctx.SYMBOL);
             }
         }
     }

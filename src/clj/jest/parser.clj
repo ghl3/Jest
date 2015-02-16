@@ -8,9 +8,11 @@
 (defn parse-source-file
   "Parse a string representing a full
    jest source file and return a list of
-   clojure expressions."
-  [code]
-  (. JestCompiler (parseSourceFile code)))
+   clojure expressions.
+   Runs correctness validation checks by
+   default "
+  ([code] (. JestCompiler (parseSourceFile code)))
+  ([code validate?] (. JestCompiler (parseSourceFile code validate?))))
 
 
 (defn parse-expression [code]
@@ -22,7 +24,7 @@
 (defn create-ast
   "Get the AST"
   [program]
-  (. JestCompiler (compile program)))
+  (. JestCompiler (compileSourceCodeToAst program)))
 
 
 (defn add-additional-code

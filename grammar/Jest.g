@@ -126,6 +126,7 @@ expression_atom returns [String code]
     : NUMBER {$code = $NUMBER.text;}
     | TRUE {$code = $TRUE.text; }
     | FALSE {$code = $FALSE.text; }
+    | NIL {$code = $NIL.text; }
     | ID {$code = $ID.text; }
     | STRING {$code = $STRING.text; }
     | SYMBOL {$code = $SYMBOL.text; }
@@ -445,6 +446,8 @@ CPEQ: '==';
 TRUE: 'true';
 
 FALSE: 'false';
+
+NIL: 'nil';
 
 /* Names of variables and functions */
 ID

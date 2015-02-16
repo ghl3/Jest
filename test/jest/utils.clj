@@ -27,20 +27,21 @@
 (defn test-code
   "Test that the given jest code
   compiles into the given clojure code"
-  [jest clojure]
-  (let [code-list (parse-source-file jest)]
-    (test-println "\nJest: ")
-    (test-println jest)
-    (test-println "Clojure: ")
-    (doall (map test-println code-list))
-    (test-println "")
+  ([jest clojure] (test-code jest clojure false))
+  ([jest clojure validate?]
+     (let [code-list (parse-source-file jest validate?)]
+       (test-println "\nJest: ")
+       (test-println jest)
+       (test-println "Clojure: ")
+       (doall (map test-println code-list))
+       (test-println "")
 
-    ;; Compare each line individually
-    (doall (map compare-code clojure code-list))
+       ;; Compare each line individually
+       (doall (map compare-code clojure code-list))
 
-    ;; Conmpare all of the code
-    (is (= (map remove-code-compare-whitespace clojure)
-           (map remove-code-compare-whitespace code-list)))))
+       ;; Conmpare all of the code
+       (is (= (map remove-code-compare-whitespace clojure)
+              (map remove-code-compare-whitespace code-list))))))
 
 
 (defn test-eval
@@ -66,7 +67,7 @@
   In addition, test that, when evaluated,
   the code gives the supplied 'val'."
   [jest clojure val]
-  (test-code jest clojure)
+  (test-code jest clojure true)
   (let [code-val (eval-jest jest)]
     (test-println "Code Val:")
     (test-println code-val)
