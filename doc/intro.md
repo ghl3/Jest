@@ -35,6 +35,8 @@ This will print the Clojure source to standard out.  Use the "-h" or "--help" fl
 
 ## Variables
 
+There are two ways to declare variables in jest.
+
 Global variables are declared using the "val" keyword, an equals sign, and an expression:
 
     val x = 10;

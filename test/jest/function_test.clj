@@ -24,7 +24,7 @@
 
 (deftest map-test
   (test-code
-   "val x = map(inc, myList);"
+   "def x = map(inc, myList);"
    ["(def x (map inc myList))"]))
 
 (deftest func-def-1
@@ -35,7 +35,7 @@
 (deftest func-def-2
   (test-code
    "defn myFunc(a, b, c) {
-      val x = a + b + c;
+      def x = a + b + c;
       x * 2;
       };",
    ["(defn myFunc [ a b c ] (def x (+ (+ a b) c)) (* x 2))"]))

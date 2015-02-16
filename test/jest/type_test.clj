@@ -6,13 +6,13 @@
 
 (deftest type-val-test-1
   (test-code
-   "val x : String = \"Foobar\";"
+   "def x : String = \"Foobar\";"
    ["(t/ann x String)
      (def x \"Foobar\")"]))
 
 (deftest type-val-check-test-1
   (test-jest-type-correct
-   "val x : String = \"Foobar\";"))
+   "def x : String = \"Foobar\";"))
 
 
 (deftest type-func-test-1
@@ -49,17 +49,17 @@
 
 (deftest type-container-test-1
   (test-code
-   "val x: Vec[String] = [\"FooBar\"];"
+   "def x: Vec[String] = [\"FooBar\"];"
    ["(t/ann x (t/Vec String)) (def x [\"FooBar\"])"]))
 
 (deftest type-container-test-2
   (test-code
-   "val x: Map[String String] = {\"Foo\" : \"Bar\"};"
+   "def x: Map[String String] = {\"Foo\" : \"Bar\"};"
    ["(t/ann x (t/Map String String)) (def x {\"Foo\" \"Bar\"})"]))
 
 (deftest type-container-test-3
   (test-code
-   "val scores: HVec[[(Integer 1) (Integer 2) (Integer 3) (Integer 4)]] = [90, 85, 95, 92];"
+   "def scores: HVec[[(Integer 1) (Integer 2) (Integer 3) (Integer 4)]] = [90, 85, 95, 92];"
    ["(t/ann scores (t/HVec [ (Integer 1) (Integer 2) (Integer 3) (Integer 4)])) (def scores [90, 85, 95, 92])"]))
 
 
@@ -89,7 +89,7 @@
   (test-clojure-type-correct
    (format "(do (require '[clojure.core.typed :as t]) %s)"
            (get-clojure
-            "val x : String = \"Foobar\";"))))
+            "def x : String = \"Foobar\";"))))
 
 
 

@@ -1,17 +1,17 @@
 
 
-val myList = range(0, 100, 10);
+def myList = range(0, 100, 10);
 
-val incremented = map(inc, myList);
+def incremented = map(inc, myList);
 
 defn square(x): Number -> Number {
      x*x;
 }
 
-val squared = map(square, incremented);
+def squared = map(square, incremented);
 
 println(squared);
 
-val halfRange = (squared.first() + squared.last()) / 2;
+def halfRange = (squared.first() + squared.last()) / 2;
 
 println(halfRange);

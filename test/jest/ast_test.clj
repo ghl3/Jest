@@ -7,7 +7,7 @@
 (import 'jest.compiler.JestCompiler)
 
 ;; (deftest compile-assignment-test
-;;   (let [program "val foo = 10;"
+;;   (let [program "def foo = 10;"
 ;;         ast (create-ast program)]
 ;;     (is (.. ast getType) (. JestParser ID))
 ;;     (is (.. ast (getChild 0) getType) (. JestParser INTEGER))

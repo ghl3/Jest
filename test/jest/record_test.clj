@@ -11,7 +11,7 @@
 (deftest record-test-2
     (test-code-eval
      "record Student{ name; class; }
-      val bob = new Student(\"Bob\", \"History\");
+      def bob = new Student(\"Bob\", \"History\");
       bob.name;"
      ["(defrecord Student [name class])"
       "(def bob (->Student \"Bob\" \"History\"))"
@@ -22,8 +22,8 @@
     (test-code-eval
      "record Student{ name; class; }
       record CollegeClass{ time; day; }
-      val history = new CollegeClass(\"Noon\", \"Wednesday\");
-      val bob = new Student(\"Bob\", history);
+      def history = new CollegeClass(\"Noon\", \"Wednesday\");
+      def bob = new Student(\"Bob\", history);
       bob.class.time;"
      ["(defrecord Student [name class])"
       "(defrecord CollegeClass [time day])"
@@ -35,7 +35,7 @@
 (deftest record-test-4
     (test-code-eval
      "record Student{ name; class; }
-      val bob = new Student(name: \"Bob\", class: \"History\");
+      def bob = new Student(name: \"Bob\", class: \"History\");
       bob.name;"
      ["(defrecord Student [name class])"
       "(def bob (map->Student {:name \"Bob\" :class \"History\"}))"

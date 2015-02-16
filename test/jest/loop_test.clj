@@ -40,7 +40,7 @@
 ;; TODO: Uncomment and fix
 ;; (deftest for-loop-bug-1
 ;;   (test-code
-;;    "val a = 10; for (b: a) {val z = 10; z;} a;"
+;;    "def a = 10; for (b: a) {def z = 10; z;} a;"
 ;;    ["(def a 10)"
 ;;     "(doall (map (fn [b] (def z 10) z) (seq a)))"
 ;;     "a"]))

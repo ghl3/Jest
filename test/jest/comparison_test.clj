@@ -43,8 +43,8 @@
 
 (deftest comparison-test-6
   (test-code-eval
-   "val x = 12;
-    val y = 12;
+   "def x = 12;
+    def y = 12;
     x == y;"
    ["(def x 12)"
     "(def y 12)"

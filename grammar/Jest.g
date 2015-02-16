@@ -55,7 +55,7 @@ val_assignment returns [String code]
 @after {
     $code = annotation + $code;
 }
-    : VAL name=ID
+    : DEF name=ID
       (COLON type=type_annotation {annotation = "(t/ann " + $name.text + " " + $type.code +  ")\n";})?
       '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
     ;
@@ -400,7 +400,7 @@ DIV:      '/' ;
 
 STRING : '"' ~('\r' | '\n' | '"')* '"' ;
 
-VAL: 'val';
+DEF: 'def';
 
 LET: 'let';
 
