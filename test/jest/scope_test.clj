@@ -22,13 +22,11 @@
 
 (deftest scope-func-def-test-2
   (validate-code
-   "val a = 10; defn foo() { val a = 20; a; } val a = 20;"
-   false))
+   "val a = 10; defn foo() { val a = 20; a; } val a = 20;" false))
 
 (deftest scope-func-def-test-3
   (validate-code
-   "val a = 10; defn foo() { val a = 20; a; } b;"
-   false))
+   "val a = 10; defn foo() { val a = 20; a; } b;" false))
 
 (deftest scope-func-def-test-4
   (validate-code
@@ -41,9 +39,25 @@
 
 (deftest scope-loop-test-2
   (validate-code
-   "val a = 10; for (b: a) {val z = 10; z;}; z;"
-   false))
+   "val a = 10; for (b: a) {val z = 10; z;}; z;" false))
 
 (deftest scope-loop-test-3
   (validate-code
    "val a = 10; for (b: a) {b;}; a;"))
+
+
+
+(deftest scope-conditional-test-1
+  (validate-code
+   "if (true) { val a = 10; a; } else {val b = 20; b;};"))
+
+(deftest scope-conditional-test-2
+  (validate-code
+   "if (true) { val a = 10; a; } else {a;};" false))
+
+
+(deftest scope-conditional-test-3
+  (validate-code
+   "if (true) { val a = 10; a; } else {val b = 20; b;} a;" false))
+
+

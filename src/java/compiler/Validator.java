@@ -113,11 +113,44 @@ public class Validator extends JestBaseListener {
 
     @Override
     public void enterMethod_def(JestParser.Method_defContext ctx) {
-        Scope loopScope = createNewScope(scopes);
+        if (currentScope().isInCurrentScope(ctx.name.getText())) {
+            throw new AlreadyDeclared(ctx.name);
+        } else {
+            currentScope().addToScope(ctx.name.getText(), ctx);
+        }
+
+        Scope functionScope = createNewScope(scopes);
+
+        // TODO: Include the function parameters in the current scope
+        JestParser.Function_def_paramsContext params = ctx.function_def_params;
+
+        for (TerminalNode node: params.ID()) {
+            currentScope().addToScope(node.getText(), node);
+        }
     }
 
     @Override
     public void exitMethod_def(JestParser.Method_defContext ctx) {
+        dropCurrentScope(scopes);
+    }
+
+
+    @Override
+    public void enterBlock(JestParser.BlockContext ctx) {
+        Scope loopScope = createNewScope(scopes);
+    }
+
+    @Override
+    public void exitBlock(JestParser.BlockContext ctx) {
+        dropCurrentScope(scopes);
+    }
+
+
+    public void enterConditional(JestParser.ConditionalContext ctx) {
+        Scope loopScope = createNewScope(scopes);
+    }
+
+    public void exitConditional(JestParser.ConditionalContext ctx) {
         dropCurrentScope(scopes);
     }
 
