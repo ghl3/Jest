@@ -95,13 +95,11 @@ public class JestCompiler {
     }
 
 
-
     public static Boolean validateAst(String source) {
 
         JestLexer lexer = new JestLexer(new ANTLRInputStream(source));
         JestParser parser = new JestParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.source_code();
-
 
         try {
             ParseTreeWalker.DEFAULT.walk(new Validator(), tree);
@@ -110,7 +108,6 @@ public class JestCompiler {
             System.out.println(e.getMessage());
             return false;
         }
-
     }
 
 

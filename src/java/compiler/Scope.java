@@ -18,8 +18,16 @@ class Scope {
         this.parent = parent;
     }
 
-    boolean isInScope(String varName) {
+    boolean isInCurrentScope(String varName) {
         if (variables.containsKey(varName)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    boolean isInScope(String varName) {
+        if (isInCurrentScope(varName)) {
             return true;
         }
 

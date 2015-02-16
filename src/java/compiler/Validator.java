@@ -13,6 +13,10 @@ public class Validator extends JestBaseListener {
 
     private final Stack<Scope> scopes;
 
+    public Scope currentScope() {
+        return scopes.peek();
+    }
+
     public Validator() {
         scopes = new Stack<Scope>();
         // Create the global scope
@@ -26,11 +30,18 @@ public class Validator extends JestBaseListener {
         }
     }
 
+    public class NotDeclared extends RuntimeException {
+        public NotDeclared(Token token) {
+            super(String.format("Error - Line %s: Attempting to use variable %s that has not been declared",
+                                token.getLine(), token.getText()));
+        }
+    }
+
     /**
        Create a new scope and return that scope
      */
     public static Scope createNewScope(Stack<Scope> scopes) {
-         Scope outerScope = scopes.peek();
+        Scope outerScope = scopes.peek();
          Scope newScope = new Scope(outerScope);
          scopes.push(newScope);
          return newScope;
@@ -47,11 +58,13 @@ public class Validator extends JestBaseListener {
 
     @Override
     public void enterFunction_def(JestParser.Function_defContext ctx) {
-        if (scopes.peek().isInScope(ctx.name.getText())) {
+        if (currentScope().isInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
         } else {
-            scopes.peek().addToScope(ctx.name.getText(), ctx);
+            currentScope().addToScope(ctx.name.getText(), ctx);
         }
+
+        // TODO: Include the function parameters in the current scope
 
         Scope functionScope = createNewScope(scopes);
     }
@@ -63,10 +76,23 @@ public class Validator extends JestBaseListener {
 
     @Override
     public void enterVal_assignment(JestParser.Val_assignmentContext ctx) {
-        if (scopes.peek().isInScope(ctx.name.getText())) {
+        if (currentScope().isInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
         } else {
-            scopes.peek().addToScope(ctx.name.getText(), ctx);
+            currentScope().addToScope(ctx.name.getText(), ctx);
         }
     }
+
+
+    public void enterExpression_atom(JestParser.Expression_atomContext ctx) {
+
+        // If the expression is a variable, ensure the variable
+        // has been declared
+        if (ctx.ID != null) {
+            if (!currentScope().isInScope(ctx.ID.getText())) {
+                throw new NotDeclared(ctx.ID);
+            }
+        }
+    }
+
 }
