@@ -123,6 +123,8 @@ is present to make the code simpler)
 
 expression_atom returns [String code]
     : NUMBER {$code = $NUMBER.text;}
+    | TRUE {$code = $TRUE.text; }
+    | FALSE {$code = $FALSE.text; }
     | ID {$code = $ID.text; }
     | STRING {$code = $STRING.text; }
     | SYMBOL {$code = $SYMBOL.text; }
@@ -435,6 +437,10 @@ LT: '<' ;
 LTEQ: '<=' ;
 
 CPEQ: '==';
+
+TRUE: 'true';
+
+FALSE: 'false';
 
 /* Names of variables and functions */
 ID
