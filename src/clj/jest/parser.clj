@@ -33,10 +33,12 @@
   [clojure-source]
   ;; Do we want to add anything from here:
   ; https://github.com/clojure/core.typed/blob/master/module-check/src/main/clojure/clojure/core/typed/base_env.clj
-  (format "(do
- (require '[clojure.core.typed :as t])
- %s
- )" clojure-source))
+  (format
+  "(do
+     (require '[jest.core :refer :all])
+     (require '[clojure.core.typed :as t])
+     %s
+   )" clojure-source))
 
 
 (defn get-clojure
