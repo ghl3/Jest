@@ -207,7 +207,7 @@ lambda returns [String code]
     ;
 
 
-
+/* NEW SCOPE */
 let_statement returns [String code]
 @init{
     String annotation = "";
@@ -220,6 +220,7 @@ let_statement returns [String code]
            ')' block {$code += "] \n" + $block.code + ")";}
     ;
 
+/* NEW SCOPE */
 function_def returns [String code]
 @init{
     String annotation = "";
@@ -234,6 +235,7 @@ function_def returns [String code]
          block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
     ;
 
+/* NEW SCOPE */
 method_def returns [String code]
 @init{
     String annotation = "";
@@ -288,7 +290,7 @@ method_params returns [String code]
     | '(' expression ')' { $code = " " + $expression.code; }
     ;
 
-
+/* NEW SCOPE */
 for_loop returns [String code]
 @init{
     String func = "(fn ";
@@ -313,12 +315,14 @@ for_loop returns [String code]
       (LAZY {lazy=true;})? block { func += $block.code;} /*'{' (statement_term {func += "\n\t" + $statement_term.code;})+ '}'*/
     ;
 
+/* NEW SCOPE */
 block returns [String code]
     : '{' expression {$code=$expression.code;} '}'
     | '{' {$code="";} (statement_term {$code += "\n\t" + $statement_term.code;})+ '}'
     ;
 
 
+/* NEW SCOPE */
 conditional returns [String code]
 @init{
     List<String> conditions = new ArrayList<String>();
@@ -375,7 +379,6 @@ clojure_map returns [String code]
 clojure_get returns [String code]
     : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";}
     ;
-
 
 
 // LEXER RULES

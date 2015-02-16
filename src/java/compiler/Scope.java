@@ -29,4 +29,9 @@ class Scope {
             return parent.isInScope(varName);
         }
     }
+
+    void addToScope(String varName, Object obj) {
+        variables.put(varName, obj);
+    }
+
 }
