@@ -140,6 +140,7 @@ expressionAtom returns [String code]
     | lambda {$code=$lambda.code;}
     | memberGetChain {$code=$memberGetChain.code;}
     | recordConstructor {$code=$recordConstructor.code;}
+    | block {$code=$block.code;}
     | '(' expression ')' {$code = $expression.code; }
     ;
 

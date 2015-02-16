@@ -160,6 +160,26 @@ public class Validator extends JestBaseListener {
         dropCurrentScope(scopes);
     }
 
+
+
+    @Override
+    public void enterVarScope(JestParser.VarScopeContext ctx) {
+        for (TerminalNode node: ctx.ID()) {
+            String name = node.getText();
+            if (currentScope().isInCurrentScope(name)) {
+                throw new AlreadyDeclared(node.getSymbol());
+            } else {
+                currentScope().addToScope(node.getText(), node);
+            }
+        }
+    }
+
+    @Override
+    public void exitVarScope(JestParser.VarScopeContext ctx) {
+        dropCurrentScope(scopes);
+    }
+
+
     // Require variables to be defined
 
     @Override
@@ -171,6 +191,8 @@ public class Validator extends JestBaseListener {
         }
     }
 
+
+    
     @Override
     public void enterExpressionAtom(JestParser.ExpressionAtomContext ctx) {
 

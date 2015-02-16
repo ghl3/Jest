@@ -37,13 +37,39 @@ This will print the Clojure source to standard out.  Use the "-h" or "--help" fl
 
 There are two ways to declare variables in jest.
 
-Global variables are declared using the "val" keyword, an equals sign, and an expression:
+Global variables are declared using the "def" keyword, an equals sign, and an expression:
 
-    val x = 10;
-    val y = x*x;
+    def x = 10;
+    def y = x*x;
     
-Variable declaration statements must terminate with a semi-colon.  Variables cannot be reassigned, and variable names may not be re-used in the same scope, though a variable name in an inner scope is allowed to shadow a variable name in an outer scope.
+Variable declaration statements must terminate with a semi-colon.
 
+Local variables that obey local scoping rules are declared using the "let" keyword:
+
+	let x = 10;
+	let y = 20;
+
+
+## Scope
+
+Local variables cannot be reassigned in the same scope, though a local variable name in an inner scope is allowed to shadow a variable name in an outer scope:
+
+    let x = 10;
+    
+    {
+    	let x = 20;
+    }
+    
+The presence of brackets creates a new scope.  Other grammatical structures that create new scopes are function bodies, for loop bodies, and bodies inside conditional statements.
+
+Brackets not only create new scopes, they are also expressions, and they evaluate to the value of the last line in their body.  So, the following is valid:
+
+	let x = {
+		let x = 10;
+		x;
+	}
+	println(x);
+	// prints 10
 
 ## Comments
 
@@ -55,31 +81,6 @@ Jest uses c-style comments
     comment
     comment
     */
-
-
-## Scope
-
-Variables declared in Jest are global unless they are declared in a let expression:
-
-    let(val x=0) {
-        x + 10;
-    }
-
-Let expressions are indeed expressions and they evaluate to the value of the final line of their body.  A variable declared in the heading of a let expression will be scoped and will exist only within the body of the let block.  A variable declared in the head will shadow any existing variables declared outside of the let expression.  One can declare multiple variables in the header of a let expression:
-
-    let (val x = 10) {
-        x+5;
-    }
-
-    val x = 100;
-    
-    val res = let (val x = 10; val y = 20) {
-        x + y;
-    }
-
-    println(res);
-    
-    // Prints "30", not "120"
 
 
 ## Comparison Operators
