@@ -8,6 +8,7 @@ import jest.grammar.JestParser;
 
 import org.antlr.v4.runtime.Token;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class Validator extends JestBaseListener {
 
@@ -68,7 +69,12 @@ public class Validator extends JestBaseListener {
         Scope functionScope = createNewScope(scopes);
 
         // TODO: Include the function parameters in the current scope
-        JestParser.Method_paramsContext method_params = ctx.method_params;
+        JestParser.Function_def_paramsContext params = ctx.function_def_params;
+
+        for (TerminalNode node: params.ID()) {
+            currentScope().addToScope(node.getText(), node);
+        }
+
     }
 
 
