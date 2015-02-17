@@ -1,0 +1,16 @@
+
+let myList = range(0, 100, 10);
+
+let incremented = map(inc, myList);
+
+defn square(x) {
+     x*x;
+     };
+
+let squared = map(square, incremented);
+
+println(squared);
+
+let halfRange = (squared.first() + squared.last()) / 2;
+
+println(halfRange);

@@ -28,19 +28,19 @@ Run a jest program:
 ## Example Programs
 
 ```
-val myList = range(0, 100, 10);
+let myList = range(0, 100, 10);
 
-val incremented = map(inc, myList);
+let incremented = map(inc, myList);
 
 defn square(x) {
      x*x;
 };
 
-val squared = map(square, incremented);
+let squared = map(square, incremented);
 
 println(squared);
 
-val halfRange = (squared.first() + squared.last()) / 2;
+let halfRange = (squared.first() + squared.last()) / 2;
 
 println(halfRange);
 ```
@@ -52,13 +52,13 @@ Which prints
 
 
 ```
-val scores = [90, 85, 95, 92];
+let scores = [90, 85, 95, 92];
 
 println("Scores: ", scores);
 
-val studentAges = {"Jane" :14, "Bob": 16, "Tom": 15};
+let studentAges = {"Jane" :14, "Bob": 16, "Tom": 15};
 
-val answers = {"Jane": ["A", "C", "D", "A"],
+let answers = {"Jane": ["A", "C", "D", "A"],
     "Bob": ["B", "C", "D", "B"],
     "Tom": ["A", "C", "B", "A"]};
 
