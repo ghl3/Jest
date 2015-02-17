@@ -311,6 +311,9 @@ block returns [String code]
     | '{' {$code="";} (varScope {$code+=" "+$varScope.code;})+ '}'
     ;
 
+/* TODO: add typing using the core.typed let macro:
+http://clojure.github.io/core.typed/#clojure.core.typed/let
+*/
 varScope returns [String code]
     :  {$code="(let [";} (LET name=ID '=' exp=expression SEMICOLON {$code+=" "+$name.text+" "+$exp.code;})+ {$code+=" ]";}
         (statementTerm {$code+=" "+$statementTerm.code;})* {$code+=")";}
