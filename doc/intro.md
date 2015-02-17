@@ -42,12 +42,12 @@ Global variables are declared using the "def" keyword, an equals sign, and an ex
     def x = 10;
     def y = x*x;
     
-Variable declaration statements must terminate with a semi-colon.
-
 Local variables that obey local scoping rules are declared using the "let" keyword:
 
 	let x = 10;
 	let y = 20;
+
+Variable declaration statements must terminate with a semi-colon.
 
 
 ## Scope
@@ -96,8 +96,8 @@ Jest uses the usual comparison operators, and comparison expressions return bool
 
 Double equals asserts that two expressions are equal to each other (where equality is determined by value, not by reference):
 
-    val x = 12;
-    val y = 12;
+    let x = 12;
+    let y = 12;
     
     x == y
     // true    
@@ -107,7 +107,7 @@ Double equals asserts that two expressions are equal to each other (where equali
 
 String literals are declared using double quotes:
 
-    val str = "My String";
+    let str = "My String";
 
 Jest strings are _Clojure_ Strings, which are _java.util.String_ Strings.  Among other things, this means that Jest strings are immutable.
 
@@ -116,47 +116,47 @@ Jest strings are _Clojure_ Strings, which are _java.util.String_ Strings.  Among
 
 Jest supports symbols (or "keywords" in _Clojure_ notation).  Symbols are values that evaluate to themselves and have no meaning outside of their own identity (in other words, they store no data other than their own id).  The main use case of a Symbol is a quick comparison, which makes them useful as keys to maps (see later);
 
-    val symb = :mySymbol;
+    let symb = :mySymbol;
 
 
 ## Vectors
 
 Jest has vector literals that can be created using bracket notation:
 
-    val vec = [1, 2, 3];
+    let vec = [1, 2, 3];
     
 Items in a vector must be separated by a comma.  Jest vectors are _Clojure_ vectors, which means they are persistent and immutable but have nearly O(1) random read access.  One can get the ith element of a vector using the get function.  There are also a number of other functions that act on vectors:
 
-    val zeroth = vec.get(0);
-	val fst = vec.first();
-	val lst = vec.last();
+    let zeroth = vec.get(0);
+	let fst = vec.first();
+	let lst = vec.last();
 
 
 ## Maps
 
 Jest has map literals that can be created using curly-bracket notation:
 
-    val mp = {"a": 1, "b": 2};
+    let mp = {"a": 1, "b": 2};
     
 Items in a map are related using a colon and pairs of items must be separated by a comma.  Jest maps are _Clojure_ maps, which means they are persistent and immutable but have nearly O(1) read access by key.  One can get a key from a map using the get function:
 
-    val myVal = mp.get("a"); 
+    let myVal = mp.get("a"); 
 
 As discussed earlier, symbols are useful as keys to maps:
 
-    val mp = {:a : 1, :b : 2};
-    val x = mp[:a];
+    let mp = {:a : 1, :b : 2};
+    let x = mp[:a];
 
 
 ## Conditionals
 
 In Jest, if statements are expressions, meaning they evaluate to a value.  The value of an if statement is the value of the final like of the block that is conditionally selected or 'nil' if no block is conditionally selected.
 
-    val conditional = if (true) { 20 } else { 30 };
+    let conditional = if (true) { 20 } else { 30 };
 
 In the above, 'conditional' will be set to the value 20;
 
-    val alwaysNil = if (false) { 100 };
+    let alwaysNil = if (false) { 100 };
     
 One can always call functions for their side effects and still ignore the value of the if statement:
 
@@ -203,20 +203,20 @@ The value of a function is the value of the last expression in the body of the f
 
 Functions are called by passing arguments to the name bound to the function in the standard way:
 
-    val result = function(1.0, 2.0, 3.0); 
+    let result = function(1.0, 2.0, 3.0); 
 
 
 ## Lambdas
 
 One can create anonymous functions, or Lambdas, in Jest using hash notation:
 
-    val myFunc = #(% * %);
+    let myFunc = #(% * %);
     myFunc(2):
     // evaluates to 4
     
 Inside the hash, a '%' represents the (single) argument to the lambda function and the result will be a callable function of one argument.  One can create functions of more than one argument by indexing the '%' keywords:
 
-    val myFunc = #(%1 + (%2*%3));
+    let myFunc = #(%1 + (%2*%3));
 	myFunc(10, 2, 5);
 	// evaluates to 15 + (2*5) = 25
 
@@ -246,7 +246,7 @@ For loops allow for looping over and mapping over one or more iterables:
 
 For loops in Jest are expressions, meaning that they evaluate to values.  This means that one can set a variable to a for loop.  The value of a for loop is the value of the final expression of the body of the loop evaluated over every item in the supplied iterables.
 
-    val x = for(a, b: iterA, iterB) {
+    let x = for(a, b: iterA, iterB) {
         a*b;
     }
     
@@ -256,7 +256,7 @@ For loops in Jest are expressions, meaning that they evaluate to values.  This m
     
 The value of a loop is an eager sequence, but one may return a lazy sequence by adding the "lazy" keyword:
 
-    val x = for(a, b: iterA, iterB) lazy {
+    let x = for(a, b: iterA, iterB) lazy {
         a*b;
     }
     
@@ -270,22 +270,22 @@ In Jest, one can create structures of data using the "record" keyword:
 
   These are not classes as they have no methods and their data is immutable.  One can create an instance of a record using the "new" keyword:
   
-    val bob = new Student("Bob", "History");
+    let bob = new Student("Bob", "History");
    
 One can alternatively create a record by naming the fields:
 
-    val bob = new Student(name: "Bob", class: "History");
+    let bob = new Student(name: "Bob", class: "History");
    
 Fields of a record can be accessed using a "dot" accessor:
 
-    val class = bob.class;
+    let class = bob.class;
 
 
 ## Methods
 
 Jest doesn't have classes.  However, Jest does have syntax that allows one to call a function on an object in a familiar way.  One can call a "method" on an object in Jest by using the dot operator:
 
-    val myVec = [1, 2, 3, 4, 5];
+    let myVec = [1, 2, 3, 4, 5];
     myVec.get(2);
     
 There, "myVec" is a vector, which is not a class, but one can use the dot notation to apply a function to it that mimics a method call in other languages.  Specifically, doing:
@@ -302,7 +302,7 @@ This is nice because it means that any function that takes a particular object a
     	vec.first() + vec.last();
     }
     
-    val myVec = [1, 2, 3, 4, 5];
+    let myVec = [1, 2, 3, 4, 5];
     myVec.bookend();
     
     // Evaluates to 1+5 = 6
@@ -350,10 +350,10 @@ Jest currently supports an experimental and optional type-checking system.  To r
     
 Jest type checking leverages Typed Clojure (core.typed) to validate type annotations.  In order to take advantage of this, one can optionally annotate their variables and functions:
 
-    val x: Integer = 5;
-    val y: Integer = 10;
+    def x: Integer = 5;
+    def y: Integer = 10;
 
-    val myList: Vec[Integer] = [1, 2, 3, 4];
+    def myList: Vec[Integer] = [1, 2, 3, 4];
 
     defn func(a, b): Integer Integer -> #AnyInteger {
         a + b;
@@ -366,8 +366,8 @@ The above function is correctly typed, as we are passing two integers into a fun
 
 If we had instead written:
 
-    val x: Double = 5.0;
-    val y: Integer = 10;
+    def x: Double = 5.0;
+    def y: Integer = 10;
 
     defn func(a, b): Integer Integer -> #AnyInteger {
         a + b;
