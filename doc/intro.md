@@ -67,7 +67,7 @@ Brackets not only create new scopes, they are also expressions, and they evaluat
 	let x = {
 		let x = 10;
 		x;
-	}
+	};
 	println(x);
 	// prints 10
 
