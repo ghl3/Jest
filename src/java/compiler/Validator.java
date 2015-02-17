@@ -60,8 +60,12 @@ public class Validator extends JestBaseListener {
        new current scope
      */
     public static Scope dropCurrentScope(Stack<Scope> scopes) {
-        scopes.pop();
-        return scopes.peek();
+        if (scopes.peek().isGlobalScope()) {
+            return scopes.peek();
+        } else {
+            scopes.pop();
+            return scopes.peek();
+        }
     }
 
 
@@ -191,8 +195,6 @@ public class Validator extends JestBaseListener {
         }
     }
 
-
-    
     @Override
     public void enterExpressionAtom(JestParser.ExpressionAtomContext ctx) {
 

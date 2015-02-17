@@ -42,4 +42,8 @@ class Scope {
         variables.put(varName, obj);
     }
 
+    boolean isGlobalScope() {
+        return parent == null;
+    }
+    
 }

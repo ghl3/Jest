@@ -56,6 +56,7 @@ public class JestCompiler {
         if (validate) {
             boolean valid = validateAst(sourceTree);
             if (!valid) {
+                System.out.println("Source code is invalid");
                 return new java.util.ArrayList<String>();
             }
         }

@@ -1,4 +1,4 @@
-(ns jest.assignment-scope-test
+(ns jest.let-assignment-test
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all]))
 

@@ -29,3 +29,4 @@ target/jest-0.1.0-SNAPSHOT-standalone.jar: $(DEPENDENCIES)
 
 clean:
 	rm -f $(GRAMMAR_SOURCES)
+	lein clean

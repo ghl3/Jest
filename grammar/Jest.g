@@ -316,7 +316,6 @@ varScope returns [String code]
         (statementTerm {$code+=" "+$statementTerm.code;})* {$code+=")";}
     ;
 
-
 /* NEW SCOPE */
 conditional returns [String code]
 @init{
