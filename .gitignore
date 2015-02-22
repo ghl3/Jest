@@ -9,7 +9,7 @@ pom.xml.asc
 /.nrepl-port
 
 .idea
-src/jest.iml
+*.iml
 
-src/java/grammar/*.java
-src/java/grammar/*.tokens
+src/java/jest/grammar/*.java
+src/java/jest/grammar/*.tokens

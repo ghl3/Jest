@@ -1,5 +1,5 @@
 
-GRAMMAR_SOURCES := $(shell find . -regex "./src/java/grammar/.*\.java" -print)
+GRAMMAR_SOURCES := $(shell find . -regex "./src/java/jest/grammar/.*\.java" -print)
 JAVA_SOURCE := $(shell find . -regex "./src/.*\.java" -print)
 CLOJURE_SOURCE := $(shell find . -regex "./src/.*\.clj" -print)
 
@@ -14,7 +14,7 @@ jar:
 	lein uberjar
 
 antlr:
-	java -jar antlr4-4.5.jar -o src/java grammar/Jest.g
+	java -jar antlr4-4.5.jar -o src/java/jest grammar/Jest.g
 
 
 src/java/grammar/JestLexer.java: antlr
