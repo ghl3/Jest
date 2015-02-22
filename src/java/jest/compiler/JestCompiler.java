@@ -1,6 +1,7 @@
 
 package jest.compiler;
 
+import java.util.List;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -93,6 +94,19 @@ public class JestCompiler {
     public static Boolean validateSourceCode(String source) {
         ParseTree tree = compileSourceCodeToAst(source);
         return validateAst(tree);
+    }
+
+
+    public static List<String> compileToClojureVisitor(ParseTree tree) {
+        Visitor visitor = new Visitor();
+        Code code = visitor.visit(tree);
+        return code.getLines();
+    }
+
+    public static List<String> compileToClojureVisitor(String source) {
+        ParseTree tree = compileSourceCodeToAst(source);
+        validateAst(tree);
+        return compileToClojureVisitor(tree);
     }
 
 }

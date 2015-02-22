@@ -24,6 +24,17 @@
   (is (= (remove-code-compare-whitespace x) (remove-code-compare-whitespace y))))
 
 
+(defn test-jest-vs-clojure
+  [clojure code-list]
+
+  ;; Compare each line individually
+  (doall (map compare-code clojure code-list))
+
+  ;; Conmpare all of the code
+  (is (= (map remove-code-compare-whitespace clojure)
+         (map remove-code-compare-whitespace code-list))))
+
+
 (defn test-code
   "Test that the given jest code
   compiles into the given clojure code"
@@ -35,13 +46,7 @@
        (test-println "Clojure: ")
        (doall (map test-println code-list))
        (test-println "")
-
-       ;; Compare each line individually
-       (doall (map compare-code clojure code-list))
-
-       ;; Conmpare all of the code
-       (is (= (map remove-code-compare-whitespace clojure)
-              (map remove-code-compare-whitespace code-list))))))
+       (test-jest-vs-clojure clojure code-list))))
 
 
 (defn test-eval
