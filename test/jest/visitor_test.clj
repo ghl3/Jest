@@ -16,3 +16,9 @@
    "import foo;"
    ["(import 'foo)"]))
 
+
+(deftest def-test-1
+  (test-visitor
+    "def foo=:bar;"
+    ["(def foo :bar)"]))
+

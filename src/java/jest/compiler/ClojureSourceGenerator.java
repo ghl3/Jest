@@ -98,7 +98,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
 
         code += String.format("(def %s %s)",
-                ctx.name.getText(), this.visitExpression(ctx.expression()));
+                ctx.name.getText(), this.visitExpression(ctx.expression()).getSingleLine());
 
         return Code.singleLine(code);
 
