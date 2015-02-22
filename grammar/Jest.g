@@ -105,11 +105,11 @@ into a function call on that atom
 */
 
 methodCallChain returns [String code]
-    : methodCall {$code=$methodCall.code;}
+    : methodCallChain {$code=$methodCall.code;}
         (
             PERIOD a=ID b=methodParams {$code="("+$a.text+" "+$code+$b.code+")";} |
             ARROW c=ID d=methodParams {$code="("+$c.text+$d.code+" "+$code+")";}
-        )+
+        )
     | methodCall {$code=$methodCall.code;}
     ;
 

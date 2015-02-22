@@ -175,6 +175,39 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
 
     @Override
+    public Code visitMethodCallChain(JestParser.MethodCallChainContext ctx) {
+
+        if (ctx.methodCall() != null) {
+            return this.visitMethodCall(ctx.methodCall);
+        }
+
+        String methodCallChain = this.visitMethodCallChain(ctx.methodCallChain())
+                .getSingleLine();
+
+        if (ctx.PERIOD() != null) {
+            String code = String.format("(%s %s %s)",
+                    ctx.a.getText(),
+                    methodCallChain,
+                    this.visitMethodParams(ctx.b).getSingleLine());
+            return Code.singleLine(code);
+        }
+
+        else if (ctx.ARROW() != null) {
+            String code = String.format("(%s %s %s)",
+                    ctx.c.getText(),
+                    this.visitMethodParams(ctx.d).getSingleLine(),
+                    methodCallChain);
+            return Code.singleLine(code);
+        }
+
+        else {
+            throw new BadSource(ctx);
+        }
+
+    }
+
+
+    @Override
     public Code visitFunctionDef(JestParser.FunctionDefContext ctx) {
 
         String code = "";
