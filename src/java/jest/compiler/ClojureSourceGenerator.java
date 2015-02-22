@@ -1,5 +1,6 @@
 package jest.compiler;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import java.util.List;
 import jest.grammar.JestParser;
@@ -106,7 +107,59 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
     @Override
     public Code visitExpression(JestParser.ExpressionContext ctx) {
+        // TODO: Flesh this out
         return Code.singleLine(ctx.code);
     }
+
+
+    @Override
+    public Code visitFunctionDef(JestParser.FunctionDefContext ctx) {
+
+        String code = "";
+
+        if (ctx.funcTypeAnnotation() != null) {
+            //code += this.visitTypeAnnotation(ctx.typeAnnotation()).getSingleLine() + "\n";
+            code += String.format("(t/ann %s [%s -> %s])\n",
+                    ctx.name.getText(), ctx.funcTypeAnnotation().code, ctx.typeAnnotation().code);
+        }
+
+        code += String.format("(defn %s [%s ] %s)",
+                ctx.name.getText(),
+                ctx.functionDefParams.code,
+                ctx.block().code);
+
+        return Code.singleLine(code);
+    }
+
+
+    @Override
+    public Code visitRecordDef(JestParser.RecordDefContext ctx) {
+
+        List<String> ids = Lists.newArrayList();
+
+        Integer numProtocols = ctx.IMPLEMENTS().size();
+        Integer numMembers = ctx.ID().size() - numProtocols;
+
+        // TODO: Does this loop over too many ids?
+        for (TerminalNode id: ctx.ID().subList(0, numMembers)) {
+            ids.add(id.getText());
+        }
+
+        String fields = Joiner.on(",").join(ids);
+
+        String code = String.format("(defrecord %s [%s]",
+                ctx.name.getText(), fields);
+
+        if (ctx.protocol != null) {
+           for (TerminalNode protocol: ctx.ID().subList(numMembers, numMembers + numProtocols)) {
+               code += String.format("\n%s", protocol.getText());
+           }
+        }
+
+        return Code.singleLine(code);
+
+
+    }
+
 
 }

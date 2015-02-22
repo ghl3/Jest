@@ -22,3 +22,15 @@
     "def foo=:bar;"
     ["(def foo :bar)"]))
 
+
+(deftest def-test-2
+  (test-visitor
+    "import foo;\n def foo=:bar;"
+    ["(import 'foo)"
+     "(def foo :bar)"]))
+
+
+(deftest func-test-1
+  (test-visitor
+    "defn foo(x) { x+12; };"
+    ["(defn foo [ x ] (+ x 12))"]))
