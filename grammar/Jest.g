@@ -67,23 +67,28 @@ expression returns [String code]
 
 
 comparisonExpression returns [String code]
-    : a=arithmeticExpression {$code=$a.code;} (GT b=arithmeticExpression {$code="(> "+$a.code+" "+$b.code+")";})?
+    : a=arithmeticExpression {$code=$a.code;}
+    (op=(GT | LT | GTEQ | LTEQ | CPEQ) b=arithmeticExpression {$code="("+$op.text+" "+$a.code+" "+$b.code+")";})?
+/*
     | a=arithmeticExpression {$code=$a.code;} (LT b=arithmeticExpression {$code="(< "+$a.code+" "+$b.code+")";})?
     | a=arithmeticExpression {$code=$a.code;} (GTEQ b=arithmeticExpression {$code="(>= "+$a.code+" "+$b.code+")";})?
     | a=arithmeticExpression {$code=$a.code;} (LTEQ b=arithmeticExpression {$code="(<= "+$a.code+" "+$b.code+")";})?
     | a=arithmeticExpression {$code=$a.code;} (CPEQ b=arithmeticExpression {$code="(= "+$a.code+" "+$b.code+")";})?
+    */
     | a=arithmeticExpression {$code=$a.code;}
     ;
 
 
 arithmeticExpression returns [String code]
 @init{$code = ""; }
-    : a=arithmeticTerm {$code = $a.code;} ( ( PLUS {$code = "(+ " + $code + " ";} | MINUS {$code = "(- " + $code + " ";} ) b=arithmeticTerm {$code += $b.code + ")";} )*
+    : a=arithmeticTerm {$code = $a.code;} ( PLUS {$code = "(+ " + $code + " ";} | MINUS {$code = "(- " + $code + " ";} ) b=arithmeticTerm {$code += $b.code + ")";}
+    | a=arithmeticTerm {$code = $a.code;}
     ;
 
 arithmeticTerm returns [String code]
 @init{$code = ""; }
-    : a=expressionComposed {$code = $a.code;} ( ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expressionComposed {$code += $b.code + ")";} )*
+    : a=expressionComposed {$code = $a.code;} ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expressionComposed {$code += $b.code + ")";}
+    | a=expressionComposed {$code = $a.code;}
     ;
 
 expressionComposed returns [String code]

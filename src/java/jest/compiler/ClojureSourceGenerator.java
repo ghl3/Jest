@@ -102,13 +102,75 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
                 ctx.name.getText(), this.visitExpression(ctx.expression()).getSingleLine());
 
         return Code.singleLine(code);
-
     }
+
+
+
 
     @Override
     public Code visitExpression(JestParser.ExpressionContext ctx) {
-        // TODO: Flesh this out
-        return Code.singleLine(ctx.code);
+        return this.visitComparisonExpression(ctx.comparisonExpression());
+    }
+
+
+
+    @Override
+    public Code visitComparisonExpression(JestParser.ComparisonExpressionContext ctx) {
+        if (ctx.op != null) {
+            String code = String.format("(%s %s %s)",
+                    ctx.op.getText(), ctx.a, ctx.b);
+            return Code.singleLine(code);
+        } else {
+            return this.visitArithmeticExpression(ctx.a);
+        }
+    }
+
+
+    @Override
+    public Code visitArithmeticExpression(JestParser.ArithmeticExpressionContext ctx) {
+
+        if (ctx.b != null) {
+            String a = this.visitArithmeticTerm(ctx.a).getSingleLine();
+            String b = this.visitArithmeticTerm(ctx.b).getSingleLine();
+            String code = String.format("(%s %s %s)",
+                    ctx.PLUS() != null ? ctx.PLUS() : ctx.MINUS(),
+                   a, b);
+            return Code.singleLine(code);
+        } else {
+            return this.visitArithmeticTerm(ctx.a);
+        }
+    }
+
+
+    @Override
+    public Code visitArithmeticTerm(JestParser.ArithmeticTermContext ctx) {
+        if (ctx.b != null) {
+            String a = this.visitExpressionComposed(ctx.a).getSingleLine();
+            String b = this.visitExpressionComposed(ctx.b).getSingleLine();
+            String code = String.format("(%s %s %s)",
+                    ctx.MULT() != null ? ctx.MULT() : ctx.DIV(),
+                    a, b);
+            return Code.singleLine(code);
+        } else {
+            return this.visitExpressionComposed(ctx.a);
+        }
+    }
+
+
+    @Override
+    public Code visitExpressionComposed(JestParser.ExpressionComposedContext ctx) {
+
+        if (ctx.methodCallChain() != null) {
+            return this.visitMethodCallChain(ctx.methodCallChain());
+        }
+
+        else if (ctx.expressionAtom() != null) {
+            return this.visitExpressionAtom(ctx.expressionAtom());
+        }
+
+        else {
+            throw new BadSource(ctx);
+        }
     }
 
 
@@ -157,7 +219,6 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
 
         return Code.singleLine(code);
-
 
     }
 
