@@ -3,16 +3,11 @@ package jest.compiler;
 
 import java.util.List;
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import jest.grammar.*;
-
-import jest.compiler.Validator;
 
 
 public class JestCompiler {
@@ -98,8 +93,8 @@ public class JestCompiler {
 
 
     public static List<String> compileToClojureVisitor(ParseTree tree) {
-        Visitor visitor = new Visitor();
-        Code code = visitor.visit(tree);
+        ClojureSourceGenerator clojureSourceGenerator = new ClojureSourceGenerator();
+        Code code = clojureSourceGenerator.visit(tree);
         return code.getLines();
     }
 
