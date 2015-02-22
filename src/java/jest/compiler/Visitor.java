@@ -1,15 +1,14 @@
+package jest.compiler;
 
 import jest.grammar.JestParser;
 import jest.grammar.JestBaseVisitor;
 
-import java.lang.String;
 
-public class Visitor extends JestBaseVisitor<String> {
+public class Visitor extends JestBaseVisitor<Code> {
 
 
     @Override
-    public String visitSourceCode(JestParser.SourceCodeContext ctx) {
-
+    public Code visitSourceCode(JestParser.SourceCodeContext ctx) {
         return visitChildren(ctx);
     }
 
