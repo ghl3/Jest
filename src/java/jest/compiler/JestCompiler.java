@@ -100,7 +100,7 @@ public class JestCompiler {
 
     public static List<String> compileToClojureVisitor(String source) {
         ParseTree tree = compileSourceCodeToAst(source);
-        validateAst(tree);
+        //validateAst(tree);
         return compileToClojureVisitor(tree);
     }
 

@@ -203,8 +203,98 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         else {
             throw new BadSource(ctx);
         }
+    }
+
+
+    @Override
+    public Code visitMethodCall(JestParser.MethodCallContext ctx) {
+
+        if (ctx.PERIOD() != null) {
+            String code = String.format("(%s %s%s)",
+                    ctx.func.getText(),
+                    this.visitExpressionAtom(ctx.obj).getSingleLine(),
+                    this.visitMethodParams(ctx.methodParams()).getSingleLine());
+            return Code.singleLine(code);
+        }
+
+        else if (ctx.ARROW() != null) {
+            String code = String.format("(%s%s %s)",
+                    ctx.func.getText(),
+                    this.visitMethodParams(ctx.methodParams()).getSingleLine(),
+                    this.visitExpressionAtom(ctx.obj).getSingleLine());
+            return Code.singleLine(code);
+        }
+
+        else {
+            throw new BadSource(ctx);
+        }
+    }
+
+    @Override
+    public Code visitExpressionAtom(JestParser.ExpressionAtomContext ctx) {
+
+        if (ctx.NUMBER() != null) {
+            return Code.singleLine(ctx.NUMBER().getText());
+        }
+        else if (ctx.TRUE() != null) {
+            return Code.singleLine(ctx.TRUE().getText());
+        }
+        else if (ctx.FALSE() != null) {
+            return Code.singleLine(ctx.FALSE().getText());
+        }
+        else if (ctx.NIL() != null) {
+            return Code.singleLine(ctx.NIL().getText());
+        }
+        else if (ctx.ID() != null) {
+            return Code.singleLine(ctx.ID().getText());
+        }
+        else if (ctx.STRING() != null) {
+            return Code.singleLine(ctx.STRING().getText());
+        }
+        else if (ctx.SYMBOL() != null) {
+            return Code.singleLine(ctx.SYMBOL().getText());
+        }
+        else if (ctx.clojureVector() != null) {
+            return this.visitClojureVector(ctx.clojureVector());
+        }
+        else if (ctx.clojureMap() != null) {
+            return this.visitClojureMap(ctx.clojureMap());
+        }
+        else if (ctx.functionCall() != null) {
+            return this.visitFunctionCall(ctx.functionCall());
+        }
+        else if (ctx.clojureGet() != null) {
+            return this.visitClojureGet(ctx.clojureGet());
+        }
+        else if (ctx.forLoop() != null) {
+            return this.visitForLoop(ctx.forLoop());
+        }
+        else if (ctx.conditional() != null) {
+            return this.visitConditional(ctx.conditional());
+        }
+        else if (ctx.lambda() != null) {
+            return this.visitLambda(ctx.lambda());
+        }
+        else if (ctx.memberGetChain() != null) {
+            return this.visitMemberGetChain(ctx.memberGetChain());
+        }
+        else if (ctx.recordConstructor() != null) {
+            return this.visitRecordConstructor(ctx.recordConstructor());
+        }
+        else if (ctx.block() != null) {
+            return this.visitBlock(ctx.block());
+        }
+        else if (ctx.expression() != null) {
+            return this.visitExpression(ctx.expression());
+        }
+        else {
+            throw new BadSource(ctx);
+        }
 
     }
+
+
+
 
 
     @Override
@@ -252,6 +342,26 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
 
         return Code.singleLine(code);
+
+    }
+
+
+
+    @Override
+    public Code visitMethodParams(JestParser.MethodParamsContext ctx) {
+
+
+        if (ctx.expressionList != null) {
+            return this.visitExpressionList(ctx.expressionList());
+        }
+
+        else if (ctx.expression() != null) {
+            return this.visitExpression(ctx.expression());
+        }
+
+        else {
+            return Code.singleLine("");
+        }
 
     }
 
