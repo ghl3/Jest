@@ -28,6 +28,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
                 context.getText(), context.start.getLine(), context.start.getCharPositionInLine());
     }
 
+
     @Override
     public Code visitSourceCode(JestParser.SourceCodeContext ctx) {
 
@@ -65,6 +66,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
     }
 
+
     @Override
     public Code visitImportStatement(JestParser.ImportStatementContext ctx) {
 
@@ -77,6 +79,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         return Code.singleLine(code);
     }
 
+
     @Override
     public Code visitStatement(JestParser.StatementContext ctx) {
 
@@ -88,6 +91,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
             throw new BadSource(ctx);
         }
     }
+
 
     @Override
     public Code visitDefAssignment(JestParser.DefAssignmentContext ctx) {
@@ -105,13 +109,10 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     }
 
 
-
-
     @Override
     public Code visitExpression(JestParser.ExpressionContext ctx) {
         return this.visitComparisonExpression(ctx.comparisonExpression());
     }
-
 
 
     @Override
@@ -230,6 +231,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
     }
 
+
     @Override
     public Code visitExpressionAtom(JestParser.ExpressionAtomContext ctx) {
 
@@ -294,7 +296,17 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     }
 
 
+    @Override
+    public Code visitExpressionList(JestParser.ExpressionListContext ctx) {
 
+        String code = this.visitExpression(ctx.a).getSingleLine();
+
+        for (JestParser.ExpressionContext expression: ctx.b) {
+            code += " " + this.visitExpression(expression).getSingleLine();
+        }
+
+        return Code.singleLine(code);
+    }
 
 
     @Override
@@ -346,10 +358,8 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     }
 
 
-
     @Override
     public Code visitMethodParams(JestParser.MethodParamsContext ctx) {
-
 
         if (ctx.expressionList != null) {
             return this.visitExpressionList(ctx.expressionList());
@@ -362,8 +372,6 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         else {
             return Code.singleLine("");
         }
-
     }
-
 
 }

@@ -49,3 +49,9 @@
   (test-visitor
     "def g = a.foobar();"
     ["(def g (foobar a))"]))
+
+
+(deftest method-test-1
+  (test-visitor
+    "y.foobar().bar();"
+    ["(bar (foobar y) )"]))

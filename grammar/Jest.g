@@ -105,12 +105,12 @@ into a function call on that atom
 */
 
 methodCallChain returns [String code]
-    : methodCallChain {$code=$methodCall.code;}
+    : methodCall {$code=$methodCall.code;}
+    | chain=methodCallChain {$code=$chain.code;}
         (
             PERIOD a=ID b=methodParams {$code="("+$a.text+" "+$code+$b.code+")";} |
             ARROW c=ID d=methodParams {$code="("+$c.text+$d.code+" "+$code+")";}
         )
-    | methodCall {$code=$methodCall.code;}
     ;
 
 methodCall returns [String code]
@@ -172,7 +172,7 @@ recordConstructor returns [String code]
 
 expressionList returns [List<String> codeList]
 @init{$codeList = new ArrayList<String>();}
-    :  a=expression {$codeList.add($a.code);} (COMMA b=expression { $codeList.add($b.code);})+
+    :  a=expression {$codeList.add($a.code);} (COMMA b+=expression /*{ $codeList.add($b.code);}*/)+
     ;
 
 /* Consider adding '/t' as a prefix to all of these
