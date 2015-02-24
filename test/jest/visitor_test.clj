@@ -67,3 +67,9 @@
   (test-visitor
     "foo(a, b, c);"
     ["(foo a b c)"]))
+
+
+(deftest for-test-1
+  (test-visitor
+    "for (a: lst) { println(a); };"
+    ["(doall (map (fn [ a ] (println a)) (seq lst)))"]))

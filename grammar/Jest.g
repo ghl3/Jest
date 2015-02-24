@@ -304,16 +304,16 @@ forLoop returns [String code]
 
     if (!lazy) $code += ")";
 }
-    : FOR '(' a=ID {func += "[ " + $a.text;} (COMMA b=ID {func += " " + $b.text;})* {func += " ]";}
-      COLON c=expression {iterator = "(seq " + $c.code + ")";} (COMMA d=expression {iterator += " (seq " + $d.code + ")";})* ')'
+    : FOR '(' a=ID {func += "[ " + $a.text;} (COMMA b+=ID /*{func += " " + $b.text;}*/)* {func += " ]";}
+      COLON c=expression {iterator = "(seq " + $c.code + ")";} (COMMA d+=expression /*{iterator += " (seq " + $d.code + ")";}*/)* ')'
       (LAZY {lazy=true;})? block { func += $block.code;}
     ;
 
 /* NEW SCOPE */
 block returns [String code]
     : '{' expression {$code=$expression.code;} '}'
-    | '{' {$code="";} (statementTerm {$code+=" "+$statementTerm.code;})+ '}'
-    | '{' {$code="";} (varScope {$code+=" "+$varScope.code;})+ '}'
+    | '{' {$code="";} (term+=statementTerm {$code+=" "+$statementTerm.code;})+ '}'
+    | '{' {$code="";} (scope+=varScope {$code+=" "+$varScope.code;})+ '}'
     ;
 
 /* TODO: add typing using the core.typed let macro:

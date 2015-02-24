@@ -534,4 +534,84 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
     }
 
+
+    @Override
+    public Code visitForLoop(JestParser.ForLoopContext ctx) {
+
+
+        String func = "(fn ";
+        String iterator = "";
+        Boolean lazy = false;
+
+        func += String.format("[ %s", ctx.a.getText());
+
+        for (Token b: ctx.b) {
+            func += String.format(" %s", b.getText());
+        }
+
+        func += " ]";
+
+        iterator = String.format("(seq %s)",
+                this.visitExpression(ctx.c).getSingleLine());
+
+        for (JestParser.ExpressionContext d: ctx.d) {
+            iterator += String.format(" (seq %s)",
+                    this.visitExpression(d).getSingleLine());
+        }
+
+        if (ctx.LAZY() != null) {
+            lazy = true;
+        }
+
+        func += this.visitBlock(ctx.block).getSingleLine();
+
+        // AFTER
+        String code;
+        func += ") ";
+
+        if (lazy) {
+            code = "";
+        } else {
+            code = "(doall ";
+        }
+
+        code += "(map " + func + " " + iterator + ")";
+
+        if (!lazy) code += ")";
+
+        return Code.singleLine(code);
+    }
+
+
+    @Override
+    public Code visitBlock(JestParser.BlockContext ctx) {
+
+        if (ctx.expression != null) {
+            return this.visitExpression(ctx.expression);
+        }
+
+        else if (ctx.term != null) {
+            String code = "";
+            for (JestParser.StatementTermContext term: ctx.term) {
+                code += String.format(" %s",
+                        this.visitStatementTerm(term).getSingleLine());
+            }
+            return Code.singleLine(code);
+        }
+
+        else if (ctx.scope != null) {
+            String code = "";
+            for (JestParser.VarScopeContext scope: ctx.scope) {
+                code += String.format(" %s",
+                        this.visitVarScope(scope).getSingleLine());
+            }
+            return Code.singleLine(code);
+        }
+
+        else {
+            throw new BadSource(ctx);
+        }
+
+    }
+
 }
