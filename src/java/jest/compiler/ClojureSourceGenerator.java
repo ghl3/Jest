@@ -611,7 +611,28 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         else {
             throw new BadSource(ctx);
         }
+    }
 
+
+    @Override
+    public Code visitVarScope(JestParser.VarScopeContext ctx) {
+
+        String code = String.format("(let [");
+
+        for (int i=0; i < ctx.name.size(); ++i) {
+            String name = ctx.name.get(i).getText();
+            String expr = this.visitExpression(ctx.exp.get(i)).getSingleLine();
+            code += String.format(" %s %s", name, expr);
+        }
+        code += " ]";
+
+        for (JestParser.StatementTermContext term: ctx.terms) {
+            code += String.format(" %s",
+                    this.visitStatementTerm(term).getSingleLine());
+        }
+        code += ")";
+
+        return Code.singleLine(code);
     }
 
 }

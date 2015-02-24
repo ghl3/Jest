@@ -320,8 +320,8 @@ block returns [String code]
 http://clojure.github.io/core.typed/#clojure.core.typed/let
 */
 varScope returns [String code]
-    :  {$code="(let [";} (LET name=ID '=' exp=expression SEMICOLON {$code+=" "+$name.text+" "+$exp.code;})+ {$code+=" ]";}
-        (statementTerm {$code+=" "+$statementTerm.code;})* {$code+=")";}
+    :  {$code="(let [";} (LET name+=ID '=' exp+=expression SEMICOLON /*{$code+=" "+$name.text+" "+$exp.code;}*/)+ {$code+=" ]";}
+        (terms+=statementTerm {$code+=" "+$statementTerm.code;})* {$code+=")";}
     ;
 
 /* NEW SCOPE */
