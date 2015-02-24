@@ -6,6 +6,7 @@ import java.util.List;
 import jest.grammar.JestParser;
 import jest.grammar.JestBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 
@@ -297,6 +298,52 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
 
     @Override
+    public Code visitMemberGetChain(JestParser.MemberGetChainContext ctx) {
+        if (ctx.PERIOD() != null) {
+            String code = String.format("(:%s %s)",
+                    ctx.a.getText(),
+                    this.visitMemberGet(ctx.memberGet()).getSingleLine());
+            return Code.singleLine(code);
+        } else {
+            return this.visitMemberGet(ctx.memberGet());
+        }
+    }
+
+    @Override
+    public Code visitMemberGet(JestParser.MemberGetContext ctx) {
+        String code = String.format("(:%s %s)",
+                ctx.member.getText(),
+                ctx.record.getText());
+        return Code.singleLine(code);
+    }
+
+
+    @Override
+    public Code visitRecordConstructor(JestParser.RecordConstructorContext ctx) {
+        if (ctx.name == null) {
+            String code = String.format("(->%s %s)",
+                    ctx.ID,
+                    this.visitMethodParams(ctx.methodParams()).getSingleLine());
+            return Code.singleLine(code);
+        } else {
+            String code = String.format("(map->%s {", ctx.name.getText());
+            code += String.format(":%s %s",
+                    ctx.firstKey.getText(),
+                    this.visitExpression(ctx.firstExp).getSingleLine());
+
+            for (int i=0; i < ctx.key.size(); ++i) {
+                String key = ctx.key.get(i).getText();
+                String expr = this.visitExpression(ctx.exp.get(i)).getSingleLine();
+                code += String.format(" :%s %s", key, expr);
+            }
+            code += "})";
+
+            return Code.singleLine(code);
+        }
+    }
+
+
+    @Override
     public Code visitExpressionList(JestParser.ExpressionListContext ctx) {
 
         String code = this.visitExpression(ctx.a).getSingleLine();
@@ -307,6 +354,71 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
         return Code.singleLine(code);
     }
+
+
+    @Override
+    public Code visitTypeAnnotation(JestParser.TypeAnnotationContext ctx) {
+
+        String code;
+
+        if (ctx.typeleft != null) {
+            code = String.format("%s %s",
+                    ctx.typeleft.getText(),
+                    ctx.num.getText());
+        }
+
+        else if (ctx.thing != null) {
+            code = String.format("(%s)",
+                    ctx.thing.getText());
+        }
+
+        else if (ctx.container != null) {
+            code = String.format("(t/%s [", ctx.container.getText());
+            for (JestParser.TypeAnnotationContext annotation: ctx.inner) {
+                code += " " + this.visitTypeAnnotation(annotation).getSingleLine();
+            }
+            code += "])";
+        }
+
+        // TODO - Double Block
+
+        else {
+            throw new BadSource(ctx);
+        }
+
+        return Code.singleLine(code);
+    }
+
+
+    @Override
+    public Code visitFuncTypeAnnotation(JestParser.FuncTypeAnnotationContext ctx) {
+
+        String code = this.visitTypeAnnotation(ctx.first).getSingleLine();
+
+        for (JestParser.TypeAnnotationContext annotation: ctx.typeAnnotation()) {
+            code += " " + this.visitTypeAnnotation(annotation).getSingleLine();
+        }
+
+        return Code.singleLine(code);
+    }
+
+
+    @Override
+    public Code visitLambda(JestParser.LambdaContext ctx) {
+
+        String expression = this.visitExpression(ctx.expression).getSingleLine();
+
+        String code;
+
+        if (expression.length() > 2 && expression.matches("[(].*[)]")) { //get(0)=="(" && $expression.code.get(expressions.length()-1)==")") {
+            code="#"+expression;
+        } else {
+            code="#("+expression+")";
+        }
+
+        return Code.singleLine(code);
+    }
+
 
 
     @Override
@@ -325,6 +437,53 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
                 ctx.functionDefParams.code,
                 ctx.block().code);
 
+        return Code.singleLine(code);
+    }
+
+
+    @Override
+    public Code visitMethodDef(JestParser.MethodDefContext ctx) {
+
+        String annotation = "";
+
+        if (ctx.typeAnnotation() != null) {
+            annotation = String.format("(t/ann %s [%s ->%s])\n",
+                    ctx.name.getText(),
+                    this.visitFuncTypeAnnotation(ctx.a).getSingleLine(),
+                    this.visitTypeAnnotation(ctx.c).getSingleLine());
+        }
+
+        String code = String.format("(%s [%s ] %s)",
+                ctx.name.getText(),
+                this.visitFunctionDefParams(ctx.functionDefParams()),
+                this.visitBlock(ctx.block).getSingleLine());
+
+       return Code.singleLine(annotation+code);
+    }
+
+
+    @Override
+    public Code visitFunctionDefParams(JestParser.FunctionDefParamsContext ctx) {
+
+        if (ctx.first == null) {
+            return Code.singleLine("");
+        }
+
+        else {
+            String code = String.format(" %s", ctx.first.getText());
+            for (Token rest: ctx.rest) {
+                code += String.format(" %s", rest.getText());
+            }
+            return Code.singleLine(code);
+        }
+    }
+
+    @Override
+    public Code visitFunctionCall(JestParser.FunctionCallContext ctx) {
+
+        String code = String.format("(%s %s)",
+                ctx.ID().getText(),
+                this.visitMethodParams(ctx.methodParams()).getSingleLine());
         return Code.singleLine(code);
     }
 
@@ -354,7 +513,6 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
 
         return Code.singleLine(code);
-
     }
 
 
@@ -362,7 +520,9 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     public Code visitMethodParams(JestParser.MethodParamsContext ctx) {
 
         if (ctx.expressionList != null) {
-            return this.visitExpressionList(ctx.expressionList());
+            String code = String.format(" %s",
+                    this.visitExpressionList(ctx.expressionList()).getSingleLine());
+            return Code.singleLine(code);
         }
 
         else if (ctx.expression() != null) {

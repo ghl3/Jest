@@ -55,3 +55,15 @@
   (test-visitor
     "y.foobar().bar();"
     ["(bar (foobar y) )"]))
+
+
+(deftest lambda-test-1
+  (test-visitor
+    "def myFunc = #(%+%);"
+    ["(def myFunc #(+ % %))"]))
+
+
+(deftest function-call-test-1
+  (test-visitor
+    "foo(a, b, c);"
+    ["(foo a b c)"]))

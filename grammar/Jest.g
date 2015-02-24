@@ -165,7 +165,7 @@ memberGet returns [String code]
 recordConstructor returns [String code]
     : NEW ID methodParams {$code="(->"+$ID.text+$methodParams.code+")";}
     | NEW name=ID {$code="(map->"+$name.text+" {";}
-         '(' firstKey=ID COLON firstExp=expression {$code+=":"+$firstKey.text+" "+$firstExp.code;} (COMMA key=ID COLON exp=expression {$code+=" :"+$key.text+" "+$exp.code;})+ ')'
+         '(' firstKey=ID COLON firstExp=expression {$code+=":"+$firstKey.text+" "+$firstExp.code;} (COMMA key+=ID COLON exp+=expression /*{$code+=" :"+$key.text+" "+$exp.code;}*/)+ ')'
           {$code+="})";}
     ;
 
@@ -183,23 +183,23 @@ typeAnnotation returns [String code]
     | '#' type=ID  {$code="t/" + $type.text;}
     | typeleft=ID num=NUMBER  {$code=$typeleft.text + " " + $num.text;}
     | '(' thing=typeAnnotation ')'  {$code = "(" + $thing.code + ")";}
-    | container=ID {$code = "(t/" + $container.text;} '[' (inner=typeAnnotation {$code += " " + $inner.code;})+ ']' {$code += ")";}
+    | container=ID {$code = "(t/" + $container.text;} '[' (inner+=typeAnnotation /*{$code += " " + $inner.code;}*/)+ ']' {$code += ")";}
         /* This is a bit of a hack to get nested containers to work */
-        /* The issue is that in jest: HVec[[(?) (?) (?)]] coudl be parsed */
+        /* The issue is that in jest: HVec[[(?) (?) (?)]] could be parsed */
         /* by allowing a '[' typeAnnotation ']' branch, but this breaks */
         /* the jest container branch style below */
-    | container=ID {$code = "(t/" + $container.text + " [";} '[[' (inner=typeAnnotation {$code += " " + $inner.code;})+ ']]' {$code += "])";}
+    | container=ID {$code = "(t/" + $container.text + " [";} '[[' (inner+=typeAnnotation /*{$code += " " + $inner.code;}*/)+ ']]' {$code += "])";}
     ;
 
 funcTypeAnnotation returns [String code]
-    : first=typeAnnotation {$code = $first.code;} (next=typeAnnotation {$code += " " + $next.code;})*
+    : first=typeAnnotation {$code = $first.code;} (next+=typeAnnotation /*{$code += " " + $next.code;}*/)*
     ;
 
 
 /*
 Lambda must have a '%' somewhere in the expression
 If the expression is a function call, we unwrap the
-external paranthese so it is:
+external parentheses so it is:
 #(func % %)
 and not
 #((func % %))
@@ -247,7 +247,7 @@ methodDef returns [String code]
 
 functionDefParams returns [String code]
     : '(' ')' { $code = "";}
-    | '(' first=ID {$code = " "+$first.text;} (COMMA rest=ID {$code += " " + $rest.text;})* ')'
+    | '(' first=ID {$code = " "+$first.text;} (COMMA rest+=ID /*{$code += " " + $rest.text;}*/)* ')'
     ;
 
 
