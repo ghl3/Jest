@@ -92,16 +92,23 @@ public class JestCompiler {
     }
 
 
-    public static List<String> compileToClojureVisitor(ParseTree tree) {
+    public static List<String> parseSourceFileVisitor(ParseTree tree) {
         ClojureSourceGenerator clojureSourceGenerator = new ClojureSourceGenerator();
         Code code = clojureSourceGenerator.visit(tree);
         return code.getLines();
     }
 
-    public static List<String> compileToClojureVisitor(String source) {
+    public static List<String> parseSourceFileVisitor(String source) {
         ParseTree tree = compileSourceCodeToAst(source);
         //validateAst(tree);
-        return compileToClojureVisitor(tree);
+        return parseSourceFileVisitor(tree);
     }
+
+    public static List<String> parseSourceFileVisitor(String source, boolean validate) {
+        ParseTree tree = compileSourceCodeToAst(source);
+        //validateAst(tree);
+        return parseSourceFileVisitor(tree);
+    }
+
 
 }

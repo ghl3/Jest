@@ -11,8 +11,8 @@
    clojure expressions.
    Runs correctness validation checks by
    default "
-  ([code] (. JestCompiler (parseSourceFile code)))
-  ([code validate?] (. JestCompiler (parseSourceFile code validate?))))
+  ([code] (. JestCompiler (parseSourceFileVisitor code)))
+  ([code validate?] (. JestCompiler (parseSourceFileVisitor code validate?))))
 
 
 (defn parse-expression [code]

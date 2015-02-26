@@ -7,7 +7,7 @@
 
 (defn test-visitor
   [source expected-lines]
-  (let [clojure (. JestCompiler compileToClojureVisitor source)]
+  (let [clojure (. JestCompiler parseSourceFileVisitor source)]
     (test-jest-vs-clojure clojure expected-lines)))
 
 
