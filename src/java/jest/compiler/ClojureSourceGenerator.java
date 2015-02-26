@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import jest.grammar.JestParser;
 import jest.grammar.JestBaseVisitor;
+import jest.grammar.JestParser.MethodDefContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -354,7 +355,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     public Code visitRecordConstructor(JestParser.RecordConstructorContext ctx) {
         if (ctx.name == null) {
             String code = String.format("(->%s %s)",
-                    ctx.ID,
+                    ctx.ID.getText(),
                     this.visitMethodParams(ctx.methodParams()).getSingleLine());
             return Code.singleLine(code);
         } else {
@@ -487,7 +488,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
         String code = String.format("(%s [%s ] %s)",
                 ctx.name.getText(),
-                this.visitFunctionDefParams(ctx.functionDefParams()),
+                this.visitFunctionDefParams(ctx.functionDefParams()).getSingleLine(),
                 this.visitBlock(ctx.block).getSingleLine());
 
        return Code.singleLine(annotation+code);
@@ -513,7 +514,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitFunctionCall(JestParser.FunctionCallContext ctx) {
 
-        String code = String.format("(%s %s)",
+        String code = String.format("(%s%s)",
                 ctx.ID().getText(),
                 this.visitMethodParams(ctx.methodParams()).getSingleLine());
         return Code.singleLine(code);
@@ -523,25 +524,49 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitRecordDef(JestParser.RecordDefContext ctx) {
 
+        //Integer numProtocols = ctx.IMPLEMENTS().size();
+        //Integer numMembers = ctx.ID().size() - numProtocols;
+
         List<String> ids = Lists.newArrayList();
-
-        Integer numProtocols = ctx.IMPLEMENTS().size();
-        Integer numMembers = ctx.ID().size() - numProtocols;
-
-        // TODO: Does this loop over too many ids?
-        for (TerminalNode id: ctx.ID().subList(0, numMembers)) {
-            ids.add(id.getText());
+        ids.add(ctx.first.getText());
+        for (Token field: ctx.field) {
+            ids.add(field.getText());
         }
 
-        String fields = Joiner.on(",").join(ids);
+        String fields = Joiner.on(" ").join(ids);
 
         String code = String.format("(defrecord %s [%s]",
                 ctx.name.getText(), fields);
+
+
+        for (JestParser.ImplementationDefContext protocolImp: ctx.implementationDef()) {
+            code += String.format("\n%s",
+                    this.visitImplementationDef(protocolImp).getSingleLine());
+        }
+        /*
+        for (int i=0; i < ctx.protocol.size(); ++i) {
+            code += String.format("\n%s", protocol.get(i).getText());
+        }
 
         if (ctx.protocol != null) {
            for (TerminalNode protocol: ctx.ID().subList(numMembers, numMembers + numProtocols)) {
                code += String.format("\n%s", protocol.getText());
            }
+        }
+*/
+        code += ")";
+
+        return Code.singleLine(code);
+    }
+
+    @Override
+    public Code visitImplementationDef(JestParser.ImplementationDefContext ctx) {
+
+        String code = ctx.protocol.getText();
+
+        for (JestParser.MethodDefContext methodDef: ctx.methodDef()) {
+            code += String.format("\n%s",
+                    this.visitMethodDef(methodDef).getSingleLine());
         }
 
         return Code.singleLine(code);

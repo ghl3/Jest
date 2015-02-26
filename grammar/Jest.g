@@ -258,13 +258,18 @@ functionCall returns [String code]
 
 recordDef returns [String code]
     : RECORD name=ID '{' {$code="(defrecord " + $name.text + " [";}
-        first=ID SEMICOLON {$code += $first.text;} (field=ID SEMICOLON{$code += " "+$field.text;})* {$code += "]";}
+        first=ID SEMICOLON {$code += $first.text;} (field+=ID SEMICOLON /*{$code += " "+$field.text;}*/)* {$code += "]";}
 
 
-        (IMPLEMENTS protocol=ID {$code += "\n"+$protocol.text;} '{'(method=methodDef {$code += "\n"+$method.code;})*'}')*
+        (imp+=implementationDef)*
 
         '}' {$code += ")";}
     ;
+
+
+implementationDef
+     : IMPLEMENTS protocol=ID '{' (method+=methodDef)* '}'
+     ;
 
 /*
  Parameter for a function or method call
