@@ -30,7 +30,7 @@ sourceCode returns [List<String> codeList]
 importStatement returns [String code]
 @init{$code = "(import '"; }
 @after{$code += ")"; }
-    : IMPORT a=ID {$code += $a.text;} (PERIOD b=ID {$code += "." + $b.text;} )*
+    : IMPORT a=ID {$code += $a.text;} (PERIOD b+=ID /*{$code += "." + $b.text;}*/ )*
     ;
 
 // A statementTerm is a statement followed
@@ -81,14 +81,14 @@ comparisonExpression returns [String code]
 
 arithmeticExpression returns [String code]
 @init{$code = ""; }
-    : a=arithmeticTerm {$code = $a.code;} ( PLUS {$code = "(+ " + $code + " ";} | MINUS {$code = "(- " + $code + " ";} ) b=arithmeticTerm {$code += $b.code + ")";}
-    | a=arithmeticTerm {$code = $a.code;}
+    : a=arithmeticTerm {$code = $a.code;} ( ( op+=PLUS {$code = "(+ " + $code + " ";} | op+=MINUS {$code = "(- " + $code + " ";} ) b+=arithmeticTerm /*{$code += $b.code + ")";}*/ )*
+    /*| a=arithmeticTerm {$code = $a.code;}*/
     ;
 
 arithmeticTerm returns [String code]
 @init{$code = ""; }
-    : a=expressionComposed {$code = $a.code;} ( MULT {$code = "(* " + $code + " ";} | DIV {$code = "(/ " + $code + " ";} ) b=expressionComposed {$code += $b.code + ")";}
-    | a=expressionComposed {$code = $a.code;}
+    : a=expressionComposed {$code = $a.code;} ( ( op+=MULT {$code = "(* " + $code + " ";} | op+=DIV {$code = "(/ " + $code + " ";} ) b+=expressionComposed /*{$code += $b.code + ")";}*/ )*
+    /*| a=expressionComposed {$code = $a.code;}*/
     ;
 
 expressionComposed returns [String code]

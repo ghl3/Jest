@@ -72,8 +72,9 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     public Code visitImportStatement(JestParser.ImportStatementContext ctx) {
 
         String code = "(import '";
-        for (TerminalNode node : ctx.ID()) {
-            code += node.getText();
+        code += ctx.a.getText();
+        for (Token token : ctx.b) {
+            code += "." + token.getText();
         }
         code += ")";
 
@@ -120,7 +121,9 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     public Code visitComparisonExpression(JestParser.ComparisonExpressionContext ctx) {
         if (ctx.op != null) {
             String code = String.format("(%s %s %s)",
-                    ctx.op.getText(), ctx.a, ctx.b);
+                    ctx.op.getText(),
+                    this.visitArithmeticExpression(ctx.a).getSingleLine(),
+                    this.visitArithmeticExpression(ctx.b).getSingleLine());
             return Code.singleLine(code);
         } else {
             return this.visitArithmeticExpression(ctx.a);
@@ -131,21 +134,49 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitArithmeticExpression(JestParser.ArithmeticExpressionContext ctx) {
 
-        if (ctx.b != null) {
-            String a = this.visitArithmeticTerm(ctx.a).getSingleLine();
+        String code = this.visitArithmeticTerm(ctx.a).getSingleLine();;
+
+        for (int i=0; i < ctx.b.size(); ++i) {
+
+            code = String.format("(%s %s %s)",
+                    ctx.op.get(i).getText(),
+                    code,
+                    this.visitArithmeticTerm(ctx.b.get(i)).getSingleLine());
+            /*
+            String a =
             String b = this.visitArithmeticTerm(ctx.b).getSingleLine();
             String code = String.format("(%s %s %s)",
                     ctx.PLUS() != null ? ctx.PLUS() : ctx.MINUS(),
-                   a, b);
-            return Code.singleLine(code);
-        } else {
-            return this.visitArithmeticTerm(ctx.a);
+                   a, b);*/
         }
+        return Code.singleLine(code);
+
     }
 
 
     @Override
     public Code visitArithmeticTerm(JestParser.ArithmeticTermContext ctx) {
+
+
+
+        String code = this.visitExpressionComposed(ctx.a).getSingleLine();;
+
+        for (int i=0; i < ctx.b.size(); ++i) {
+
+            code = String.format("(%s %s %s)",
+                    ctx.op.get(i).getText(),
+                    code,
+                    this.visitExpressionComposed(ctx.b.get(i)).getSingleLine());
+            /*
+            String a =
+            String b = this.visitArithmeticTerm(ctx.b).getSingleLine();
+            String code = String.format("(%s %s %s)",
+                    ctx.PLUS() != null ? ctx.PLUS() : ctx.MINUS(),
+                   a, b);*/
+        }
+        return Code.singleLine(code);
+
+        /*
         if (ctx.b != null) {
             String a = this.visitExpressionComposed(ctx.a).getSingleLine();
             String b = this.visitExpressionComposed(ctx.b).getSingleLine();
@@ -156,6 +187,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         } else {
             return this.visitExpressionComposed(ctx.a);
         }
+        */
     }
 
 
@@ -434,8 +466,8 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
         code += String.format("(defn %s [%s ] %s)",
                 ctx.name.getText(),
-                ctx.functionDefParams.code,
-                ctx.block().code);
+                this.visitFunctionDefParams(ctx.functionDefParams()).getSingleLine(), //.code,
+                this.visitBlock(ctx.block()).getSingleLine());
 
         return Code.singleLine(code);
     }
