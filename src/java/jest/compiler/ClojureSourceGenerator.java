@@ -220,7 +220,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
                 .getSingleLine();
 
         if (ctx.PERIOD() != null) {
-            String code = String.format("(%s %s %s)",
+            String code = String.format("(%s %s%s)",
                     ctx.a.getText(),
                     methodCallChain,
                     this.visitMethodParams(ctx.b).getSingleLine());
@@ -228,7 +228,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
 
         else if (ctx.ARROW() != null) {
-            String code = String.format("(%s %s %s)",
+            String code = String.format("(%s%s %s)",
                     ctx.c.getText(),
                     this.visitMethodParams(ctx.d).getSingleLine(),
                     methodCallChain);
@@ -583,7 +583,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
 
         else if (ctx.expression() != null) {
-            return this.visitExpression(ctx.expression());
+            return Code.singleLine(" " + this.visitExpression(ctx.expression()).getSingleLine());
         }
 
         else {
@@ -738,7 +738,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     public Code visitClojureGet(JestParser.ClojureGetContext ctx) {
         String code = String.format("(get %s %s)",
                 ctx.a.getText(),
-                this.visitExpression(ctx.b));
+                this.visitExpression(ctx.b).getSingleLine());
         return Code.singleLine(code);
     }
 
