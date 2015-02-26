@@ -73,3 +73,15 @@
   (test-visitor
     "for (a: lst) { println(a); };"
     ["(doall (map (fn [ a ] (println a)) (seq lst)))"]))
+
+
+(deftest vec-test-2
+  (test-visitor
+    "def x = [1, 2];"
+    ["(def x [1, 2])"]))
+
+
+(deftest map-test-2
+  (test-visitor
+    "def mp = {a:1, b:2};"
+    ["(def mp {a 1 b 2})"]))

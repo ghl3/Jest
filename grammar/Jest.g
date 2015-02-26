@@ -368,14 +368,14 @@ clojureVector returns [String code]
 @init{$code = "["; }
 @after{$code += "]"; }
     : '[' ']'
-    | '[' a=expression {$code += $a.code;} (COMMA WS? b=expression {$code += ", " + $b.code;})* ']'
+    | '[' a=expression {$code += $a.code;} (COMMA WS? b+=expression /*{$code += ", " + $b.code;}*/)* ']'
     ;
 
 clojureMap returns [String code]
 @init{$code = "{"; }
 @after{$code += "}"; }
     : '{' '}'
-    | '{' a=expression COLON b=expression {$code += $a.code + " " + $b.code;} (COMMA WS? c=expression COLON d=expression {$code += " " + $c.code + " " + $d.code;})* '}'
+    | '{' a=expression COLON b=expression {$code += $a.code + " " + $b.code;} (COMMA WS? c+=expression COLON d+=expression /*{$code += " " + $c.code + " " + $d.code;}*/)* '}'
     ;
 
 clojureGet returns [String code]

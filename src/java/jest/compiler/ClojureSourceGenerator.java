@@ -635,4 +635,55 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         return Code.singleLine(code);
     }
 
+
+    @Override
+    public Code visitClojureVector(JestParser.ClojureVectorContext ctx) {
+
+        if (ctx.a != null) {
+            String code = "[";
+            code += this.visitExpression(ctx.a).getSingleLine();
+
+            for (JestParser.ExpressionContext expression: ctx.b) {
+                code += ", " + this.visitExpression(expression).getSingleLine();
+            }
+
+            code += "]";
+            return Code.singleLine(code);
+        } else {
+            return Code.singleLine("[]");
+        }
+    }
+
+
+
+    @Override
+    public Code visitClojureMap(JestParser.ClojureMapContext ctx) {
+
+        if (ctx.a != null) {
+            String code = "{";
+            code += this.visitExpression(ctx.a).getSingleLine();
+            code += " " + this.visitExpression(ctx.b).getSingleLine();
+
+            for (int i=0; i < ctx.c.size(); ++i) {
+                code += " " + this.visitExpression(ctx.c.get(i)).getSingleLine();
+                code += " " + this.visitExpression(ctx.d.get(i)).getSingleLine();
+            }
+
+            code += "}";
+            return Code.singleLine(code);
+        } else {
+            return Code.singleLine("{}");
+        }
+    }
+
+
+    @Override
+    public Code visitClojureGet(JestParser.ClojureGetContext ctx) {
+        String code = String.format("(get %s %s)",
+                ctx.a.getText(),
+                this.visitExpression(ctx.b));
+        return Code.singleLine(code);
+    }
+
+
 }
