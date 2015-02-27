@@ -1,8 +1,10 @@
 package jest.compiler;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Map;
 import jest.grammar.JestParser;
 import jest.grammar.JestBaseVisitor;
 import jest.grammar.JestParser.MethodDefContext;
@@ -118,11 +120,23 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     }
 
 
+    public static final Map<String, String> comparisonOverrideMap = ImmutableMap.of(
+            "==", "=");
+
     @Override
     public Code visitComparisonExpression(JestParser.ComparisonExpressionContext ctx) {
         if (ctx.op != null) {
+
+            String clojureOp;
+            if (comparisonOverrideMap.containsKey(ctx.op.getText())) {
+                clojureOp = comparisonOverrideMap.get(ctx.op.getText());
+            } else {
+                clojureOp = ctx.op.getText();
+            }
+
+
             String code = String.format("(%s %s %s)",
-                    ctx.op.getText(),
+                    clojureOp,
                     this.visitArithmeticExpression(ctx.a).getSingleLine(),
                     this.visitArithmeticExpression(ctx.b).getSingleLine());
             return Code.singleLine(code);
@@ -333,9 +347,15 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitMemberGetChain(JestParser.MemberGetChainContext ctx) {
         if (ctx.PERIOD() != null) {
-            String code = String.format("(:%s %s)",
-                    ctx.a.getText(),
-                    this.visitMemberGet(ctx.memberGet()).getSingleLine());
+
+            String code = this.visitMemberGet(ctx.memberGet()).getSingleLine();
+
+            for (Token token: ctx.a) {
+                code = String.format("(:%s %s)",
+                        token.getText(),
+                        code);
+            }
+
             return Code.singleLine(code);
         } else {
             return this.visitMemberGet(ctx.memberGet());
@@ -690,6 +710,58 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         code += ")";
 
         return Code.singleLine(code);
+    }
+
+
+    @Override
+    public Code visitConditional(JestParser.ConditionalContext ctx) {
+
+        List<String> conditions = Lists.newArrayList();
+        List<String> results = Lists.newArrayList();
+
+        String code;
+
+        conditions.add(ctx.ifCondition.code);
+        results.add(ctx.iftrue.code);
+
+        for (int i=0; i < ctx.elifExpression.size(); ++i) {
+            conditions.add(this.visitExpression(ctx.elifExpression.get(i)).getSingleLine());
+            results.add(this.visitBlock(ctx.elifBlock.get(i)).getSingleLine());
+        }
+
+        if (ctx.elseBlock != null) {
+            results.add(this.visitBlock(ctx.elseBlock).getSingleLine());
+        }
+
+        if (conditions.size()==results.size()) {
+            if (conditions.size()==1) {
+                code = "(if " + conditions.get(0) + " " + results.get(0) + ")";
+            } else {
+                code = "(cond ";
+                for (int i=0; i < conditions.size(); ++i) {
+                    code += "\n" + conditions.get(i) + " " + results.get(i);
+                }
+                code += ")";
+            }
+        } else if (conditions.size()+1 == results.size()) {
+            // If we have 1 more result than condition, the
+            // final result is a guaranteed 'else'
+            if (conditions.size()==1) {
+                code = "(if " + conditions.get(0) + " " + results.get(0) + " " + results.get(1) +")";
+            } else {
+                code = "(cond ";
+                for (int i=0; i < conditions.size(); ++i) {
+                    code += "\n" + conditions.get(i) + " " + results.get(i);
+                }
+                code += "\n :else " + results.get(results.size()-1) + ")";
+            }
+        } else {
+            code = "WTF!!!";
+        }
+
+
+        return Code.singleLine(code);
+
     }
 
 

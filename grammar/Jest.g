@@ -152,7 +152,7 @@ expressionAtom returns [String code]
 
 
 memberGetChain returns [String code]
-    : memberGet {$code=$memberGet.code;} (PERIOD a=ID {$code="(:"+$a.text+" "+$code+")";})+
+    : memberGet {$code=$memberGet.code;} (PERIOD a+=ID /*{$code="(:"+$a.text+" "+$code+")";}*/)+
     | memberGet {$code=$memberGet.code;}
     ;
 
@@ -364,7 +364,7 @@ conditional returns [String code]
     }
 }
     : IF '(' ifCondition=expression ')' iftrue=block {conditions.add($ifCondition.code);results.add($iftrue.code);}
-      (ELIF '(' elifExpression=expression ')' elifBlock=block {conditions.add($elifExpression.code);results.add($elifBlock.code);})*
+      (ELIF '(' elifExpression+=expression ')' elifBlock+=block /*{conditions.add($elifExpression.code);results.add($elifBlock.code);}*/)*
        (ELSE elseBlock=block {results.add($elseBlock.code);})?
     ;
 
