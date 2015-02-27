@@ -179,16 +179,16 @@ expressionList returns [List<String> codeList]
    and remove the hash notation to prefix that by hand*/
 
 typeAnnotation returns [String code]
-    : type=ID  {$code=$type.text;}
-    | '#' type=ID  {$code="t/" + $type.text;}
+    : singleType=ID  /*{$code=$type.text;}*/
+    | '#' hashType=ID  /*{$code="t/" + $type.text;}*/
     | typeleft=ID num=NUMBER  {$code=$typeleft.text + " " + $num.text;}
     | '(' thing=typeAnnotation ')'  {$code = "(" + $thing.code + ")";}
-    | container=ID {$code = "(t/" + $container.text;} '[' (inner+=typeAnnotation /*{$code += " " + $inner.code;}*/)+ ']' {$code += ")";}
+    | container=ID '[' (inner+=typeAnnotation)+ ']'
         /* This is a bit of a hack to get nested containers to work */
         /* The issue is that in jest: HVec[[(?) (?) (?)]] could be parsed */
         /* by allowing a '[' typeAnnotation ']' branch, but this breaks */
         /* the jest container branch style below */
-    | container=ID {$code = "(t/" + $container.text + " [";} '[[' (inner+=typeAnnotation /*{$code += " " + $inner.code;}*/)+ ']]' {$code += "])";}
+    | doubleContainer=ID '[[' (doubleInner+=typeAnnotation)+ ']]'
     ;
 
 funcTypeAnnotation returns [String code]

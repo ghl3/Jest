@@ -412,7 +412,15 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
         String code;
 
-        if (ctx.typeleft != null) {
+        if (ctx.singleType != null){
+            code = String.format("%s", ctx.singleType.getText());
+        }
+
+        else if (ctx.hashType != null){
+            code = String.format("t/%s", ctx.hashType.getText());
+        }
+
+        else if (ctx.typeleft != null) {
             code = String.format("%s %s",
                     ctx.typeleft.getText(),
                     ctx.num.getText());
@@ -424,11 +432,13 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
 
         else if (ctx.container != null) {
-            code = String.format("(t/%s [", ctx.container.getText());
-            for (JestParser.TypeAnnotationContext annotation: ctx.inner) {
-                code += " " + this.visitTypeAnnotation(annotation).getSingleLine();
+
+            code = String.format("(t/%s ", ctx.container.getText());
+
+            for (JestParser.TypeAnnotationContext inner: ctx.inner) {
+                code += " " + this.visitTypeAnnotation(inner).getSingleLine();
             }
-            code += "])";
+            code += ")";
         }
 
         // TODO - Double Block
@@ -446,7 +456,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
         String code = this.visitTypeAnnotation(ctx.first).getSingleLine();
 
-        for (JestParser.TypeAnnotationContext annotation: ctx.typeAnnotation()) {
+        for (JestParser.TypeAnnotationContext annotation: ctx.next) {
             code += " " + this.visitTypeAnnotation(annotation).getSingleLine();
         }
 
@@ -480,7 +490,9 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         if (ctx.funcTypeAnnotation() != null) {
             //code += this.visitTypeAnnotation(ctx.typeAnnotation()).getSingleLine() + "\n";
             code += String.format("(t/ann %s [%s -> %s])\n",
-                    ctx.name.getText(), ctx.funcTypeAnnotation().code, ctx.typeAnnotation().code);
+                    ctx.name.getText(),
+                    this.visitFuncTypeAnnotation(ctx.funcTypeAnnotation()).getSingleLine(),
+                    this.visitTypeAnnotation(ctx.typeAnnotation()).getSingleLine());
         }
 
         code += String.format("(defn %s [%s ] %s)",
