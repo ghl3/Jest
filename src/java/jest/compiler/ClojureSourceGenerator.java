@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.Map;
 import jest.grammar.JestParser;
 import jest.grammar.JestBaseVisitor;
-import jest.grammar.JestParser.MethodDefContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 
 public class ClojureSourceGenerator extends JestBaseVisitor<Code> {

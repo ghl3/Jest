@@ -51,10 +51,10 @@
     ["(def g (foobar a))"]))
 
 
-(deftest method-test-1
+(deftest method-test-2
   (test-visitor
     "y.foobar().bar();"
-    ["(bar (foobar y) )"]))
+    ["(bar (foobar y))"]))
 
 
 (deftest lambda-test-1
