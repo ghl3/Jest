@@ -188,7 +188,7 @@ typeAnnotation returns [String code]
         /* The issue is that in jest: HVec[[(?) (?) (?)]] could be parsed */
         /* by allowing a '[' typeAnnotation ']' branch, but this breaks */
         /* the jest container branch style below */
-    | doubleContainer=ID '[[' (doubleInner+=typeAnnotation)+ ']]'
+    | nestedContainer=ID '[[' (nestedInner+=typeAnnotation)+ ']]'
     ;
 
 funcTypeAnnotation returns [String code]

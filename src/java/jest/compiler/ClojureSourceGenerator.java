@@ -99,16 +99,18 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitDefAssignment(JestParser.DefAssignmentContext ctx) {
 
-        String code = "";
+        String annotation = "";
 
-        if (ctx.typeAnnotation() != null) {
-            code += this.visitTypeAnnotation(ctx.typeAnnotation()).getSingleLine() + "\n";
+        if (ctx.type != null) {
+            annotation = String.format("(t/ann %s %s)\n",
+                    ctx.name.getText(),
+                    this.visitTypeAnnotation(ctx.type).getSingleLine());
         }
 
-        code += String.format("(def %s %s)",
+        String code = String.format("(def %s %s)",
                 ctx.name.getText(), this.visitExpression(ctx.expression()).getSingleLine());
 
-        return Code.singleLine(code);
+        return Code.singleLine(annotation+code);
     }
 
 
@@ -428,7 +430,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
         else if (ctx.thing != null) {
             code = String.format("(%s)",
-                    ctx.thing.getText());
+                    this.visitTypeAnnotation(ctx.thing).getSingleLine());
         }
 
         else if (ctx.container != null) {
@@ -439,6 +441,16 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
                 code += " " + this.visitTypeAnnotation(inner).getSingleLine();
             }
             code += ")";
+        }
+
+        else if (ctx.nestedContainer != null) {
+
+            code = String.format("(t/%s [", ctx.nestedContainer.getText());
+
+            for (JestParser.TypeAnnotationContext inner: ctx.nestedInner) {
+                code += " " + this.visitTypeAnnotation(inner).getSingleLine();
+            }
+            code += "])";
         }
 
         // TODO - Double Block
