@@ -31,14 +31,20 @@ public class Validator extends JestBaseListener {
         }
     }
 
-    public class AlreadyDeclared extends RuntimeException {
+    public class ValidationError extends RuntimeException {
+        public ValidationError(String message) {
+            super(message);
+        }
+    }
+
+    public class AlreadyDeclared extends ValidationError {
         public AlreadyDeclared(Token token) {
             super(String.format("Error - Line %s: Already declared variable with name: %s",
                                 token.getLine(), token.getText()));
         }
     }
 
-    public class NotDeclared extends RuntimeException {
+    public class NotDeclared extends ValidationError {
         public NotDeclared(Token token) {
             super(String.format("Error - Line %s: Attempting to use variable %s that has not been declared",
                                 token.getLine(), token.getText()));
