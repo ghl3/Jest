@@ -57,7 +57,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
             return this.visitStatement(ctx.statement());
         } else if (ctx.functionDef() != null) {
             return this.visitFunctionDef(ctx.functionDef());
-        } else if (ctx.recordDef != null) {
+        } else if (ctx.recordDef() != null) {
             return this.visitRecordDef(ctx.recordDef());
         } else if (ctx.block() != null) {
             return this.visitBlock(ctx.block());
@@ -227,7 +227,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     public Code visitMethodCallChain(JestParser.MethodCallChainContext ctx) {
 
         if (ctx.methodCall() != null) {
-            return this.visitMethodCall(ctx.methodCall);
+            return this.visitMethodCall(ctx.methodCall());
         }
 
         String methodCallChain = this.visitMethodCallChain(ctx.methodCallChain())
@@ -373,9 +373,9 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
     @Override
     public Code visitRecordConstructor(JestParser.RecordConstructorContext ctx) {
-        if (ctx.name == null) {
+        if (ctx.firstKey == null) {
             String code = String.format("(->%s %s)",
-                    ctx.ID.getText(),
+                    ctx.name.getText(),
                     this.visitMethodParams(ctx.methodParams()).getSingleLine());
             return Code.singleLine(code);
         } else {
@@ -479,7 +479,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitLambda(JestParser.LambdaContext ctx) {
 
-        String expression = this.visitExpression(ctx.expression).getSingleLine();
+        String expression = this.visitExpression(ctx.expression()).getSingleLine();
 
         String code;
 
@@ -531,7 +531,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         String code = String.format("(%s [%s ] %s)",
                 ctx.name.getText(),
                 this.visitFunctionDefParams(ctx.functionDefParams()).getSingleLine(),
-                this.visitBlock(ctx.block).getSingleLine());
+                this.visitBlock(ctx.block()).getSingleLine());
 
        return Code.singleLine(annotation+code);
     }
@@ -618,7 +618,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitMethodParams(JestParser.MethodParamsContext ctx) {
 
-        if (ctx.expressionList != null) {
+        if (ctx.expressionList() != null) {
             String code = String.format(" %s",
                     this.visitExpressionList(ctx.expressionList()).getSingleLine());
             return Code.singleLine(code);
@@ -662,7 +662,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
             lazy = true;
         }
 
-        func += this.visitBlock(ctx.block).getSingleLine();
+        func += this.visitBlock(ctx.block()).getSingleLine();
 
         // AFTER
         String code;
@@ -685,8 +685,8 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitBlock(JestParser.BlockContext ctx) {
 
-        if (ctx.expression != null) {
-            return this.visitExpression(ctx.expression);
+        if (ctx.expression() != null) {
+            return this.visitExpression(ctx.expression());
         }
 
         else if (ctx.term != null) {
@@ -743,8 +743,8 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
 
         String code;
 
-        conditions.add(ctx.ifCondition.code);
-        results.add(ctx.iftrue.code);
+        conditions.add(this.visitExpression(ctx.ifCondition).getSingleLine());
+        results.add(this.visitBlock(ctx.iftrue).getSingleLine());
 
         for (int i=0; i < ctx.elifExpression.size(); ++i) {
             conditions.add(this.visitExpression(ctx.elifExpression.get(i)).getSingleLine());

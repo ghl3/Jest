@@ -18,82 +18,55 @@ package jest.grammar;
 
 // A file is a list of statements
 // followed by an EOF
-sourceCode returns [List<String> codeList]
-@init{
-    $codeList = new ArrayList<String>();
-}
-    : (importStatement SEMICOLON {$codeList.add($importStatement.code);} WS?)*
-      (statementTerm {$codeList.add($statementTerm.code);} WS?)*
+sourceCode
+    : (importStatement SEMICOLON WS?)*
+      (statementTerm WS?)*
         EOF
     ;
 
-importStatement returns [String code]
-@init{$code = "(import '"; }
-@after{$code += ")"; }
-    : IMPORT a=ID {$code += $a.text;} (PERIOD b+=ID /*{$code += "." + $b.text;}*/ )*
+importStatement
+    : IMPORT a=ID (PERIOD b+=ID)*
     ;
 
 // A statementTerm is a statement followed
 // by a semicolon
-statementTerm returns [String code]
-    : statement SEMICOLON {$code = $statement.code;}
-    | functionDef {$code = $functionDef.code; }
-    | recordDef {$code = $recordDef.code; }
-    | block {$code = $block.code; }
-    | varScope {$code = $varScope.code; }
+statementTerm
+    : statement SEMICOLON
+    | functionDef
+    | recordDef
+    | block
+    | varScope
     ;
 
-statement returns [String code]
-    : expression {$code = $expression.code; }
-    | defAssignment {$code = $defAssignment.code; }
+statement
+    : expression
+    | defAssignment
     ;
 
-defAssignment returns [String code]
-@init{
-    String annotation = "";
-}
-@after {
-    $code = annotation + $code;
-}
-    : DEF name=ID
-      (COLON type=typeAnnotation {annotation = "(t/ann " + $name.text + " " + $type.code +  ")\n";})?
-      '=' expression { $code = "(def " + $name.text + " " + $expression.code + ")"; }
+defAssignment
+    : DEF name=ID (COLON type=typeAnnotation)? '=' expression
     ;
 
-
-expression returns [String code]
-    : comparisonExpression {$code = $comparisonExpression.code; }
+expression
+    : comparisonExpression
     ;
 
-
-comparisonExpression returns [String code]
-    : a=arithmeticExpression {$code=$a.code;}
-    (op=(GT | LT | GTEQ | LTEQ | CPEQ) b=arithmeticExpression {$code="("+$op.text+" "+$a.code+" "+$b.code+")";})?
-/*
-    | a=arithmeticExpression {$code=$a.code;} (LT b=arithmeticExpression {$code="(< "+$a.code+" "+$b.code+")";})?
-    | a=arithmeticExpression {$code=$a.code;} (GTEQ b=arithmeticExpression {$code="(>= "+$a.code+" "+$b.code+")";})?
-    | a=arithmeticExpression {$code=$a.code;} (LTEQ b=arithmeticExpression {$code="(<= "+$a.code+" "+$b.code+")";})?
-    | a=arithmeticExpression {$code=$a.code;} (CPEQ b=arithmeticExpression {$code="(= "+$a.code+" "+$b.code+")";})?
-    */
-    | a=arithmeticExpression {$code=$a.code;}
+comparisonExpression
+    : a=arithmeticExpression (op=(GT | LT | GTEQ | LTEQ | CPEQ) b=arithmeticExpression)?
+    | a=arithmeticExpression
     ;
 
-
-arithmeticExpression returns [String code]
-@init{$code = ""; }
-    : a=arithmeticTerm {$code = $a.code;} ( ( op+=PLUS {$code = "(+ " + $code + " ";} | op+=MINUS {$code = "(- " + $code + " ";} ) b+=arithmeticTerm /*{$code += $b.code + ")";}*/ )*
-    /*| a=arithmeticTerm {$code = $a.code;}*/
+arithmeticExpression
+    : a=arithmeticTerm ( ( op+=PLUS | op+=MINUS ) b+=arithmeticTerm)*
     ;
 
-arithmeticTerm returns [String code]
-@init{$code = ""; }
-    : a=expressionComposed {$code = $a.code;} ( ( op+=MULT {$code = "(* " + $code + " ";} | op+=DIV {$code = "(/ " + $code + " ";} ) b+=expressionComposed /*{$code += $b.code + ")";}*/ )*
-    /*| a=expressionComposed {$code = $a.code;}*/
+arithmeticTerm
+    : a=expressionComposed ( (op+=MULT | op+=DIV) b+=expressionComposed)*
     ;
 
-expressionComposed returns [String code]
-    : methodCallChain{$code=$methodCallChain.code;}
-    | expressionAtom {$code=$expressionAtom.code;}
+expressionComposed
+    : methodCallChain
+    | expressionAtom
     ;
 
 
@@ -103,21 +76,15 @@ obj.func(x, y, z) <--> func(obj, x, y, z)
 They can take any expression atom and transform it
 into a function call on that atom
 */
-
-methodCallChain returns [String code]
-    : methodCall {$code=$methodCall.code;}
-    | chain=methodCallChain {$code=$chain.code;}
-        (
-            PERIOD a=ID b=methodParams {$code="("+$a.text+" "+$code+$b.code+")";} |
-            ARROW c=ID d=methodParams {$code="("+$c.text+$d.code+" "+$code+")";}
-        )
+methodCallChain
+    : methodCall
+    | chain=methodCallChain (PERIOD a=ID b=methodParams | ARROW c=ID d=methodParams)
     ;
 
-methodCall returns [String code]
-    : obj=expressionAtom PERIOD func=ID methodParams { $code = "(" + $func.text + " " + $obj.code + $methodParams.code + ")"; }
-    | obj=expressionAtom ARROW func=ID methodParams { $code = "(" + $func.text + $methodParams.code + " " + $obj.code + ")"; }
+methodCall
+    : obj=expressionAtom PERIOD func=ID methodParams
+    | obj=expressionAtom ARROW func=ID methodParams
     ;
-
 
 /*
 An expression atom is an undividable component
@@ -127,62 +94,52 @@ to create more complicated expressions
 (The obvious exception is the final line, but that
 is present to make the code simpler)
 */
-
-expressionAtom returns [String code]
-    : NUMBER {$code = $NUMBER.text;}
-    | TRUE {$code = $TRUE.text; }
-    | FALSE {$code = $FALSE.text; }
-    | NIL {$code = $NIL.text; }
-    | ID {$code = $ID.text; }
-    | STRING {$code = $STRING.text; }
-    | SYMBOL {$code = $SYMBOL.text; }
-    | clojureVector {$code = $clojureVector.code; }
-    | clojureMap {$code = $clojureMap.code; }
-    | functionCall {$code = $functionCall.code; }
-    | clojureGet {$code = $clojureGet.code; }
-    | forLoop {$code = $forLoop.code; }
-    | conditional {$code = $conditional.code; }
-    | lambda {$code=$lambda.code;}
-    | memberGetChain {$code=$memberGetChain.code;}
-    | recordConstructor {$code=$recordConstructor.code;}
-    | block {$code=$block.code;}
-    | '(' expression ')' {$code = $expression.code; }
+expressionAtom
+    : NUMBER
+    | TRUE
+    | FALSE
+    | NIL
+    | ID
+    | STRING
+    | SYMBOL
+    | clojureVector
+    | clojureMap
+    | functionCall
+    | clojureGet
+    | forLoop
+    | conditional
+    | lambda
+    | memberGetChain
+    | recordConstructor
+    | block
+    | '(' expression ')'
     ;
 
-
-
-memberGetChain returns [String code]
-    : memberGet {$code=$memberGet.code;} (PERIOD a+=ID /*{$code="(:"+$a.text+" "+$code+")";}*/)+
-    | memberGet {$code=$memberGet.code;}
+memberGetChain
+    : memberGet (PERIOD a+=ID)+
+    | memberGet
     ;
 
-
-memberGet returns [String code]
-    : record=ID PERIOD member=ID { $code = "(:" + $member.text + " " + $record.text + ")";}
+memberGet
+    : record=ID PERIOD member=ID
     ;
 
-
-recordConstructor returns [String code]
-    : NEW ID methodParams {$code="(->"+$ID.text+$methodParams.code+")";}
-    | NEW name=ID {$code="(map->"+$name.text+" {";}
-         '(' firstKey=ID COLON firstExp=expression {$code+=":"+$firstKey.text+" "+$firstExp.code;} (COMMA key+=ID COLON exp+=expression /*{$code+=" :"+$key.text+" "+$exp.code;}*/)+ ')'
-          {$code+="})";}
+recordConstructor
+    : NEW name=ID methodParams
+    | NEW name=ID '(' firstKey=ID COLON firstExp=expression (COMMA key+=ID COLON exp+=expression)+ ')'
     ;
 
-
-expressionList returns [List<String> codeList]
-@init{$codeList = new ArrayList<String>();}
-    :  a=expression {$codeList.add($a.code);} (COMMA b+=expression /*{ $codeList.add($b.code);}*/)+
+expressionList
+    :  a=expression (COMMA b+=expression)+
     ;
 
 /* Consider adding '/t' as a prefix to all of these
    and remove the hash notation to prefix that by hand*/
-
-typeAnnotation returns [String code]
-    : singleType=ID  /*{$code=$type.text;}*/
-    | '#' hashType=ID  /*{$code="t/" + $type.text;}*/
-    | typeleft=ID num=NUMBER  {$code=$typeleft.text + " " + $num.text;}
-    | '(' thing=typeAnnotation ')'  {$code = "(" + $thing.code + ")";}
+typeAnnotation
+    : singleType=ID
+    | '#' hashType=ID
+    | typeleft=ID num=NUMBER
+    | '(' thing=typeAnnotation ')'
     | container=ID '[' (inner+=typeAnnotation)+ ']'
         /* This is a bit of a hack to get nested containers to work */
         /* The issue is that in jest: HVec[[(?) (?) (?)]] could be parsed */
@@ -191,10 +148,9 @@ typeAnnotation returns [String code]
     | nestedContainer=ID '[[' (nestedInner+=typeAnnotation)+ ']]'
     ;
 
-funcTypeAnnotation returns [String code]
-    : first=typeAnnotation {$code = $first.code;} (next+=typeAnnotation /*{$code += " " + $next.code;}*/)*
+funcTypeAnnotation
+    : first=typeAnnotation (next+=typeAnnotation)*
     ;
-
 
 /*
 Lambda must have a '%' somewhere in the expression
@@ -204,68 +160,37 @@ external parentheses so it is:
 and not
 #((func % %))
 */
-lambda returns [String code]
-    : '#(' expression ')' {
-            if ($expression.code.length() > 2 && $expression.code.matches("[(].*[)]")) { //get(0)=="(" && $expression.code.get(expressions.length()-1)==")") {
-                $code="#"+$expression.code;
-            } else {
-                $code="#("+$expression.code+")";
-            }
-        }
+lambda
+    : '#(' expression ')' ;
+
+/* NEW SCOPE */
+functionDef
+    : DEFN name=ID functionDefParams (COLON a=funcTypeAnnotation ARROW c=typeAnnotation)? block (SEMICOLON)?
     ;
 
 /* NEW SCOPE */
-functionDef returns [String code]
-@init{
-    String annotation = "";
-}
-@after{
-    $code = annotation + $code;
-}
-    : DEFN name=ID {$code="(defn "+$name.text;}
-            functionDefParams {$code += " ["+$functionDefParams.code+" ]";}
-        (COLON {annotation = "(t/ann " + $name.text + " [";} a=funcTypeAnnotation { annotation += $a.code + " ";}
-         ARROW c=typeAnnotation {annotation += "-> " + $c.code + "])\n";})?
-         block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
-    ;
-
-/* NEW SCOPE */
-methodDef returns [String code]
-@init{
-    String annotation = "";
-}
-@after{
-    $code = annotation + $code;
-}
-    : DEFN name=ID {$code="("+$name.text;}
-            functionDefParams {$code += " ["+$functionDefParams.code+" ]";}
-        (COLON {annotation = "(t/ann " + $name.text + " [";} a=funcTypeAnnotation { annotation += $a.code + " ";}
-         ARROW c=typeAnnotation {annotation += "-> " + $c.code + "])\n";})?
-         block {$code+=$block.code;} (SEMICOLON)? {$code+=")";}
+methodDef
+    : DEFN name=ID functionDefParams (COLON a=funcTypeAnnotation ARROW c=typeAnnotation)? block (SEMICOLON)?
     ;
 
 
-functionDefParams returns [String code]
-    : '(' ')' { $code = "";}
-    | '(' first=ID {$code = " "+$first.text;} (COMMA rest+=ID /*{$code += " " + $rest.text;}*/)* ')'
+functionDefParams
+    : '(' ')'
+    | '(' first=ID (COMMA rest+=ID)* ')'
     ;
 
 
-functionCall returns [String code]
-    : ID methodParams { $code = "(" + $ID.text + $methodParams.code + ")"; }
+functionCall
+    : ID methodParams
     ;
 
 
-recordDef returns [String code]
-    : RECORD name=ID '{' {$code="(defrecord " + $name.text + " [";}
-        first=ID SEMICOLON {$code += $first.text;} (field+=ID SEMICOLON /*{$code += " "+$field.text;}*/)* {$code += "]";}
-
-
+recordDef
+    : RECORD name=ID '{'
+        first=ID SEMICOLON (field+=ID SEMICOLON)*
         (imp+=implementationDef)*
-
-        '}' {$code += ")";}
+        '}'
     ;
-
 
 implementationDef
      : IMPLEMENTS protocol=ID '{' (method+=methodDef)* '}'
@@ -278,113 +203,52 @@ implementationDef
  directly added to any previous text
 */
 
-methodParams returns [String code]
-    : '(' ')' { $code = "";}
-    | '(' expressionList ')' {
-            $code = "";
-            for(int i=0; i < $expressionList.codeList.size(); ++i) {
-                $code += " " +$expressionList.codeList.get(i);
-            }
-        }
-    | '(' expression ')' { $code = " " + $expression.code; }
+methodParams
+    : '(' ')'
+    | '(' expressionList ')'
+    | '(' expression ')'
     ;
 
 /* NEW SCOPE */
-forLoop returns [String code]
-@init{
-    String func = "(fn ";
-    String iterator = "";
-    Boolean lazy = false;
-}
-@after{
-    func += ") ";
-
-    if (lazy) {
-      $code = "";
-    } else {
-      $code = "(doall ";
-    }
-
-    $code += "(map " + func + " " + iterator + ")";
-
-    if (!lazy) $code += ")";
-}
-    : FOR '(' a=ID {func += "[ " + $a.text;} (COMMA b+=ID /*{func += " " + $b.text;}*/)* {func += " ]";}
-      COLON c=expression {iterator = "(seq " + $c.code + ")";} (COMMA d+=expression /*{iterator += " (seq " + $d.code + ")";}*/)* ')'
-      (LAZY {lazy=true;})? block { func += $block.code;}
+forLoop
+    : FOR '(' a=ID (COMMA b+=ID )* COLON c=expression (COMMA d+=expression)* ')' (LAZY)? block
     ;
 
 /* NEW SCOPE */
-block returns [String code]
-    : '{' expression {$code=$expression.code;} '}'
-    | '{' {$code="";} (term+=statementTerm {$code+=" "+$statementTerm.code;})+ '}'
-    | '{' {$code="";} (scope+=varScope {$code+=" "+$varScope.code;})+ '}'
+block
+    : '{' expression '}'
+    | '{' (term+=statementTerm)+ '}'
+    | '{' (scope+=varScope)+ '}'
     ;
 
 /* TODO: add typing using the core.typed let macro:
 http://clojure.github.io/core.typed/#clojure.core.typed/let
 */
-varScope returns [String code]
-    :  {$code="(let [";} (LET name+=ID '=' exp+=expression SEMICOLON /*{$code+=" "+$name.text+" "+$exp.code;}*/)+ {$code+=" ]";}
-        (terms+=statementTerm {$code+=" "+$statementTerm.code;})* {$code+=")";}
+varScope
+    : (LET name+=ID '=' exp+=expression SEMICOLON)+
+      (terms+=statementTerm )*
     ;
 
 /* NEW SCOPE */
-conditional returns [String code]
-@init{
-    List<String> conditions = new ArrayList<String>();
-    List<String> results = new ArrayList<String>();
-}
-@after{
-
-    if (conditions.size()==results.size()) {
-        if (conditions.size()==1) {
-            $code = "(if " + conditions.get(0) + " " + results.get(0) + ")";
-        } else {
-            $code = "(cond ";
-            for (int i=0; i < conditions.size(); ++i) {
-                $code += "\n" + conditions.get(i) + " " + results.get(i);
-            }
-            $code += ")";
-        }
-    } else if (conditions.size()+1 == results.size()) {
-        // If we have 1 more result than condition, the
-        // final result is a guaranteed 'else'
-        if (conditions.size()==1) {
-            $code = "(if " + conditions.get(0) + " " + results.get(0) + " " + results.get(1) +")";
-        } else {
-            $code = "(cond ";
-            for (int i=0; i < conditions.size(); ++i) {
-                $code += "\n" + conditions.get(i) + " " + results.get(i);
-            }
-            $code += "\n :else " + results.get(results.size()-1) + ")";
-        }
-    } else {
-        $code = "WTF!!!";
-    }
-}
-    : IF '(' ifCondition=expression ')' iftrue=block {conditions.add($ifCondition.code);results.add($iftrue.code);}
-      (ELIF '(' elifExpression+=expression ')' elifBlock+=block /*{conditions.add($elifExpression.code);results.add($elifBlock.code);}*/)*
-       (ELSE elseBlock=block {results.add($elseBlock.code);})?
+conditional
+    : IF '(' ifCondition=expression ')' iftrue=block
+      (ELIF '(' elifExpression+=expression ')' elifBlock+=block)*
+      (ELSE elseBlock=block)?
     ;
 
 
-clojureVector returns [String code]
-@init{$code = "["; }
-@after{$code += "]"; }
+clojureVector
     : '[' ']'
-    | '[' a=expression {$code += $a.code;} (COMMA WS? b+=expression /*{$code += ", " + $b.code;}*/)* ']'
+    | '[' a=expression (COMMA WS? b+=expression)* ']'
     ;
 
-clojureMap returns [String code]
-@init{$code = "{"; }
-@after{$code += "}"; }
+clojureMap
     : '{' '}'
-    | '{' a=expression COLON b=expression {$code += $a.code + " " + $b.code;} (COMMA WS? c+=expression COLON d+=expression /*{$code += " " + $c.code + " " + $d.code;}*/)* '}'
+    | '{' a=expression COLON b=expression (COMMA WS? c+=expression COLON d+=expression)* '}'
     ;
 
-clojureGet returns [String code]
-    : a=ID '[' b=expression ']' {$code = "(get " + $a.text + " " + $b.code + ")";}
+clojureGet
+    : a=ID '[' b=expression ']'
     ;
 
 

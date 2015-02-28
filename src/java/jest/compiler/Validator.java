@@ -45,9 +45,9 @@ public class Validator extends JestBaseListener {
     }
 
     public class NotDeclared extends ValidationError {
-        public NotDeclared(Token token) {
+        public NotDeclared(TerminalNode token) {
             super(String.format("Error - Line %s: Attempting to use variable %s that has not been declared",
-                                token.getLine(), token.getText()));
+                                token.getSymbol().getLine(), token.getText()));
         }
     }
 
@@ -86,7 +86,7 @@ public class Validator extends JestBaseListener {
         Scope functionScope = createNewScope(scopes);
 
         // TODO: Include the function parameters in the current scope
-        JestParser.FunctionDefParamsContext params = ctx.functionDefParams;
+        JestParser.FunctionDefParamsContext params = ctx.functionDefParams();
 
         for (TerminalNode node: params.ID()) {
             currentScope().addToScope(node.getText(), node);
@@ -128,7 +128,7 @@ public class Validator extends JestBaseListener {
         Scope functionScope = createNewScope(scopes);
 
         // TODO: Include the function parameters in the current scope
-        JestParser.FunctionDefParamsContext params = ctx.functionDefParams;
+        JestParser.FunctionDefParamsContext params = ctx.functionDefParams();
 
         for (TerminalNode node: params.ID()) {
             currentScope().addToScope(node.getText(), node);
@@ -206,17 +206,17 @@ public class Validator extends JestBaseListener {
 
         // If the expression is a variable, ensure the variable
         // has been declared
-        if (ctx.ID != null) {
-            if (!currentScope().isInScope(ctx.ID.getText())) {
-                throw new NotDeclared(ctx.ID);
+        if (ctx.ID() != null) {
+            if (!currentScope().isInScope(ctx.ID().getText())) {
+                throw new NotDeclared(ctx.ID());
             }
         }
     }
 
     @Override
     public void enterFunctionCall(JestParser.FunctionCallContext ctx) {
-        if (!currentScope().isInScope(ctx.ID.getText())) {
-            throw new NotDeclared(ctx.ID);
+        if (!currentScope().isInScope(ctx.ID().getText())) {
+            throw new NotDeclared(ctx.ID());
         }
     }
 }
