@@ -5,14 +5,24 @@
 (import 'jest.compiler.JestCompiler)
 
 
+(defn validate-source-file
+  ""
+  [code] (. JestCompiler (validateSourceCode code)))
+
+
 (defn parse-source-file
   "Parse a string representing a full
    jest source file and return a list of
    clojure expressions.
    Runs correctness validation checks by
    default "
-  ([code] (. JestCompiler (parseSourceFileVisitor code)))
-  ([code validate?] (. JestCompiler (parseSourceFileVisitor code validate?))))
+  ([code] (. JestCompiler (parseSourceFile code)))
+  ([code validate?]
+   (if (or (not validate?) (validate-source-file code))
+     (parse-source-file code)
+     nil)))
+;;   (. JestCompiler (parseSourceFile code validate?))))
+
 
 
 (defn parse-expression [code]
@@ -20,11 +30,11 @@
   expression and return a clojure expression"
   (. JestCompiler (parseExpression code)))
 
-
-(defn create-ast
-  "Get the AST"
-  [program]
-  (. JestCompiler (compileSourceCodeToAst program)))
+;
+;(defn create-ast
+;  "Get the AST"
+;  [program]
+;  (. JestCompiler (compileSourceCodeToAst program)))
 
 
 (defn add-additional-code
