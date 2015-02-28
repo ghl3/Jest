@@ -5,36 +5,30 @@
 (import 'jest.compiler.JestCompiler)
 
 
-(defn validate-source-file
-  ""
-  [code] (. JestCompiler (validateSourceCode code)))
+(defn validate-source-code
+  "Validate jest source code, returning
+  true if it is valid and false if invalid"
+  [jest-code] (. JestCompiler (validateSourceCode jest-code)))
 
 
-(defn parse-source-file
+(defn parse-source-code
   "Parse a string representing a full
    jest source file and return a list of
    clojure expressions.
    Runs correctness validation checks by
    default "
-  ([code] (. JestCompiler (parseSourceFile code)))
-  ([code validate?]
-   (if (or (not validate?) (validate-source-file code))
-     (parse-source-file code)
+  ([jest-code] (. JestCompiler (parseSourceFile jest-code)))
+  ([jest-code validate?]
+   (if (or (not validate?) (validate-source-code jest-code))
+     (parse-source-code jest-code)
      nil)))
-;;   (. JestCompiler (parseSourceFile code validate?))))
 
 
-
-(defn parse-expression [code]
+(defn parse-expression
   "Parse a string representing a jest
   expression and return a clojure expression"
-  (. JestCompiler (parseExpression code)))
-
-;
-;(defn create-ast
-;  "Get the AST"
-;  [program]
-;  (. JestCompiler (compileSourceCodeToAst program)))
+  [jest-expression]
+  (. JestCompiler (parseExpression jest-expression)))
 
 
 (defn add-additional-code
@@ -57,7 +51,7 @@
   code to complete the Jest->Clojure translation"
   ([jest-code] (get-clojure jest-code false))
   ([jest-code add-additional?]
-     (let [raw-clojure-list (parse-source-file jest-code)
+     (let [raw-clojure-list (parse-source-code jest-code)
            raw-clojure (str/join "\n" raw-clojure-list)]
        (if add-additional?
          (add-additional-code raw-clojure)
@@ -85,7 +79,7 @@
 (defn print-jest [jest-code]
   "Evaluate the given jest code and
   return the value"
-  (doall (map println (parse-source-file jest-code))))
+  (doall (map println (parse-source-code jest-code))))
 
 
 (defn eval-jest [jest-code]
@@ -98,11 +92,6 @@
   "Take a list of strings representing jest source code statements
   and evaluate them all sequentially."
   (eval-clojure (get-clojure jest-code true)))
-
-
-;;(defn type-check-jest [jest-code]
-;;  "Type check the given jest source code"
-;;  (type-check-clojure (parse-source-file jest-code)))
 
 
 (defn type-check-jest [jest-code]

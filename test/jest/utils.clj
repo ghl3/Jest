@@ -40,7 +40,7 @@
   compiles into the given clojure code"
   ([jest clojure] (test-code jest clojure false))
   ([jest clojure validate?]
-     (let [code-list (parse-source-file jest validate?)]
+     (let [code-list (parse-source-code jest validate?)]
        (test-println "\nJest: ")
        (test-println jest)
        (test-println "Clojure: ")
