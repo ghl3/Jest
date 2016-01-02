@@ -19,7 +19,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
         }
     }
 
-    public class BadSource extends ClojureSourceGeneratorException {
+    public static class BadSource extends ClojureSourceGeneratorException {
         public BadSource(ParserRuleContext context) {
             super(String.format("Error - %s", getLineInfo(context)));
         }

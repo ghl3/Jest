@@ -16,6 +16,6 @@
 
 (deftest native-test-1
 
-  (let [jest-src-string "import Foo;\n import Bar;  let foo=12;"
+  (let [jest-src-string "import foo.Bar; import foo.Baz; def foo=12;"
         clj-form (jest->clojure jest-src-string)]
     (println clj-form)))
