@@ -30,7 +30,7 @@
                  [lein-cljfmt "0.1.4"]]
 
   :main jest.jest
-  :aot [jest.jest]
+  :aot [jest.compiler.NativeJestCompiler jest.jest]
 
   ;; Typed configs
   :core.typed {:check [jest.test]}

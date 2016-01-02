@@ -1,6 +1,7 @@
 (ns jest.parser
   (:require [clojure.core.typed :as t]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [jest.compiler.NativeJestCompiler]))
 
 (import 'jest.compiler.JestCompiler)
 

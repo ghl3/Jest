@@ -10,7 +10,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import jest.grammar.*;
 
-
 public class JestCompiler {
 
 

@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [jest.parser :refer :all]
             [clojure.string :as string]
-            [environ.core :refer [env]]))
+            [environ.core :refer [env]])
+  (:import (clojure.lang ExceptionInfo)))
 
 
 (defn test-println [& log]
@@ -87,7 +88,7 @@
   ([clojure-code correct?]
      (if correct?
        (is (type-check-clojure clojure-code))
-       (is (thrown? clojure.lang.ExceptionInfo (type-check-clojure clojure-code))))))
+       (is (thrown? ExceptionInfo (type-check-clojure clojure-code))))))
 
 
 (defn test-clojure-type-equals
@@ -113,7 +114,7 @@
   ([jest-code correct?]
      (if correct?
        (is (type-check-jest jest-code))
-       (is (thrown? clojure.lang.ExceptionInfo (type-check-jest jest-code))))))
+       (is (thrown? ExceptionInfo (type-check-jest jest-code))))))
 
 
 (defn test-jest-type-equals
