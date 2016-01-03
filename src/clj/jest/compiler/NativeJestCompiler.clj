@@ -26,8 +26,13 @@
 
 
 (defmacro self-visit
-  [name]
-  `(.. ~'this (.. ~(symbol (str "visit" (upper-first name))) (. what ~(symbol (lower-first name))))))
+  [this ctx name]
+  `(.. ~this ~(symbol (str "visit" (upper-first (str name)))) (. ~ctx ~(symbol (lower-first (str name))))))
+
+
+(defmacro get-symbol
+  [ctx variable]
+  `(symbol (.. ~ctx ~variable getText)))
 
 
 (defn obj->seq
@@ -80,17 +85,20 @@
   [this ^JestParser$StatementContext ctx]
 
   (cond
-    (. ctx expression) (.. this (visitExpression (. ctx expression)))
+    (. ctx expression)    (.. this (visitExpression (. ctx expression)))
     (. ctx defAssignment) (.. this (visitDefAssignment (. ctx defAssignment)))
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+
+
+
 
 
 (defn -visitDefAssignment
   [this ^JestParser$DefAssignmentContext ctx]
 
   (let [type (. ctx type)
-        name (symbol (.. ctx name getText))
+        name (get-symbol ctx name) ;;(symbol (.. ctx name getText))
         expr (.. this (visitExpression (. ctx expression)))]
 
     (if type (println type))
@@ -201,7 +209,7 @@
   [this ^JestParser$ExpressionAtomContext ctx]
 
   (cond
-    (. ctx NUMBER) (symbol (.. ctx NUMBER getText))
+    (. ctx NUMBER) (read-string (.. ctx NUMBER getText))
 
     (. ctx TRUE) true ;;(.. ctx TRUE getText)
 
