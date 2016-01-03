@@ -396,7 +396,7 @@
   [this ^JestParser$VarScopeContext ctx]
   (let [names (into [] (map #(symbol (. % getText)) (. ctx name)))
         vals (into [] (map #(.. this (visitExpression %)) (. ctx exp)))
-        bindings (flatten (zip names vals))
+        bindings (apply concat (zip names vals))
         expressions (into [] (map #(. this (visitStatementTerm %)) (. ctx terms)))]
     `(let [~@bindings] ~@expressions)))
 
