@@ -59,7 +59,7 @@
   (println (separator "Jest Source" 80))
   (println jest-src-str)
   (println (separator "Compiled Clojure" 80))
-  (println (jest->clojure jest-src-str))
+  (doall (map println (jest->clojure jest-src-str)))
   (println (separator 80)))
 
 (defn -main [& args]

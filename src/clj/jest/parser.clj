@@ -66,6 +66,8 @@
   and executes the clojure forms"
   [jest-source-str]
   (let [clojure-forms (jest->clojure jest-source-str)]
+    (println "Running forms")
+    (println clojure-forms)
     (dorun (map eval clojure-forms))))
 
 

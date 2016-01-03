@@ -1,6 +1,19 @@
 (ns jest.compiler.NativeJestCompiler
-  (:import (jest.grammar JestParser$SourceCodeContext JestParser$StatementTermContext JestParser$StatementContext JestParser$DefAssignmentContext
-                         JestParser$ExpressionContext JestParser$ComparisonExpressionContext JestParser$ArithmeticExpressionContext JestParser$ArithmeticTermContext JestParser$ExpressionComposedContext JestParser$MethodCallContext JestParser$MethodCallChainContext JestParser$ExpressionAtomContext JestParser$MemberGetChainContext JestParser$MemberGetContext JestParser$RecordConstructorContext JestParser$ExpressionListContext JestParser$TypeAnnotationContext JestParser$FuncTypeAnnotationContext JestParser$LambdaContext JestParser$FunctionDefContext JestParser$MethodDefContext JestParser$FunctionDefParamsContext JestParser$FunctionCallContext JestParser$RecordDefContext JestParser$ImplementationDefContext JestParser$MethodParamsContext JestParser$ForLoopContext JestParser$BlockContext JestParser$VarScopeContext JestParser$ConditionalContext JestParser$ClojureVectorContext JestParser$ClojureMapContext)
+  (:import (jest.grammar JestParser$SourceCodeContext JestParser$StatementTermContext
+                         JestParser$StatementContext JestParser$DefAssignmentContext
+                         JestParser$ExpressionContext JestParser$ComparisonExpressionContext
+                         JestParser$ArithmeticExpressionContext JestParser$ArithmeticTermContext
+                         JestParser$ExpressionComposedContext JestParser$MethodCallContext
+                         JestParser$MethodCallChainContext JestParser$ExpressionAtomContext
+                         JestParser$MemberGetChainContext JestParser$MemberGetContext
+                         JestParser$RecordConstructorContext JestParser$ExpressionListContext
+                         JestParser$TypeAnnotationContext JestParser$FuncTypeAnnotationContext
+                         JestParser$LambdaContext JestParser$FunctionDefContext JestParser$MethodDefContext
+                         JestParser$FunctionDefParamsContext JestParser$FunctionCallContext
+                         JestParser$RecordDefContext JestParser$ImplementationDefContext
+                         JestParser$MethodParamsContext JestParser$ForLoopContext
+                         JestParser$BlockContext JestParser$VarScopeContext JestParser$ConditionalContext
+                         JestParser$ClojureVectorContext JestParser$ClojureMapContext)
            (jest.compiler ClojureSourceGenerator$BadSource)
            (sun.reflect.generics.reflectiveObjects NotImplementedException))
   (:gen-class
@@ -38,7 +51,7 @@
 
 (defn obj->seq
   "Convert an object into a sequence.
-  If it is a sequence already, return the sequnce.
+  If it is a sequence already, return the sequence.
   If it's a java iterable, convert to sequence and return.
   Otherwise, create a list containing the single element
   and return that list"
@@ -136,8 +149,6 @@
     (.. this (visitArithmeticExpression (. ctx a)))))
 
 
-
-;; TODO
 (defn -visitArithmeticExpression
   [this ^JestParser$ArithmeticExpressionContext ctx]
   (reduce (fn [accum next]
@@ -150,7 +161,6 @@
           (zip (. ctx op) (. ctx b))))
 
 
-;; TODO
 (defn -visitArithmeticTerm
   [this ^JestParser$ArithmeticTermContext ctx]
 
@@ -158,7 +168,7 @@
             (let [[left right] next
                   op (symbol (. left getText))
                   term (.. this (visitExpressionComposed right))]
-              '(~op ~accum ~term)))
+              `(~op ~accum ~term)))
           (. this (visitExpressionComposed (. ctx a)))
           (zip (. ctx op) (. ctx b))))
 
@@ -167,8 +177,8 @@
   [this ^JestParser$ExpressionComposedContext ctx]
 
   (cond
-    (. ctx methodCallChain) (self-visit this ctx methodCallChain) ;;(.. this (visitMethodCallChain (. ctx methodCallChain)))
-    (. ctx expressionAtom) (self-visit this ctx expressionAtom) ;;(.. this (visitExpressionAtom (. ctx expressionAtom)))
+    (. ctx methodCallChain) (self-visit this ctx methodCallChain)
+    (. ctx expressionAtom) (self-visit this ctx expressionAtom)
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
 
@@ -178,15 +188,15 @@
 
   (cond
 
-    (. ctx methodCall) (self-visit this ctx methodCall) ;;(.. this (visitMethodCall (. ctx methodCall)))
+    (. ctx methodCall) (self-visit this ctx methodCall)
 
     (. ctx PERIOD) (let [a (.. ctx a getText)
-                         b (self-visit this ctx methodCallChain) ;;(.. this (visitMethodCallChain (. ctx methodCallChain)))
+                         b (self-visit this ctx methodCallChain)
                          params (.. this (visitMethodParams (. ctx b)))]
                      `(~a ~b ~@params))
 
     (. ctx ARROW) (let [a (.. ctx a getText)
-                        b (self-visit this ctx methodCallChain) ;;(.. this (visitMethodCallChain (. ctx methodCallChain)))
+                        b (self-visit this ctx methodCallChain)
                         params (.. this (visitMethodParams (. ctx b)))]
                     `(~a ~@params ~b))
 
@@ -197,16 +207,16 @@
   [this ^JestParser$MethodCallContext ctx]
 
   (cond
-    (. ctx PERIOD) (let [a (.. ctx func getText)
+    (. ctx PERIOD) (let [a (get-symbol ctx func)
                          b (.. this (visitExpressionAtom (. ctx obj)))
-                         params (self-visit this ctx methodParmams)] ;;(.. this (visitMethodParams (. ctx methodParams)))]
-                     (a b params))
+                         params (self-visit this ctx methodParams)]
+                     `(~a ~b ~@params))
 
 
-    (. ctx ARROW) (let [a (.. ctx func getText)
+    (. ctx ARROW) (let [a (get-symbol ctx func)
                         b (.. this (visitExpressionAtom (. ctx obj)))
-                        params (self-visit this ctx methodParams)] ;;(.. this (visitMethodParams (. ctx methodParams)))]
-                    (b a params))
+                        params (self-visit this ctx methodParams)]
+                    `(~b ~a ~@params))
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
 
@@ -217,11 +227,11 @@
   (cond
     (. ctx NUMBER) (read-string (.. ctx NUMBER getText))
 
-    (. ctx TRUE) true ;;(.. ctx TRUE getText)
+    (. ctx TRUE) true
 
-    (. ctx FALSE) false ;;(.. ctx FALSE getText)
+    (. ctx FALSE) false
 
-    (. ctx NIL) nil ;;(.. ctx NIL getText)
+    (. ctx NIL) nil
 
     (. ctx ID) (symbol (.. ctx ID getText))
 
@@ -257,12 +267,17 @@
 
 (defn -visitMemberGetChain
   [this ^JestParser$MemberGetChainContext ctx]
-  (throw (new NotImplementedException)))
+  (if (. ctx PERIOD)
+    (reduce (fn [accum next] `(~(keyword (. next getText)) ~accum))
+            (self-visit this ctx memberGet)
+            (. ctx a))
+    (self-visit this ctx memberGet)))
 
 
 (defn -visitMemberGet
   [this ^JestParser$MemberGetContext ctx]
-  (throw (new NotImplementedException)))
+  ;; TODO: Are these really "getText" calls?
+  `(~(keyword (.. ctx member getText)) ~(symbol (.. ctx record getText))))
 
 
 (defn -visitRecordConstructor
@@ -294,7 +309,18 @@
 
 (defn -visitFunctionDef
   [this ^JestParser$FunctionDefContext ctx]
-  (throw (new NotImplementedException)))
+
+  ;if (ctx.funcTypeAnnotation() != null) {
+  ;                                       code += String.format("(t/ann %s [%s -> %s])\n",
+  ;                                                              ctx.name.getText(),
+  ;                                                              this.visitFuncTypeAnnotation(ctx.funcTypeAnnotation()).getSingleLine(),
+  ;                                                              this.visitTypeAnnotation(ctx.typeAnnotation()).getSingleLine());
+  ;                                       }
+
+  `(defn
+     ~(get-symbol ctx name) ;;.. ctx name getText)
+     [~@(self-visit this ctx functionDefParams)]
+     ~@(self-visit this ctx block)))
 
 
 (defn -visitMethodDef
@@ -304,21 +330,14 @@
 
 (defn -visitFunctionDefParams
   [this ^JestParser$FunctionDefParamsContext ctx]
-  (throw (new NotImplementedException)))
+  (if (. ctx first)
+    (into [] (map #(symbol (. % getText)) (merge-items (. ctx first) (. ctx rest))))
+    '()))
 
 
 (defn -visitFunctionCall
   [this ^JestParser$FunctionCallContext ctx]
-
   `(~(get-symbol ctx ID) ~@(.. this (visitMethodParams (. ctx methodParams)))))
-  ;
-  ;String code = String.format("(%s%s)",
-  ;                             ctx.ID().getText(),
-  ;                             this.visitMethodParams(ctx.methodParams()).getSingleLine());
-  ;return Code.singleLine(code);
-  ;
-  ;
-  ;(throw (new NotImplementedException)))
 
 
 (defn -visitRecordDef
@@ -340,7 +359,7 @@
   (cond
     (. ctx expressionList) (self-visit this ctx expressionList)
     (. ctx expression)     [(self-visit this ctx expression)]
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+    :else '()))
 
 
 (defn -visitForLoop
@@ -350,7 +369,15 @@
 
 (defn -visitBlock
   [this ^JestParser$BlockContext ctx]
-  (throw (new NotImplementedException)))
+
+  (cond
+    (. ctx expression) (self-visit this ctx expression)
+
+    (. ctx term) (into [] (map #(.. this (visitStatementTerm %)) (. ctx term)))
+
+    (. ctx scope)  (map #(.. this (visitVarScope %)) (. ctx scope))
+
+    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
 
 
 (defn -visitVarScope
