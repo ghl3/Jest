@@ -18,4 +18,6 @@
 
   (let [jest-src-string "import foo.Bar; import foo.Baz; def foo=12;"
         clj-form (jest->clojure jest-src-string)]
-    (println clj-form)))
+
+    (is (= clj-form
+           ['(import foo.Bar) '(import foo.Baz) '(def foo 12)]))))

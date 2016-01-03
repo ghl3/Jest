@@ -134,7 +134,6 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
                 clojureOp = ctx.op.getText();
             }
 
-
             String code = String.format("(%s %s %s)",
                     clojureOp,
                     this.visitArithmeticExpression(ctx.a).getSingleLine(),
@@ -149,20 +148,13 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitArithmeticExpression(JestParser.ArithmeticExpressionContext ctx) {
 
-        String code = this.visitArithmeticTerm(ctx.a).getSingleLine();;
+        String code = this.visitArithmeticTerm(ctx.a).getSingleLine();
 
         for (int i=0; i < ctx.b.size(); ++i) {
-
             code = String.format("(%s %s %s)",
                     ctx.op.get(i).getText(),
                     code,
                     this.visitArithmeticTerm(ctx.b.get(i)).getSingleLine());
-            /*
-            String a =
-            String b = this.visitArithmeticTerm(ctx.b).getSingleLine();
-            String code = String.format("(%s %s %s)",
-                    ctx.PLUS() != null ? ctx.PLUS() : ctx.MINUS(),
-                   a, b);*/
         }
         return Code.singleLine(code);
 
@@ -172,9 +164,7 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitArithmeticTerm(JestParser.ArithmeticTermContext ctx) {
 
-
-
-        String code = this.visitExpressionComposed(ctx.a).getSingleLine();;
+        String code = this.visitExpressionComposed(ctx.a).getSingleLine();
 
         for (int i=0; i < ctx.b.size(); ++i) {
 
@@ -182,27 +172,8 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
                     ctx.op.get(i).getText(),
                     code,
                     this.visitExpressionComposed(ctx.b.get(i)).getSingleLine());
-            /*
-            String a =
-            String b = this.visitArithmeticTerm(ctx.b).getSingleLine();
-            String code = String.format("(%s %s %s)",
-                    ctx.PLUS() != null ? ctx.PLUS() : ctx.MINUS(),
-                   a, b);*/
         }
         return Code.singleLine(code);
-
-        /*
-        if (ctx.b != null) {
-            String a = this.visitExpressionComposed(ctx.a).getSingleLine();
-            String b = this.visitExpressionComposed(ctx.b).getSingleLine();
-            String code = String.format("(%s %s %s)",
-                    ctx.MULT() != null ? ctx.MULT() : ctx.DIV(),
-                    a, b);
-            return Code.singleLine(code);
-        } else {
-            return this.visitExpressionComposed(ctx.a);
-        }
-        */
     }
 
 
