@@ -39,27 +39,28 @@
 (defn line-break [n]
   (str/join (repeat n "=")))
 
-
 (defn pretty-print-clojure [src]
   (cljfmt/reformat-string src))
 
 
-(defn verbose-print-jest-source [source-code]
-  "Print helpful information based on the
-  input source code we're running"
+(defn- separator
+  ([] (separator 50))
+  ([n] (clojure.string/join (take n (repeat "-"))))
+  ([title n] (let [text (str " " title " ")
+                  text-len (count text)
+                  left-n (Math/ceil (/ (- n text-len) 2))
+                  right-n (- n left-n text-len)]
+              (str (separator left-n) text (separator right-n)))))
 
-  (println "\n" "Raw input source code: \n")
-  (println (line-break 20))
-  (println source-code)
-  (println (line-break 20))
 
-  (println "\n" "Translated into Clojure: \n")
-  (println (line-break 20))
-  (print-jest source-code)
-  (println (line-break 20))
-
-  (println "\n" "Program Output: \n"))
-
+(defn verbose-print-jest-source
+  ""
+  [jest-src-str]
+  (println (separator "Jest Source" 80))
+  (println jest-src-str)
+  (println (separator "Compiled Clojure" 80))
+  (println (jest->clojure jest-src-str))
+  (println (separator 80)))
 
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
@@ -75,9 +76,9 @@
 
       ;; Print some helpful output for testing/debugging
       (cond
-       (:verbose options) (exit 0 (verbose-print-jest-source source-code))
-       (:clojure options) (exit 0 (-> source-code get-clojure pretty-print-clojure))
-       (:type-check options) (exit 0 (do (println "Using Type Checking") (type-check-jest source-code))))
+        (:verbose options) (verbose-print-jest-source source-code)
+        (:clojure options) (exit 0 (-> source-code jest->clojure println))) ;;pretty-print-clojure)))
+      ;;(:type-check options) (exit 0 (do (println "Using Type Checking") (type-check-jest source-code))))
 
       ;; Run all the things!
-      (execute-jest source-code))))
+      (validate-and-execute-jest source-code))))

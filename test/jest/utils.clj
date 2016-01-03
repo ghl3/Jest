@@ -41,20 +41,25 @@
   compiles into the given clojure code"
   ([jest clojure] (test-code jest clojure false))
   ([jest clojure validate?]
-     (let [code-list (parse-source-code jest validate?)]
+
+   (if (and validate? (not (validate-source-code jest)))
+     nil
+
+     (let [code-list (jest->clojure jest)]
        (test-println "\nJest: ")
        (test-println jest)
        (test-println "Clojure: ")
        (doall (map test-println code-list))
        (test-println "")
-       (test-jest-vs-clojure clojure code-list))))
+       (test-jest-vs-clojure clojure code-list)))))
+
 
 
 (defn test-eval
   "Evaluate the jest expression and
   assert that it equals the given value"
   [jest val]
-  (let [clojure (get-clojure jest)]
+  (let [clojure (jest->clojure jest)]
     (test-println "\nJest: ")
     (test-println jest)
     (test-println "Clojure: ")
@@ -106,27 +111,27 @@
        (is (not= (type-check-clojure clojure-code) type)))))
 
 
-(defn test-jest-type-correct
-  "Takes jest code and either asserts that
-  the code is correct in terms of type or that
-  it IS NOT (based on correct?)"
-  ([jest-code] (test-jest-type-correct jest-code true))
-  ([jest-code correct?]
-     (if correct?
-       (is (type-check-jest jest-code))
-       (is (thrown? ExceptionInfo (type-check-jest jest-code))))))
+;(defn test-jest-type-correct
+;  "Takes jest code and either asserts that
+;  the code is correct in terms of type or that
+;  it IS NOT (based on correct?)"
+;  ([jest-code] (test-jest-type-correct jest-code true))
+;  ([jest-code correct?]
+;     (if correct?
+;       (is (type-check-jest jest-code))
+;       (is (thrown? ExceptionInfo (type-check-jest jest-code))))))
 
 
-(defn test-jest-type-equals
-  "Takes jest code as a string and ensures
-  that it is type correct.  It then checks the
-  resulting type against the supplied type and
-  either requires that they match or that they
-  DO NOT match (based on match?)"
-
-  ([jest-code type] (test-jest-type-equals jest-code type true))
-  ([jest-code type match?]
-     (test-jest-type-correct jest-code)
-     (if match?
-       (is (= (type-check-jest jest-code) type))
-       (is (not= (type-check-jest jest-code) type)))))
+;(defn test-jest-type-equals
+;  "Takes jest code as a string and ensures
+;  that it is type correct.  It then checks the
+;  resulting type against the supplied type and
+;  either requires that they match or that they
+;  DO NOT match (based on match?)"
+;
+;  ([jest-code type] (test-jest-type-equals jest-code type true))
+;  ([jest-code type match?]
+;     (test-jest-type-correct jest-code)
+;     (if match?
+;       (is (= (type-check-jest jest-code) type))
+;       (is (not= (type-check-jest jest-code) type)))))

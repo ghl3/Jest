@@ -1,17 +1,8 @@
 (ns jest.native.native-test
   (:require [clojure.test :refer :all]
-            [jest.utils :refer :all])
-  (:import (jest.compiler NativeJestCompiler JestCompiler)))
+            [jest.utils :refer :all]
+            [jest.parser :refer [jest->clojure]]))
 
-
-(defn jest->clojure
-  "Parse jest source code (as a string)
-  into a clojure form"
-  [jest-src-str]
-
-  (let [tree (. JestCompiler (compileSourceCodeToParseTree jest-src-str))
-        parser (new NativeJestCompiler)]
-    (.. parser (visit tree))))
 
 
 (deftest native-test-1
@@ -25,3 +16,11 @@
 
     (is (= clj-form
            ['(clojure.core/import foo.Bar) '(clojure.core/import foo.Baz) '(def foo 12)]))))
+
+
+(deftest native-test-2
+
+  (let [jest-src-string "1 + 1;"
+        clj-form (jest->clojure jest-src-string)]
+
+    (is (= clj-form ['(+ 1 1)]))))
