@@ -63,12 +63,11 @@
 (defn execute-jest
   "Takes a string of Kest source code,
   converts it into a list of clojure forms,
-  and executes the clojure forms"
+  and executes the clojure forms.
+  Returns the value of the last executed form."
   [jest-source-str]
   (let [clojure-forms (jest->clojure jest-source-str)]
-    (println "Running forms")
-    (println clojure-forms)
-    (dorun (map eval clojure-forms))))
+    (last (map eval clojure-forms))))
 
 
 (defn validate-and-execute-jest

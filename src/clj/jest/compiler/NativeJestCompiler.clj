@@ -362,9 +362,21 @@
     :else '()))
 
 
+(defn- make-seqable
+  [x]
+  `(seq ~x))
+
 (defn -visitForLoop
   [this ^JestParser$ForLoopContext ctx]
-  (throw (new NotImplementedException)))
+
+  (let [func-args (into [] (map #(symbol (. % getText)) (merge-items (. ctx a) (. ctx b))))
+        func `(fn [~@func-args] ~@(self-visit this ctx block))
+        seq-items (map #(.. this (visitExpression %)) (merge-items (. ctx c) (. ctx d)))
+        iterator (into [] (map make-seqable seq-items))]
+
+    (if (. ctx LAZY)
+      `(map ~func ~@iterator)
+      `(doall (map ~func ~@iterator)))))
 
 
 (defn -visitBlock
@@ -382,7 +394,11 @@
 
 (defn -visitVarScope
   [this ^JestParser$VarScopeContext ctx]
-  (throw (new NotImplementedException)))
+  (let [names (into [] (map #(symbol (. % getText)) (. ctx name)))
+        vals (into [] (map #(.. this (visitExpression %)) (. ctx exp)))
+        bindings (flatten (zip names vals))
+        expressions (into [] (map #(. this (visitStatementTerm %)) (. ctx terms)))]
+    `(let [~@bindings] ~@expressions)))
 
 
 (defn -visitConditional
@@ -392,14 +408,26 @@
 
 (defn -visitClojureVector
   [this ^JestParser$ClojureVectorContext ctx]
-  (throw (new NotImplementedException)))
+  (if (. ctx a)
+    (into [] (map #(.. this (visitExpression %)) (merge-items (. ctx a) (. ctx b))))
+    []))
+
+
+(defn- extract-expression-pairs
+  [this pair]
+  (let [[left right] pair]
+    [(.. this (visitExpression left))
+     (.. this (visitExpression right))]))
 
 
 (defn -visitClojureMap
   [this ^JestParser$ClojureMapContext ctx]
-  (throw (new NotImplementedException)))
+  (if (. ctx a)
+    (let [kv-pairs (zip (merge-items (. ctx a) (. ctx c)) (merge-items (. ctx b) (. ctx d)))]
+      (into (array-map) (map #(extract-expression-pairs this %) kv-pairs)))
+    {}))
 
 
 (defn -visitClojureGet
   [this JestParser$ClojureGetContext ctx]
-  (throw (new NotImplementedException)))
+  `(get ~(.. ctx a getText) ~(.. this (visitExpression (. ctx b)))))
