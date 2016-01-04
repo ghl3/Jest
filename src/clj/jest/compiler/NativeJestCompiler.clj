@@ -8,11 +8,12 @@
                          JestParser$MemberGetChainContext JestParser$MemberGetContext
                          JestParser$RecordConstructorContext JestParser$ExpressionListContext
                          JestParser$TypeAnnotationContext JestParser$FuncTypeAnnotationContext
-                         JestParser$LambdaContext JestParser$FunctionDefContext JestParser$MethodDefContext
+                         JestParser$LambdaContext JestParser$FunctionDefContext
+                         JestParser$MethodDefContext JestParser$ConditionalContext
                          JestParser$FunctionDefParamsContext JestParser$FunctionCallContext
                          JestParser$RecordDefContext JestParser$ImplementationDefContext
                          JestParser$MethodParamsContext JestParser$ForLoopContext
-                         JestParser$BlockContext JestParser$VarScopeContext JestParser$ConditionalContext
+                         JestParser$BlockContext JestParser$VarScopeContext
                          JestParser$ClojureVectorContext JestParser$ClojureMapContext)
            (jest.compiler ClojureSourceGenerator$BadSource)
            (sun.reflect.generics.reflectiveObjects NotImplementedException))
@@ -93,11 +94,11 @@
   [this ^JestParser$StatementTermContext ctx]
 
   (cond
-    (. ctx statement)   (self-visit this ctx statement) ;;(.. this (visitStatement (. ctx statement)))
-    (. ctx functionDef) (self-visit this ctx functionDef) ;;(.. this (visitFunctionDef (. ctx functionDef)))
-    (. ctx recordDef)   (self-visit this ctx recordDef)  ;;(.. this (visitRecordDef (. ctx recordDef)))
-    (. ctx block)       (self-visit this ctx block) ;;(.. this (visitBlock (. ctx block)))
-    (. ctx varScope)    (self-visit this ctx varScope) ;;(.. this (visitVarScope (. ctx varScope)))
+    (. ctx statement)   (self-visit this ctx statement)
+    (. ctx functionDef) (self-visit this ctx functionDef)
+    (. ctx recordDef)   (self-visit this ctx recordDef)
+    (. ctx block)       (self-visit this ctx block)
+    (. ctx varScope)    (self-visit this ctx varScope)
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
 
@@ -106,8 +107,8 @@
   [this ^JestParser$StatementContext ctx]
 
   (cond
-    (. ctx expression)    (self-visit this ctx expression) ;;(.. this (visitExpression (. ctx expression)))
-    (. ctx defAssignment) (self-visit this ctx defAssignment) ;;(.. this (visitDefAssignment (. ctx defAssignment)))
+    (. ctx expression)    (self-visit this ctx expression)
+    (. ctx defAssignment) (self-visit this ctx defAssignment)
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
 
@@ -116,8 +117,8 @@
   [this ^JestParser$DefAssignmentContext ctx]
 
   (let [type (. ctx type)
-        name (get-symbol ctx name) ;;(symbol (.. ctx name getText))
-        expr (self-visit this ctx expression)] ;;(.. this (visitExpression (. ctx expression)))]
+        name (get-symbol ctx name)
+        expr (self-visit this ctx expression)]
 
     (if type (println type))
     `(def ~name ~expr)))
@@ -126,7 +127,6 @@
 (defn -visitExpression
   [this ^JestParser$ExpressionContext ctx]
   (self-visit this ctx comparisonExpression))
-  ;;(.. this (visitComparisonExpression (. ctx comparisonExpression))))
 
 
 (def comparison-override-map {"==", "="})
@@ -318,7 +318,7 @@
   ;                                       }
 
   `(defn
-     ~(get-symbol ctx name) ;;.. ctx name getText)
+     ~(get-symbol ctx name)
      [~@(self-visit this ctx functionDefParams)]
      ~@(self-visit this ctx block)))
 
