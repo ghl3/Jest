@@ -14,7 +14,7 @@
                          JestParser$RecordDefContext JestParser$ImplementationDefContext
                          JestParser$MethodParamsContext JestParser$ForLoopContext
                          JestParser$BlockContext JestParser$VarScopeContext
-                         JestParser$ClojureVectorContext JestParser$ClojureMapContext)
+                         JestParser$ClojureVectorContext JestParser$ClojureMapContext JestParser$ClojureGetContext)
            (jest.compiler ClojureSourceGenerator$BadSource)
            (sun.reflect.generics.reflectiveObjects NotImplementedException))
   (:gen-class
@@ -429,5 +429,5 @@
 
 
 (defn -visitClojureGet
-  [this JestParser$ClojureGetContext ctx]
-  `(get ~(.. ctx a getText) ~(.. this (visitExpression (. ctx b)))))
+  [this ^JestParser$ClojureGetContext ctx]
+  `(get ~(symbol (.. ctx a getText)) ~(.. this (visitExpression (. ctx b)))))
