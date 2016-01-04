@@ -450,11 +450,11 @@ public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
     @Override
     public Code visitLambda(JestParser.LambdaContext ctx) {
 
-        String expression = this.visitExpression(ctx.expression()).getSingleLine();
+        String expression = this.visitBlock(ctx.block()).getSingleLine();
 
         String code;
 
-        if (expression.length() > 2 && expression.matches("[(].*[)]")) { //get(0)=="(" && $expression.code.get(expressions.length()-1)==")") {
+        if (expression.length() > 2 && expression.matches("[(].*[)]")) {
             code="#"+expression;
         } else {
             code="#("+expression+")";

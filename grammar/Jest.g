@@ -161,7 +161,7 @@ and not
 #((func % %))
 */
 lambda
-    : '#(' expression ')' ;
+    : functionDefParams ARROW body=block;
 
 /* NEW SCOPE */
 functionDef

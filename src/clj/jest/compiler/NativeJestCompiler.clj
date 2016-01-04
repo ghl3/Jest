@@ -304,7 +304,9 @@
 
 (defn -visitLambda
   [this ^JestParser$LambdaContext ctx]
-  (throw (new NotImplementedException)))
+  (let [params (self-visit this ctx functionDefParams)
+        body  (self-visit this ctx block)]
+  `(fn [~@params] ~@body)))
 
 
 (defn -visitFunctionDef
