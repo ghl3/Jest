@@ -1,7 +1,7 @@
 
 def x = range(0, 100)
          ->filter(even?)
-         ->map( #(%+%) )
+         ->map((x) -> {2*x;})
          ->take(20);
 
 println(x);

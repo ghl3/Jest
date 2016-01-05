@@ -157,7 +157,7 @@
                   term (.. this (visitArithmeticTerm right))]
               `(~op ~accum ~term)
               ))
-          (. this (visitArithmeticTerm(. ctx a)))
+          (. this (visitArithmeticTerm (. ctx a)))
           (zip (. ctx op) (. ctx b))))
 
 
@@ -190,15 +190,15 @@
 
     (. ctx methodCall) (self-visit this ctx methodCall)
 
-    (. ctx PERIOD) (let [a (.. ctx a getText)
-                         b (self-visit this ctx methodCallChain)
+    (. ctx PERIOD) (let [left (get-symbol ctx a)
+                         right (self-visit this ctx methodCallChain)
                          params (.. this (visitMethodParams (. ctx b)))]
-                     `(~a ~b ~@params))
+                     `(~left ~right ~@params))
 
-    (. ctx ARROW) (let [a (.. ctx a getText)
-                        b (self-visit this ctx methodCallChain)
-                        params (.. this (visitMethodParams (. ctx b)))]
-                    `(~a ~@params ~b))
+    (. ctx ARROW) (let [left (get-symbol ctx c)
+                        right (self-visit this ctx methodCallChain)
+                        params (.. this (visitMethodParams (. ctx d)))]
+                    `(~left ~@params ~right))
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
 
@@ -216,7 +216,7 @@
     (. ctx ARROW) (let [a (get-symbol ctx func)
                         b (.. this (visitExpressionAtom (. ctx obj)))
                         params (self-visit this ctx methodParams)]
-                    `(~b ~a ~@params))
+                    `(~a ~@params ~b))
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
 
