@@ -403,9 +403,26 @@
     `(let [~@bindings] ~@expressions)))
 
 
+(defn- wrap-in-do
+  [expressions]
+  (cond
+    (= 0 (count expressions)) (throw (new NotImplementedException))
+    (= 1 (count expressions)) (first expressions)
+    :else `(do ~@expressions)))
+
 (defn -visitConditional
   [this ^JestParser$ConditionalContext ctx]
-  (throw (new NotImplementedException)))
+
+  (let [conditions (map #( .. this (visitExpression %)) (merge-items (. ctx ifCondition) (. ctx elifExpression)))
+        results (map #( .. this (visitBlock %)) (merge-items (. ctx iftrue) (. ctx elifBlock)))
+        else (if (. ctx elseBlock) (.. this (visitBlock (. ctx elseBlock))) nil)
+        single-if (= (. conditions size) 1)]
+
+    (cond
+      (and single-if else) `(if ~(. conditions (get 0)) ~(wrap-in-do (. results (get 0))) ~(wrap-in-do else))
+      single-if `(if ~(. conditions (get 0)) ~(wrap-in-do (. results (get 0))))
+      (not else) `(cond ~@(apply concat (zip conditions (map wrap-in-do results))))
+      :else `(cond ~@(apply concat (zip conditions (map wrap-in-do results))) :else ~(wrap-in-do else)))))
 
 
 (defn -visitClojureVector
