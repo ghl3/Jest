@@ -23,6 +23,9 @@
     :prefix "-"
     :main false))
 
+(defn- make-seqable
+  [x]
+  `(seq ~x))
 
 (defn upper-first
   [string]
@@ -62,6 +65,17 @@
     (seq? obj) obj
     (instance? Iterable obj) (into [] obj)
     :else [obj]))
+
+
+
+
+(defn- wrap-in-do
+  [expressions]
+  (cond
+    (not (instance? List expressions)) expressions
+    (= 0 (count expressions)) (throw (new NotImplementedException))
+    (= 1 (count expressions)) (first expressions)
+    :else `(do ~@expressions)))
 
 
 ;; HELPER
@@ -365,9 +379,6 @@
     :else '()))
 
 
-(defn- make-seqable
-  [x]
-  `(seq ~x))
 
 (defn -visitForLoop
   [this ^JestParser$ForLoopContext ctx]
@@ -385,14 +396,17 @@
 (defn -visitBlock
   [this ^JestParser$BlockContext ctx]
 
-  (cond
-    (. ctx expression) (self-visit this ctx expression)
+  (wrap-in-do
+    (cond
+      (. ctx expression) (self-visit this ctx expression)
 
-    (. ctx term) (into [] (map #(.. this (visitStatementTerm %)) (. ctx term)))
+      ;;(. ctx term) (into [] (map #(.. this (visitStatementTerm %)) (. ctx term)))
 
-    (. ctx scope)  (map #(.. this (visitVarScope %)) (. ctx scope))
+      (. ctx term) (map #(.. this (visitStatementTerm %)) (. ctx term))
 
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+      (. ctx scope) (map #(.. this (visitVarScope %)) (. ctx scope))
+
+      :else (throw (new ClojureSourceGenerator$BadSource ctx)))))
 
 
 (defn -visitVarScope
@@ -400,25 +414,17 @@
   (let [names (into [] (map #(symbol (. % getText)) (. ctx name)))
         vals (into [] (map #(.. this (visitExpression %)) (. ctx exp)))
         bindings (apply concat (zip names vals))
-        expressions (into [] (map #(. this (visitStatementTerm %)) (. ctx terms)))]
+        expressions (map #(. this (visitStatementTerm %)) (. ctx terms))]
     `(let [~@bindings] ~@expressions)))
 
-
-(defn- wrap-in-do
-  [expressions]
-  (cond
-    (not (instance? List expressions)) expressions
-    (= 0 (count expressions)) (throw (new NotImplementedException))
-    (= 1 (count expressions)) (first expressions)
-    :else `(do ~@expressions)))
 
 
 (defn -visitConditional
   [this ^JestParser$ConditionalContext ctx]
 
   (let [conditions (map #( .. this (visitExpression %)) (merge-items (. ctx ifCondition) (. ctx elifExpression)))
-        results (map #(wrap-in-do (.. this (visitBlock %))) (merge-items (. ctx iftrue) (. ctx elifBlock)))
-        else (if (. ctx elseBlock) (wrap-in-do (.. this (visitBlock (. ctx elseBlock)))) nil)
+        results (map #(.. this (visitBlock %)) (merge-items (. ctx iftrue) (. ctx elifBlock)))
+        else (if (. ctx elseBlock) (.. this (visitBlock (. ctx elseBlock))) nil)
         single-if (= (. conditions size) 1)]
 
     (cond
