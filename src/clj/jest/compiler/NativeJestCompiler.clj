@@ -67,8 +67,6 @@
     :else [obj]))
 
 
-
-
 (defn- wrap-in-do
   [expressions]
   (cond
@@ -89,6 +87,14 @@
 (defn zip
   [& args]
   (apply map vector args))
+
+
+(defn alternate
+  "Takes a list of sequences and returns a sequence
+  of the first from each sequence, in order, followed
+  by the 2nd, etc (as a single long sequence)"
+  [& args]
+  (apply concat (apply zip args)))
 
 
 (defn -visitSourceCode
@@ -291,13 +297,20 @@
 
 (defn -visitMemberGet
   [this ^JestParser$MemberGetContext ctx]
-  ;; TODO: Are these really "getText" calls?
   `(~(keyword (.. ctx member getText)) ~(symbol (.. ctx record getText))))
 
 
 (defn -visitRecordConstructor
   [this ^JestParser$RecordConstructorContext ctx]
-  (throw (new NotImplementedException)))
+
+  (if (nil? (. ctx firstKey))
+
+    `(~(symbol (str "->" (.. ctx name getText))) ~@(self-visit this ctx methodParams))
+
+    `(~(symbol (str "map->" (.. ctx name getText)))
+       ~(apply array-map (alternate
+         (map #(keyword (. % getText)) (merge-items (. ctx firstKey) (. ctx key)))
+         (map #(.. this (visitExpression %)) (merge-items (. ctx firstExp) (. ctx exp))))))))
 
 
 (defn -visitExpressionList
@@ -413,7 +426,7 @@
   [this ^JestParser$VarScopeContext ctx]
   (let [names (into [] (map #(symbol (. % getText)) (. ctx name)))
         vals (into [] (map #(.. this (visitExpression %)) (. ctx exp)))
-        bindings (apply concat (zip names vals))
+        bindings (alternate names vals)
         expressions (map #(. this (visitStatementTerm %)) (. ctx terms))]
     `(let [~@bindings] ~@expressions)))
 
@@ -430,8 +443,8 @@
     (cond
       (and single-if else) `(if ~(. conditions (get 0)) ~(. results (get 0)) ~else)
       single-if `(if ~(. conditions (get 0)) ~(. results (get 0)))
-      (not else) `(cond ~@(apply concat (zip conditions results)))
-      :else `(cond ~@(apply concat (zip conditions results)) :else ~else))))
+      (not else) `(cond ~@(alternate conditions results))
+      :else `(cond ~@(alternate conditions results) :else ~else))))
 
 
 (defn -visitClojureVector
