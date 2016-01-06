@@ -16,7 +16,8 @@
                          JestParser$BlockContext JestParser$VarScopeContext
                          JestParser$ClojureVectorContext JestParser$ClojureMapContext JestParser$ClojureGetContext)
            (jest.compiler ClojureSourceGenerator$BadSource)
-           (sun.reflect.generics.reflectiveObjects NotImplementedException))
+           (sun.reflect.generics.reflectiveObjects NotImplementedException)
+           (java.util List))
   (:gen-class
     :extends jest.grammar.JestBaseVisitor
     :prefix "-"
@@ -406,9 +407,11 @@
 (defn- wrap-in-do
   [expressions]
   (cond
+    (not (instance? List expressions)) expressions
     (= 0 (count expressions)) (throw (new NotImplementedException))
     (= 1 (count expressions)) (first expressions)
     :else `(do ~@expressions)))
+
 
 (defn -visitConditional
   [this ^JestParser$ConditionalContext ctx]
