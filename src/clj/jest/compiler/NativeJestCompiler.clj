@@ -390,12 +390,17 @@
 
 (defn -visitRecordDef
   [this ^JestParser$RecordDefContext ctx]
-  (throw (new NotImplementedException)))
+
+  `(defrecord ~(get-symbol ctx name)
+     [~@(map #(symbol (.. % getText)) (merge-items (. ctx first) (. ctx field)))]
+     ~@(apply concat (map #(.. this (visitImplementationDef %)) (. ctx implementationDef)))))
 
 
 (defn -visitImplementationDef
   [this ^JestParser$ImplementationDefContext ctx]
-  (throw (new NotImplementedException)))
+
+  (into [(get-symbol ctx protocol)]
+        (map #(.. this (visitMethodDef %)) (. ctx methodDef))))
 
 
 (defn -visitMethodParams
@@ -475,7 +480,6 @@
         bindings (alternate names vals)
         expressions (map #(. this (visitStatementTerm %)) (. ctx terms))]
     `(let [~@bindings] ~@expressions)))
-
 
 
 (defn -visitConditional
