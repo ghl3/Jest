@@ -67,6 +67,15 @@
     :else [obj]))
 
 
+(defn- wrap-in-do
+  [expressions]
+  (cond
+    (not (instance? List expressions)) expressions
+    (= 0 (count expressions)) (throw (new NotImplementedException))
+    (= 1 (count expressions)) (first expressions)
+    :else `(do ~@expressions)))
+
+
 ;; HELPER
 (defn merge-items
   "Takes two items and joins them as a single sequence."
@@ -105,12 +114,14 @@
 (defn -visitStatementTerm
   [this ^JestParser$StatementTermContext ctx]
 
-  ;; Should this always return a list?
   (cond
     (. ctx statement)   (self-visit this ctx statement)
     (. ctx functionDef) (self-visit this ctx functionDef)
     (. ctx recordDef)   (self-visit this ctx recordDef)
-    (. ctx block)       (self-visit this ctx block)
+
+    ;; I believe we want to wrap this in a do to make it
+    ;; a single statement, not a list, correct...?
+    (. ctx block)       (wrap-in-do (self-visit this ctx block))
     (. ctx varScope)    (self-visit this ctx varScope)
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
@@ -271,7 +282,10 @@
 
     (. ctx recordConstructor) (self-visit this ctx recordConstructor)
 
-    (. ctx block) (self-visit this ctx block)
+    ;; A block, when used as an expression, must consist of a
+    ;; single expression or otherwise must be wrapped
+    ;; in a do statement
+    (. ctx block) (wrap-in-do (self-visit this ctx block))
 
     (. ctx expression) (self-visit this ctx expression)
 
@@ -342,7 +356,7 @@
   `(defn
      ~(get-symbol ctx name)
      [~@(self-visit this ctx functionDefParams)]
-     ~(self-visit this ctx block)))
+     ~@(self-visit this ctx block)))
 
 
 (defn -visitMethodDef
@@ -357,8 +371,9 @@
   ;                                   }
 
 
-  `(~(symbol (.. ctx name getText)) [~@(self-visit this ctx functionDefParams)]
-     ~(self-visit this ctx block)))
+  `(~(symbol (.. ctx name getText))
+     [~@(self-visit this ctx functionDefParams)]
+     ~@(self-visit this ctx block)))
 
 
 (defn -visitFunctionDefParams
@@ -409,39 +424,46 @@
       `(doall (map ~func ~@iterator)))))
 
 
-(defn- wrap-in-do
-  [expressions]
-  (cond
-    (not (instance? List expressions)) expressions
-    (= 0 (count expressions)) (throw (new NotImplementedException))
-    (= 1 (count expressions)) (first expressions)
-    :else `(do ~@expressions)))
-
-
 (defn -visitBlock
-  "A block doesn't return a list, it only returns a single expression.
-  However, if there are multiple expressions coming from that block,
-  it wraps them in a do expression"
+  "Note that a block, unlike most other visit statements,
+  returns a list of clojure forms, not just a single form.
+  This can make working with blocks tricky.  One must take
+  care to do one of the following:
+  - Unwrap the list in a macro using the ~@ operator
+  - Wrap the list in a single 'do' expression with the wrap-in-do function
+  You would use the first version if it's okay to have a number of
+  clojure forms in a row.  For example, a function body is allowed to
+  consist of multiple clojure forms each representing an expression:
+
+  (defn foobar [x]
+      (A)
+      (B)
+      (C))
+
+  On the other hand, the 'true' or 'false' part of an if statement
+  must be a single expression, and therefore it must be wrapped in a
+  do expression if one wants to use a block that consists of multiple
+  expressions:
+
+  (if true
+      (do
+          (A)
+          (B)
+          (C))
+      false)
+
+  We could have automatically wrapped all blocks in do statements in
+  visitBlock (if necessary) but we like in the 'defn' example above
+  having all the expressions inline an an unwrapped list, so we here
+  return a list and leave the unwrapping of the list to the consumer."
   [this ^JestParser$BlockContext ctx]
 
   (cond
-    (. ctx expression) (self-visit this ctx expression)
+    (. ctx expression) [(self-visit this ctx expression)]
 
-    ;;(. ctx term) (into [] (map #(.. this (visitStatementTerm %)) (. ctx term)))
+    (. ctx term) (into [] (map #(.. this (visitStatementTerm %)) (. ctx term)))
 
-    (. ctx term) (let [num-terms (.. (. ctx term) size)]
-                   (cond
-                     (= 0 num-terms) (throw (new NotImplementedException))
-                     (= 1 num-terms) (.. this (visitStatementTerm (.. (. ctx term) (get 0))))
-                     :else `(do ~@(into [] (map #(.. this (visitStatementTerm %)) (. ctx term))))))
-
-    ;;(. ctx scope) (into [] (map #(.. this (visitVarScope %)) (. ctx scope)))
-
-    (. ctx scope) (let [num-scopes (.. (. ctx scope) size)]
-                    (cond
-                      (= 0 num-scopes) (throw NotImplementedException)
-                      (= 1 num-scopes) (.. this (visitVarScope (.. (. ctx scope) (get 0))))
-                      :else `(do ~@(into [] (map #(.. this (visitVarScope %)) (. ctx scope))))))
+    (. ctx scope) (into [] (map #(.. this (visitVarScope %)) (. ctx scope)))
 
     :else (throw (new ClojureSourceGenerator$BadSource ctx))))
 
@@ -460,8 +482,8 @@
   [this ^JestParser$ConditionalContext ctx]
 
   (let [conditions (map #( .. this (visitExpression %)) (merge-items (. ctx ifCondition) (. ctx elifExpression)))
-        results (map #(.. this (visitBlock %)) (merge-items (. ctx iftrue) (. ctx elifBlock)))
-        else (if (. ctx elseBlock) (.. this (visitBlock (. ctx elseBlock))) nil)
+        results (map #(wrap-in-do (.. this (visitBlock %))) (merge-items (. ctx iftrue) (. ctx elifBlock)))
+        else (if (. ctx elseBlock) (wrap-in-do (.. this (visitBlock (. ctx elseBlock)))) nil)
         single-if (= (. conditions size) 1)]
 
     (cond
