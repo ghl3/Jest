@@ -29,11 +29,12 @@
   [clojure code-list]
 
   ;; Compare each line individually
-  (doall (map compare-code clojure code-list))
+  (doall (map #(is (= %1 %2)) clojure code-list))
 
   ;; Conmpare all of the code
-  (is (= (map remove-code-compare-whitespace clojure)
-         (map remove-code-compare-whitespace code-list))))
+  (is (= clojure code-list)))
+  ;;(map remove-code-compare-whitespace clojure)
+  ;;       (map remove-code-compare-whitespace code-list))))
 
 
 (defn test-code
@@ -42,16 +43,19 @@
   ([jest clojure] (test-code jest clojure false))
   ([jest clojure validate?]
 
-   (if (and validate? (not (validate-source-code jest)))
-     nil
+   (if validate?
+     (is (validate-source-code jest)))
 
-     (let [code-list (jest->clojure jest)]
-       (test-println "\nJest: ")
-       (test-println jest)
-       (test-println "Clojure: ")
-       (doall (map test-println code-list))
-       (test-println "")
-       (test-jest-vs-clojure clojure code-list)))))
+     ;;(and validate? (not (validate-source-code jest)))
+     ;;nil
+
+   (let [code-list (jest->clojure jest)]
+     (test-println "\nJest: ")
+     (test-println jest)
+     (test-println "Clojure: ")
+     (doall (map test-println code-list))
+     (test-println "")
+     (test-jest-vs-clojure clojure code-list))))
 
 
 
