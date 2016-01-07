@@ -7,7 +7,7 @@
   (test-code-eval
   "// COMMENT
   10;"
-  ["10"]
+  [10]
   10))
 
 
@@ -17,7 +17,7 @@
   OTHER COMMENTS
   */
   10;"
-  ["10"]
+  [10]
   10))
 
 
@@ -28,7 +28,7 @@
   OTHER COMMENTS
   STUFF */
   10;"
-  ["10"]
+  [10]
   10))
 
 
@@ -40,7 +40,7 @@
   OTHER COMMENTS
   STUFF */
   ;"
-  ["10"]
+  [10]
   10))
 
 
@@ -52,5 +52,5 @@
   OTHER COMMENTS
   STUFF */
   "
-  ["10"]
+  [10]
   10))

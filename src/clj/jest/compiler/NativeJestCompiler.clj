@@ -157,19 +157,19 @@
 
 
 (defn- create-comparison-operation
-  [ctx]
-  (let [op-raw (. ctx op)
-        op (get comparison-override-map op-raw op-raw)
-        left (. ctx a)
-        right (. ctx b)]
-    '(op left right)))
+  [this ctx]
+  (let [op-raw (.. ctx op getText)
+        op (symbol (get comparison-override-map op-raw op-raw))
+        left (.. this (visitArithmeticExpression (. ctx a)))
+        right (.. this (visitArithmeticExpression (. ctx b)))]
+    `(~op ~left ~right)))
 
 
 (defn -visitComparisonExpression
   [this ^JestParser$ComparisonExpressionContext ctx]
 
   (if (. ctx op)
-    (create-comparison-operation ctx)
+    (create-comparison-operation this ctx)
     (.. this (visitArithmeticExpression (. ctx a)))))
 
 
