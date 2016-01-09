@@ -6,5 +6,5 @@
 (deftest map-test-1
   (test-code
    "def sym = :mySymbol;"
-   ["(def sym :mySymbol)"]))
+   ['(def sym :mySymbol)]))
 
