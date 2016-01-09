@@ -163,13 +163,17 @@ public class Validator extends JestBaseListener {
 
     public void enterLambda(JestParser.LambdaContext ctx) {
         Scope scope = createNewScope(scopes);
-        scope.addToScope("%", null);
+        JestParser.FunctionDefParamsContext params = ctx.functionDefParams();
+
+        for (TerminalNode node: params.ID()) {
+            currentScope().addToScope(node.getText(), node);
+        }
+
     }
 
     public void exitLambda(JestParser.LambdaContext ctx) {
         dropCurrentScope(scopes);
     }
-
 
 
     @Override
