@@ -13,6 +13,11 @@
    "def mp = {a:1, b:2};"
    ['(def mp {a 1 b 2})]))
 
+(deftest map-test-3
+  (test-code
+    "def mp = {:a : 1, :b : 2};"
+    ['(def mp {:a 1 :b 2})]))
+
 (deftest map-access-1
   (test-code-eval
    "def mp = {:a : 1, :b : 2}; mp[:a];"
@@ -22,7 +27,7 @@
 (deftest map-get-1
   (test-code-eval
    "def mp = {:a:1, :b:2}; mp.get(:a);"
-   ['(def mp {:a 1 :b 2}) '(clojure.core/get mp :a)]
+   ['(def mp {:a 1 :b 2}) '(get mp :a)]
    1))
 
 (deftest map-test-3

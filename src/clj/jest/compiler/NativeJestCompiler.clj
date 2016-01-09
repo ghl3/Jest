@@ -262,7 +262,7 @@
     (. ctx STRING) (.. ctx STRING getText)
 
     ;; TODO: Rename 'symbol' to 'keyword'
-    (. ctx SYMBOL) (symbol (.. ctx SYMBOL getText)) ;;(keyword (.. ctx SYMBOL getText))
+    (. ctx SYMBOL) (keyword (subs (.. ctx SYMBOL getText) 1)) ;;(keyword (.. ctx SYMBOL getText))
 
     (. ctx clojureVector) (self-visit this ctx clojureVector)
 
