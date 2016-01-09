@@ -259,7 +259,7 @@
 
     (. ctx ID) (symbol (.. ctx ID getText))
 
-    (. ctx STRING) (.. ctx STRING getText)
+    (. ctx STRING) (read-string (.. ctx STRING getText))
 
     ;; TODO: Rename 'symbol' to 'keyword'
     (. ctx SYMBOL) (keyword (subs (.. ctx SYMBOL getText) 1)) ;;(keyword (.. ctx SYMBOL getText))
