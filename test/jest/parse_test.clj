@@ -23,7 +23,7 @@
    ['(clojure.core/defn foobar [ a b c ] 10)]))
 
 (deftest import-test
-  (test-codeg
+  (test-code
    "import foo.bar;"
    ['(clojure.core/import foo.bar)]))
 
