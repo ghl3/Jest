@@ -11,7 +11,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 
-public class ClojureSourceGenerator extends JestBaseVisitor<Code> {
+@Deprecated
+public class LegacyClojureSourceGenerator extends JestBaseVisitor<Code> {
 
     public static class ClojureSourceGeneratorException extends RuntimeException {
         public ClojureSourceGeneratorException(String message) {

@@ -1,7 +1,6 @@
 package jest.compiler;
 
 import java.util.Stack;
-import jest.compiler.Scope;
 
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
@@ -156,6 +155,7 @@ public class Validator extends JestBaseListener {
         Scope loopScope = createNewScope(scopes);
     }
 
+
     public void exitConditional(JestParser.ConditionalContext ctx) {
         dropCurrentScope(scopes);
     }
@@ -193,8 +193,6 @@ public class Validator extends JestBaseListener {
         dropCurrentScope(scopes);
     }
 
-
-    // Require variables to be defined
 
     @Override
     public void enterDefAssignment(JestParser.DefAssignmentContext ctx) {

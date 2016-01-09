@@ -1,8 +1,8 @@
 package jest.compiler;
 
-
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+
 
 public abstract class Code {
 
@@ -13,7 +13,6 @@ public abstract class Code {
     public abstract List<String> getMultiLine();
 
     public abstract String getSingleLine();
-
 
     public static Code singleLine(String code) {
         return new SingleLine(code);
@@ -27,15 +26,6 @@ public abstract class Code {
         return Code.multiLine(ImmutableList.<String>of());
     }
 
-    /*
-    public static String getCodeList(Code code) {
-        if (code.isSingleLine()) {
-            return code.getSingleLine();
-        } else {
-            return Joiner.on("\n").join(code.getMultiLine());
-        }
-    }
-*/
 
     public List<String> getLines() {
         if (this.isSingleLine()) {
@@ -68,7 +58,6 @@ public abstract class Code {
         public String getSingleLine() {
             return this.code;
         }
-
 
     }
 

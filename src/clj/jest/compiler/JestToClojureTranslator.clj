@@ -1,4 +1,4 @@
-(ns jest.compiler.NativeJestCompiler
+(ns jest.compiler.JestToClojureTranslator
   (:import (jest.grammar JestParser$SourceCodeContext JestParser$StatementTermContext
                          JestParser$StatementContext JestParser$DefAssignmentContext
                          JestParser$ExpressionContext JestParser$ComparisonExpressionContext
@@ -15,7 +15,7 @@
                          JestParser$MethodParamsContext JestParser$ForLoopContext
                          JestParser$BlockContext JestParser$VarScopeContext
                          JestParser$ClojureVectorContext JestParser$ClojureMapContext JestParser$ClojureGetContext)
-           (jest.compiler ClojureSourceGenerator$BadSource)
+           (jest.compiler LegacyClojureSourceGenerator$BadSource)
            (sun.reflect.generics.reflectiveObjects NotImplementedException)
            (java.util List))
   (:gen-class
@@ -115,16 +115,16 @@
   [this ^JestParser$StatementTermContext ctx]
 
   (cond
-    (. ctx statement)   (self-visit this ctx statement)
+    (. ctx statement) (self-visit this ctx statement)
     (. ctx functionDef) (self-visit this ctx functionDef)
-    (. ctx recordDef)   (self-visit this ctx recordDef)
+    (. ctx recordDef) (self-visit this ctx recordDef)
 
     ;; I believe we want to wrap this in a do to make it
     ;; a single statement, not a list, correct...?
-    (. ctx block)       (wrap-in-do (self-visit this ctx block))
-    (. ctx varScope)    (self-visit this ctx varScope)
+    (. ctx block) (wrap-in-do (self-visit this ctx block))
+    (. ctx varScope) (self-visit this ctx varScope)
 
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
 
 
 (defn -visitStatement
@@ -134,7 +134,7 @@
     (. ctx expression)    (self-visit this ctx expression)
     (. ctx defAssignment) (self-visit this ctx defAssignment)
 
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
 
 
 (defn -visitDefAssignment
@@ -204,7 +204,7 @@
     (. ctx methodCallChain) (self-visit this ctx methodCallChain)
     (. ctx expressionAtom) (self-visit this ctx expressionAtom)
 
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
 
 
 (defn -visitMethodCallChain
@@ -224,7 +224,7 @@
                         params (.. this (visitMethodParams (. ctx d)))]
                     `(~left ~@params ~right))
 
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
 
 
 (defn -visitMethodCall
@@ -242,7 +242,7 @@
                         params (self-visit this ctx methodParams)]
                     `(~a ~@params ~b))
 
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
 
 
 (defn -visitExpressionAtom
@@ -289,7 +289,7 @@
 
     (. ctx expression) (self-visit this ctx expression)
 
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
 
 
 (defn -visitMemberGetChain
@@ -470,7 +470,7 @@
 
     (. ctx scope) (into [] (map #(.. this (visitVarScope %)) (. ctx scope)))
 
-    :else (throw (new ClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
 
 
 (defn -visitVarScope

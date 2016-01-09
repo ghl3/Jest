@@ -1,7 +1,6 @@
 (ns jest.utils
   (:require [clojure.test :refer :all]
             [jest.parser :refer :all]
-            [clojure.string :as string]
             [environ.core :refer [env]])
   (:import (clojure.lang ExceptionInfo)))
 
@@ -13,18 +12,6 @@
   (if (env :verbose) (apply println log) nil))
 
 
-(defn remove-code-compare-whitespace
-  [s]
-  (-> s
-      (string/replace #"[\n\t]" " ")
-      (string/replace #"\s+" " ")))
-
-(defn compare-code
-  [x y]
-  (test-println x y)
-  (is (= (remove-code-compare-whitespace x) (remove-code-compare-whitespace y))))
-
-
 (defn test-jest-vs-clojure
   [clojure code-list]
 
@@ -33,8 +20,6 @@
 
   ;; Conmpare all of the code
   (is (= clojure code-list)))
-  ;;(map remove-code-compare-whitespace clojure)
-  ;;       (map remove-code-compare-whitespace code-list))))
 
 
 (defn test-code
@@ -46,9 +31,6 @@
    (if validate?
      (is (validate-source-code jest)))
 
-     ;;(and validate? (not (validate-source-code jest)))
-     ;;nil
-
    (let [code-list (jest->clojure jest)]
      (test-println "\nJest: ")
      (test-println jest)
@@ -56,7 +38,6 @@
      (doall (map test-println code-list))
      (test-println "")
      (test-jest-vs-clojure clojure code-list))))
-
 
 
 (defn test-eval
@@ -70,7 +51,7 @@
     (test-println clojure)
     (test-println "")
 
-    (let [code-val (eval-jest jest)]
+    (let [code-val (execute-jest jest)]
       (test-println "Code Val:")
       (test-println code-val)
       (is (= code-val val)))))
@@ -83,7 +64,7 @@
   the code gives the supplied 'val'."
   [jest clojure val]
   (test-code jest clojure true)
-  (let [code-val (eval-jest jest)]
+  (let [code-val (execute-jest jest)]
     (test-println "Code Val:")
     (test-println code-val)
     (is (= code-val val))))
