@@ -152,23 +152,16 @@ funcTypeAnnotation
     : first=typeAnnotation (next+=typeAnnotation)*
     ;
 
-/*
-Lambda must have a '%' somewhere in the expression
-If the expression is a function call, we unwrap the
-external parentheses so it is:
-#(func % %)
-and not
-#((func % %))
-*/
+
 lambda
     : functionDefParams ARROW body=block;
 
-/* NEW SCOPE */
+
 functionDef
     : DEFN name=ID functionDefParams (COLON a=funcTypeAnnotation ARROW c=typeAnnotation)? block (SEMICOLON)?
     ;
 
-/* NEW SCOPE */
+
 methodDef
     : DEFN name=ID functionDefParams (COLON a=funcTypeAnnotation ARROW c=typeAnnotation)? block (SEMICOLON)?
     ;
@@ -209,27 +202,25 @@ methodParams
     | '(' expression ')'
     ;
 
-/* NEW SCOPE */
+
 forLoop
     : FOR '(' a=ID (COMMA b+=ID )* COLON c=expression (COMMA d+=expression)* ')' (LAZY)? block
     ;
 
-/* NEW SCOPE */
+
 block
     : '{' expression '}'
     | '{' (term+=statementTerm)+ '}'
     | '{' (scope+=varScope)+ '}'
     ;
 
-/* TODO: add typing using the core.typed let macro:
-http://clojure.github.io/core.typed/#clojure.core.typed/let
-*/
+
 varScope
-    : (LET name+=ID '=' exp+=expression SEMICOLON)+
+    : (LET name+=ID (COLON a+=funcTypeAnnotation)? '=' exp+=expression SEMICOLON)+
       (terms+=statementTerm )*
     ;
 
-/* NEW SCOPE */
+
 conditional
     : IF '(' ifCondition=expression ')' iftrue=block
       (ELIF '(' elifExpression+=expression ')' elifBlock+=block)*

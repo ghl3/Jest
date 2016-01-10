@@ -2,13 +2,17 @@ package jest.compiler;
 
 import java.util.Map;
 import java.util.HashMap;
+import jest.compiler.DeclaredTypes.FunctionSignature;
+import jest.compiler.DeclaredTypes.Type;
 
 
-class Scope {
+public class Scope {
 
     final Scope parent;
 
-    final Map<String, Object> variables = new HashMap<String, Object>();
+    final Map<String, Type> variables = new HashMap<String, Type>();
+
+    final Map<String, FunctionSignature> functions = new HashMap<String, FunctionSignature>();
 
     public Scope() {
         this.parent = null;
@@ -18,7 +22,11 @@ class Scope {
         this.parent = parent;
     }
 
-    boolean isInCurrentScope(String varName) {
+    boolean isGlobalScope() {
+        return parent == null;
+    }
+
+    public boolean isVariableInCurrentScope(String varName) {
         if (variables.containsKey(varName)) {
             return true;
         } else {
@@ -26,24 +34,50 @@ class Scope {
         }
     }
 
-    boolean isInScope(String varName) {
-        if (isInCurrentScope(varName)) {
+    public boolean isVariableInScope(String varName) {
+        if (isVariableInCurrentScope(varName)) {
             return true;
         }
 
         if (parent == null) {
             return false;
         } else {
-            return parent.isInScope(varName);
+            return parent.isVariableInScope(varName);
         }
     }
 
-    void addToScope(String varName, Object obj) {
-        variables.put(varName, obj);
+    void addVariable(String varName, Type type) {
+        variables.put(varName, type);
     }
 
-    boolean isGlobalScope() {
-        return parent == null;
+    ///////
+
+    public boolean isFunctionInCurrentScope(String varName) {
+        if (functions.containsKey(varName)) {
+            return true;
+        } else {
+            return false;
+        }
     }
-    
+
+    public boolean isFunctionInScope(String varName) {
+        if (isFunctionInCurrentScope(varName)) {
+            return true;
+        }
+
+        if (parent == null) {
+            return false;
+        } else {
+            return parent.isFunctionInScope(varName);
+        }
+    }
+
+    void addFunction(String varName, FunctionSignature signature) {
+        functions.put(varName, signature);
+    }
+
+
+    public boolean isVariableOrFunctionInScope(String name) {
+        return isVariableInScope(name) || isFunctionInScope(name);
+    }
 }
