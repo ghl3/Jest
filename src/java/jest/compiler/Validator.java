@@ -7,6 +7,7 @@ import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
 
+import jest.grammar.JestParser.ExpressionContext;
 import org.antlr.v4.runtime.Token;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -20,7 +21,12 @@ public class Validator extends JestBaseListener {
         return scopes.peek();
     }
 
-    protected ExpressionTypeVisitor expressionEvaluator = new ExpressionTypeVisitor();
+
+    public static Type getExpressionType(Scope scope, ExpressionContext expression) {
+        return new ExpressionEvaluator(scope).visit(expression);
+    }
+
+    //protected ExpressionTypeVisitor expressionEvaluator = new ExpressionTypeVisitor(scopes);
 
 
     public Validator() {
@@ -223,11 +229,8 @@ public class Validator extends JestBaseListener {
             throw new AlreadyDeclared(ctx.name);
         }
 
-        Type type = expressionEvaluator.visit(ctx.expression());
+        Type type = getExpressionType(currentScope(), ctx.expression());
         currentScope().addVariable(ctx.name.getText(), type);
-        //declaredTypes.setType(
-
-        //currentScope().addToScope(ctx.name.getText(), ctx);
     }
 
     @Override
@@ -248,5 +251,4 @@ public class Validator extends JestBaseListener {
             throw new NotDeclared(ctx.ID());
         }
     }
-
 }

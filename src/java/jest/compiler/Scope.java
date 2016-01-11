@@ -1,7 +1,9 @@
 package jest.compiler;
 
+import com.google.common.base.Optional;
 import java.util.Map;
 import java.util.HashMap;
+import jdk.nashorn.internal.runtime.options.Option;
 import jest.compiler.DeclaredTypes.FunctionSignature;
 import jest.compiler.DeclaredTypes.Type;
 
@@ -50,6 +52,11 @@ public class Scope {
         variables.put(varName, type);
     }
 
+
+    public Optional<Type> getVariableType(String name) {
+        return Optional.fromNullable(this.variables.get(name));
+    }
+
     ///////
 
     public boolean isFunctionInCurrentScope(String varName) {
@@ -76,6 +83,10 @@ public class Scope {
         functions.put(varName, signature);
     }
 
+
+    public Optional<FunctionSignature> getFunctionSignature(String name) {
+        return Optional.fromNullable(this.functions.get(name));
+    }
 
     public boolean isVariableOrFunctionInScope(String name) {
         return isVariableInScope(name) || isFunctionInScope(name);

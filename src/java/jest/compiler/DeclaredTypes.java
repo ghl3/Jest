@@ -25,6 +25,12 @@ public class DeclaredTypes {
                 return "jest.String";
             }
         },
+        Symbol {
+            @Override
+            public String getName() {
+                return "jest.Symbol";
+            }
+        },
         Number {
             @Override
             public String getName() {
@@ -43,10 +49,22 @@ public class DeclaredTypes {
                 return "jest.List";
             }
         },
+        Vector {
+            @Override
+            public String getName() {
+                return "jest.Vector";
+            }
+        },
         Boolean {
             @Override
             public String getName() {
                 return "jest.Boolean";
+            }
+        },
+        Nil {
+            @Override
+            public String getName() {
+                return "jest.Nil";
             }
         }
     }
