@@ -3,15 +3,20 @@ package jest.compiler;
 import java.util.Stack;
 
 import jest.Exception.NotYetImplemented;
+import jest.Exception.TypeMismatchError;
 import jest.compiler.DeclaredTypes.FunctionSignature;
 import jest.compiler.DeclaredTypes.Type;
+import jest.compiler.DeclaredTypes.UserType;
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
 
 import jest.grammar.JestParser.ExpressionContext;
+import jest.grammar.JestParser.TypeAnnotationContext;
 import org.antlr.v4.runtime.Token;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import static jest.compiler.DeclaredTypes.typesEqual;
 
 
 public class Validator extends JestBaseListener {
@@ -26,8 +31,6 @@ public class Validator extends JestBaseListener {
     public static Type getExpressionType(Scope scope, ExpressionContext expression) {
         return new ExpressionEvaluator(scope).visit(expression);
     }
-
-    //protected ExpressionTypeVisitor expressionEvaluator = new ExpressionTypeVisitor(scopes);
 
 
     public Validator() {
@@ -224,6 +227,14 @@ public class Validator extends JestBaseListener {
     }
 
 
+    public static Type getAnnotatedType(TypeAnnotationContext ctx) {
+        if (ctx.singleType != null) {
+            return new UserType(ctx.singleType.getText());
+        } else {
+            throw new NotYetImplemented(ctx);
+        }
+    }
+
     @Override
     public void enterDefAssignment(JestParser.DefAssignmentContext ctx) {
         if (currentScope().isVariableInCurrentScope(ctx.name.getText())) {
@@ -231,6 +242,15 @@ public class Validator extends JestBaseListener {
         }
 
         Type type = getExpressionType(currentScope(), ctx.expression());
+
+        if (ctx.typeAnnotation() != null) {
+            Type annotatedType = getAnnotatedType(ctx.typeAnnotation());
+
+            if (!typesEqual(annotatedType, type)) {
+                throw new TypeMismatchError(ctx);
+            }
+        }
+
         currentScope().addVariable(ctx.name.getText(), type);
     }
 

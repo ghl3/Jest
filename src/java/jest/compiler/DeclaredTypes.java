@@ -10,6 +10,24 @@ public class DeclaredTypes {
         String getName();
     }
 
+    public static boolean typesEqual(Type left, Type right) {
+        return left.getName().equals(right.getName());
+    }
+
+    public static class UserType implements Type {
+
+        final String name;
+
+        public UserType(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+
 
     public interface FunctionSignature {
         List<Type> getParameterTypes();
