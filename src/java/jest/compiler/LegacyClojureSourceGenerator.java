@@ -57,8 +57,8 @@ public class LegacyClojureSourceGenerator extends JestBaseVisitor<Code> {
     public Code visitImportStatement(JestParser.ImportStatementContext ctx) {
 
         String code = "(import '";
-        code += ctx.a.getText();
-        for (Token token : ctx.b) {
+        code += ctx.path().a.getText();
+        for (Token token : ctx.path().b) {
             code += "." + token.getText();
         }
         code += ")";

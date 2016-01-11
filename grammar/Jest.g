@@ -24,9 +24,14 @@ sourceCode
         EOF
     ;
 
-importStatement
-    : IMPORT a=ID (PERIOD b+=ID)*
+path
+    :  a=ID (PERIOD b+=ID)*
     ;
+
+importStatement
+    : IMPORT path
+    ;
+
 
 // A statementTerm is a statement followed
 // by a semicolon
@@ -136,7 +141,7 @@ expressionList
 /* Consider adding '/t' as a prefix to all of these
    and remove the hash notation to prefix that by hand*/
 typeAnnotation
-    : singleType=ID
+    : singleType=path
     | '#' hashType=ID
     | typeleft=ID num=NUMBER
     | '(' thing=typeAnnotation ')'

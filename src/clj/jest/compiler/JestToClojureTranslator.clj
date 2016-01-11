@@ -107,7 +107,7 @@
 (defn -visitImportStatement
   [this ^JestParser$StatementTermContext ctx]
   (let [to-import (clojure.string/join "."
-                                       (map #(. % getText) (merge-items (.. ctx a) (.. ctx b))))]
+                                       (map #(. % getText) (merge-items (.. ctx path  a) (.. ctx path b))))]
     `(import ~(symbol to-import))))
 
 
