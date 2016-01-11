@@ -1,5 +1,7 @@
 package jest.compiler;
 
+import jest.Exception.BadSource;
+import jest.Exception.NotExpressionError;
 import jest.compiler.DeclaredTypes.BuiltInTypes;
 import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseVisitor;
@@ -35,8 +37,7 @@ import jest.grammar.JestParser.StatementContext;
 import jest.grammar.JestParser.StatementTermContext;
 import jest.grammar.JestParser.TypeAnnotationContext;
 import jest.grammar.JestParser.VarScopeContext;
-import jest.util.BadSource;
-import jest.util.NotExpressionError;
+
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import static jest.util.combine;
@@ -53,7 +54,6 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
     public ExpressionEvaluator(Scope scope) {
         this.scope = scope;
     }
-
 
 
     @Override

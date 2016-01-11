@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
+import jest.Exception.BadSource;
 import jest.grammar.JestParser;
 import jest.grammar.JestBaseVisitor;
-import jest.util.BadSource;
 import org.antlr.v4.runtime.Token;
 
 

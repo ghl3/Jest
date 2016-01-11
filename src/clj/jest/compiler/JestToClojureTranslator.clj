@@ -15,7 +15,7 @@
                          JestParser$MethodParamsContext JestParser$ForLoopContext
                          JestParser$BlockContext JestParser$VarScopeContext
                          JestParser$ClojureVectorContext JestParser$ClojureMapContext JestParser$ClojureGetContext)
-           (jest.compiler LegacyClojureSourceGenerator$BadSource)
+           (jest Exception$BadSource)
            (sun.reflect.generics.reflectiveObjects NotImplementedException)
            (java.util List))
   (:gen-class
@@ -124,7 +124,7 @@
     (. ctx block) (wrap-in-do (self-visit this ctx block))
     (. ctx varScope) (self-visit this ctx varScope)
 
-    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new Exception$BadSource ctx))))
 
 
 (defn -visitStatement
@@ -134,7 +134,7 @@
     (. ctx expression)    (self-visit this ctx expression)
     (. ctx defAssignment) (self-visit this ctx defAssignment)
 
-    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new Exception$BadSource ctx))))
 
 
 (defn -visitDefAssignment
@@ -204,7 +204,7 @@
     (. ctx methodCallChain) (self-visit this ctx methodCallChain)
     (. ctx expressionAtom) (self-visit this ctx expressionAtom)
 
-    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new Exception$BadSource ctx))))
 
 
 (defn -visitMethodCallChain
@@ -224,7 +224,7 @@
                         params (.. this (visitMethodParams (. ctx d)))]
                     `(~left ~@params ~right))
 
-    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new Exception$BadSource ctx))))
 
 
 (defn -visitMethodCall
@@ -242,7 +242,7 @@
                         params (self-visit this ctx methodParams)]
                     `(~a ~@params ~b))
 
-    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new Exception$BadSource ctx))))
 
 
 (defn -visitExpressionAtom
@@ -289,7 +289,7 @@
 
     (. ctx expression) (self-visit this ctx expression)
 
-    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new Exception$BadSource ctx))))
 
 
 (defn -visitMemberGetChain
@@ -470,7 +470,7 @@
 
     (. ctx scope) (into [] (map #(.. this (visitVarScope %)) (. ctx scope)))
 
-    :else (throw (new LegacyClojureSourceGenerator$BadSource ctx))))
+    :else (throw (new Exception$BadSource ctx))))
 
 
 (defn -visitVarScope

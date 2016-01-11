@@ -2,32 +2,14 @@ package jest;
 
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
-//import jdk.nashorn.internal.runtime.options.Option;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 
 public class util {
-
-    public static class ClojureSourceGeneratorException extends RuntimeException {
-        public ClojureSourceGeneratorException(String message) {
-            super(message);
-        }
-    }
-
-    public static class BadSource extends ClojureSourceGeneratorException {
-        public BadSource(ParserRuleContext context) {
-            super(String.format("Error - %s", getLineInfo(context)));
-        }
-    }
-
-    public static class NotExpressionError extends RuntimeException {
-        public NotExpressionError(ParserRuleContext context) {
-            super(String.format("Error - %s", getLineInfo(context)));
-        }
-    }
 
     public static String getLineInfo(ParserRuleContext context) {
         return String.format("%s (Line: %s Character: %s)",
@@ -61,6 +43,14 @@ public class util {
         }
         lst.add(right);
         return ImmutableList.copyOf(lst);
+    }
+
+    public static <T> Iterable<T> allButLast(List<T> lst) {
+        if (lst.size() == 0 || lst.size() == 1) {
+            return ImmutableList.of();
+        } else {
+            return lst.subList(0, lst.size()-2);
+        }
     }
 
     public static <T> Optional<T> last(List<T> lst) {
