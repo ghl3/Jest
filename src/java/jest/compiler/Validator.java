@@ -2,6 +2,7 @@ package jest.compiler;
 
 import java.util.Stack;
 
+import jest.Exception.NotYetImplemented;
 import jest.compiler.DeclaredTypes.FunctionSignature;
 import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseListener;

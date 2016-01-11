@@ -2,6 +2,7 @@ package jest.compiler;
 
 import jest.Exception.BadSource;
 import jest.Exception.NotExpressionError;
+import jest.Exception.NotYetImplemented;
 import jest.compiler.DeclaredTypes.BuiltInTypes;
 import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseVisitor;
@@ -37,8 +38,6 @@ import jest.grammar.JestParser.StatementContext;
 import jest.grammar.JestParser.StatementTermContext;
 import jest.grammar.JestParser.TypeAnnotationContext;
 import jest.grammar.JestParser.VarScopeContext;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import static jest.util.combine;
 import static jest.util.last;
@@ -176,22 +175,22 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
             return this.scope.getFunctionSignature(ctx.functionCall().ID().getText()).get().getReturnType();
         }
         else if (ctx.clojureGet() != null) {
-            throw new NotImplementedException();
+            throw new NotYetImplemented(ctx);
             //return this.visitClojureGet(ctx.clojureGet());
         }
         else if (ctx.forLoop() != null) {
-            throw new NotImplementedException();
+            throw new NotYetImplemented(ctx);
         }
         else if (ctx.conditional() != null) {
             return this.visitConditional(ctx.conditional());
         }
         else if (ctx.lambda() != null) {
-            throw new NotImplementedException();
+            throw new NotYetImplemented(ctx);
 
             //return this.visitLambda(ctx.lambda());
         }
         else if (ctx.memberGetChain() != null) {
-            throw new NotImplementedException();
+            throw new NotYetImplemented(ctx);
 
             //return this.visitMemberGetChain(ctx.memberGetChain());
         }
@@ -202,8 +201,6 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
                     return "RECORD";
                 }
             };
-
-//            return this.visitRecordConstructor(ctx.recordConstructor());
         }
         else if (ctx.block() != null) {
             return this.visitBlock(ctx.block());
