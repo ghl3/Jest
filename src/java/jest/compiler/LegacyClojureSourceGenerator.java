@@ -7,29 +7,12 @@ import java.util.List;
 import java.util.Map;
 import jest.grammar.JestParser;
 import jest.grammar.JestBaseVisitor;
-import org.antlr.v4.runtime.ParserRuleContext;
+import jest.util.BadSource;
 import org.antlr.v4.runtime.Token;
 
 
 @Deprecated
 public class LegacyClojureSourceGenerator extends JestBaseVisitor<Code> {
-
-    public static class ClojureSourceGeneratorException extends RuntimeException {
-        public ClojureSourceGeneratorException(String message) {
-            super(message);
-        }
-    }
-
-    public static class BadSource extends ClojureSourceGeneratorException {
-        public BadSource(ParserRuleContext context) {
-            super(String.format("Error - %s", getLineInfo(context)));
-        }
-    }
-
-    public static String getLineInfo(ParserRuleContext context) {
-        return String.format("%s (Line: %s Character: %s)",
-                context.getText(), context.start.getLine(), context.start.getCharPositionInLine());
-    }
 
 
     @Override

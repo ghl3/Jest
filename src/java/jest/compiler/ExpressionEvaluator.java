@@ -1,12 +1,7 @@
 package jest.compiler;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Optional;
 import jest.compiler.DeclaredTypes.BuiltInTypes;
 import jest.compiler.DeclaredTypes.Type;
-import jest.compiler.LegacyClojureSourceGenerator.BadSource;
 import jest.grammar.JestBaseVisitor;
 import jest.grammar.JestParser.ArithmeticExpressionContext;
 import jest.grammar.JestParser.ArithmeticTermContext;
@@ -40,10 +35,12 @@ import jest.grammar.JestParser.StatementContext;
 import jest.grammar.JestParser.StatementTermContext;
 import jest.grammar.JestParser.TypeAnnotationContext;
 import jest.grammar.JestParser.VarScopeContext;
-import org.antlr.v4.runtime.ParserRuleContext;
+import jest.util.BadSource;
+import jest.util.NotExpressionError;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import static jest.compiler.LegacyClojureSourceGenerator.getLineInfo;
+import static jest.util.combine;
+import static jest.util.last;
 
 
 /**
@@ -57,48 +54,6 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
         this.scope = scope;
     }
 
-    public static class NotExpressionError extends RuntimeException {
-        public NotExpressionError(ParserRuleContext context) {
-            super(String.format("Error - %s", getLineInfo(context)));
-        }
-    }
-
-    public static <T> Iterable<T> combine(T left, Iterable<T> right) {
-        List<T> lst = Lists.newArrayList();
-        lst.add(left);
-        for (T t: right) {
-            lst.add(t);
-        }
-        return ImmutableList.copyOf(lst);
-    }
-
-    public static <T> Iterable<T> combine(Iterable<T> left, Iterable<T> right) {
-        List<T> lst = Lists.newArrayList();
-        for (T t: left) {
-            lst.add(t);
-        }
-        for (T t: right) {
-            lst.add(t);
-        }
-        return ImmutableList.copyOf(lst);
-    }
-
-    public static <T> Iterable<T> combine(Iterable<T> left, T right) {
-        List<T> lst = Lists.newArrayList();
-        for (T t: left) {
-            lst.add(t);
-        }
-        lst.add(right);
-        return ImmutableList.copyOf(lst);
-    }
-
-    public static <T> Optional<T> last(List<T> lst) {
-        if (lst.size() == 0) {
-            return Optional.empty();
-        } else {
-            return Optional.of(lst.get(lst.size()-1));
-        }
-    }
 
 
     @Override
