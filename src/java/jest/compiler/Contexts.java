@@ -41,7 +41,7 @@ public class Contexts {
 
     public static Type getReturnType(Scope scope, FunctionDefContext function) {
         String returnTypeName = function.returnType.getText();
-        return scope.getVariableType(returnTypeName).orElseThrow(jestException(function));
+        return scope.getType(returnTypeName).orElseThrow(jestException(function));
     }
 
 

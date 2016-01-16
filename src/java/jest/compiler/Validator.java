@@ -36,6 +36,11 @@ public class Validator extends JestBaseListener {
             // TODO: Add signature for core functions
             scopes.peek().addFunction(func, null);
         }
+
+        // Add built-in types to the scope
+        for (Type type: Core.BuiltInTypes.values()) {
+            scopes.peek().addType(type.getName(), type);
+        }
     }
 
     public class ValidationError extends RuntimeException {

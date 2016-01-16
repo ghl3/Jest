@@ -158,9 +158,6 @@ funcTypeAnnotation
     ;
 
 
-lambda
-    : functionDefParams ARROW body=block;
-
 
 functionDef
     : DEFN name=ID functionDefParams (ARROW returnType=typeAnnotation)? block (SEMICOLON)?
@@ -181,6 +178,10 @@ functionDefParams
 functionCall
     : ID methodParams
     ;
+
+
+lambda
+    : functionDefParams ARROW body=block;
 
 
 recordDef

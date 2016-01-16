@@ -15,6 +15,8 @@ public class Scope {
 
     final Map<String, FunctionSignature> functions = new HashMap<String, FunctionSignature>();
 
+    final Map<String, Type> types = new HashMap<String, Type>();
+
     public Scope() {
         this.parent = null;
     }
@@ -26,6 +28,9 @@ public class Scope {
     boolean isGlobalScope() {
         return parent == null;
     }
+
+
+    // Variables
 
     public boolean isVariableInCurrentScope(String varName) {
         if (variables.containsKey(varName)) {
@@ -56,7 +61,38 @@ public class Scope {
         return Optional.ofNullable(this.variables.get(name));
     }
 
-    ///////
+    // Types
+
+    public boolean isTypeInCurrentScope(String varName) {
+        if (types.containsKey(varName)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isTypeInScope(String varName) {
+        if (isTypeInCurrentScope(varName)) {
+            return true;
+        }
+
+        if (parent == null) {
+            return false;
+        } else {
+            return parent.isTypeInScope(varName);
+        }
+    }
+
+    void addType(String varName, Type type) {
+        types.put(varName, type);
+    }
+
+
+    public Optional<Type> getType(String name) {
+        return Optional.ofNullable(this.types.get(name));
+    }
+
+    // Functions
 
     public boolean isFunctionInCurrentScope(String varName) {
         if (functions.containsKey(varName)) {

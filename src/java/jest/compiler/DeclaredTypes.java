@@ -1,7 +1,9 @@
 package jest.compiler;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 public class DeclaredTypes {
@@ -66,55 +68,4 @@ public class DeclaredTypes {
         }
     }
 
-
-    enum BuiltInTypes implements Type {
-        String {
-            @Override
-            public String getName() {
-                return "jest.String";
-            }
-        },
-        Symbol {
-            @Override
-            public String getName() {
-                return "jest.Symbol";
-            }
-        },
-        Number {
-            @Override
-            public String getName() {
-                return "jest.Number";
-            }
-        },
-        Map {
-            @Override
-            public String getName() {
-                return "jest.Map";
-            }
-        },
-        List {
-            @Override
-            public String getName() {
-                return "jest.List";
-            }
-        },
-        Vector {
-            @Override
-            public String getName() {
-                return "jest.Vector";
-            }
-        },
-        Boolean {
-            @Override
-            public String getName() {
-                return "jest.Boolean";
-            }
-        },
-        Nil {
-            @Override
-            public String getName() {
-                return "jest.Nil";
-            }
-        }
-    }
 }

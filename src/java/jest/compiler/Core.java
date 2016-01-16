@@ -3,9 +3,64 @@ package jest.compiler;
 
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
+import jest.compiler.DeclaredTypes.Type;
 
 
 public class Core {
+
+
+    enum BuiltInTypes implements Type {
+        String {
+            @Override
+            public String getName() {
+                return "String";
+            }
+        },
+        Symbol {
+            @Override
+            public String getName() {
+                return "Symbol";
+            }
+        },
+        Number {
+            @Override
+            public String getName() {
+                return "Number";
+            }
+        },
+        Map {
+            @Override
+            public String getName() {
+                return "Map";
+            }
+        },
+        List {
+            @Override
+            public String getName() {
+                return "List";
+            }
+        },
+        Vector {
+            @Override
+            public String getName() {
+                return "Vector";
+            }
+        },
+        Boolean {
+            @Override
+            public String getName() {
+                return "Boolean";
+            }
+        },
+        Nil {
+            @Override
+            public String getName() {
+                return "Nil";
+            }
+        }
+    }
+
+
 
     public static final Set<String> clojureCoreFunctions = ImmutableSet.of("accessor","aclone","add-classpath","add-watch","agent","agent-error",
         "agent-errors","aget","alength","alias","all-ns","alter","alter-meta!","alter-var-root","amap","ancestors","and","apply","areduce",

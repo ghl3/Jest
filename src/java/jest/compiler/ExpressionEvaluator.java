@@ -3,7 +3,7 @@ package jest.compiler;
 import jest.Exception.BadSource;
 import jest.Exception.NotExpressionError;
 import jest.Exception.NotYetImplemented;
-import jest.compiler.DeclaredTypes.BuiltInTypes;
+import jest.compiler.Core.BuiltInTypes;
 import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseVisitor;
 import jest.grammar.JestParser.ArithmeticExpressionContext;

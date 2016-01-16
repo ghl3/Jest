@@ -1,7 +1,9 @@
 package jest;
 
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
@@ -15,13 +17,17 @@ public class Utils {
             context.getText(), context.start.getLine(), context.start.getCharPositionInLine());
     }
 
+    public static <T> Iterable<T> removeNulls(Iterable<T> lst) {
+        return Iterables.filter(lst, Predicates.notNull());
+    }
+
     public static <T> Iterable<T> combine(T left, Iterable<T> right) {
         List<T> lst = Lists.newArrayList();
         lst.add(left);
         for (T t: right) {
             lst.add(t);
         }
-        return ImmutableList.copyOf(lst);
+        return ImmutableList.copyOf(removeNulls(lst));
     }
 
     public static <T> Iterable<T> combine(Iterable<T> left, Iterable<T> right) {
@@ -32,7 +38,7 @@ public class Utils {
         for (T t: right) {
             lst.add(t);
         }
-        return ImmutableList.copyOf(lst);
+        return ImmutableList.copyOf(removeNulls(lst));
     }
 
     public static <T> Iterable<T> combine(Iterable<T> left, T right) {
@@ -41,7 +47,7 @@ public class Utils {
             lst.add(t);
         }
         lst.add(right);
-        return ImmutableList.copyOf(lst);
+        return ImmutableList.copyOf(removeNulls(lst));
     }
 
     public static <T> Iterable<T> allButLast(List<T> lst) {
