@@ -1,5 +1,6 @@
 package jest.compiler;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 
@@ -33,6 +34,36 @@ public class DeclaredTypes {
         List<Type> getParameterTypes();
         Type getReturnType();
         String getName();
+    }
+
+    public static class DeclaredFunctionSignature implements FunctionSignature {
+
+        final String name;
+
+        final List<Type> parameterTypes;
+
+        final Type returnType;
+
+        public DeclaredFunctionSignature(String name, List<Type> parameterTypes, Type returnType) {
+            this.name = name;
+            this.parameterTypes = ImmutableList.copyOf(parameterTypes);
+            this.returnType = returnType;
+        }
+
+        @Override
+        public List<Type> getParameterTypes() {
+            return ImmutableList.copyOf(parameterTypes);
+        }
+
+        @Override
+        public Type getReturnType() {
+            return returnType;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
     }
 
 

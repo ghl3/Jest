@@ -2,20 +2,18 @@ package jest.compiler;
 
 import java.util.Stack;
 
-import jest.Exception.NotYetImplemented;
 import jest.Exception.TypeMismatchError;
 import jest.compiler.DeclaredTypes.FunctionSignature;
 import jest.compiler.DeclaredTypes.Type;
-import jest.compiler.DeclaredTypes.UserType;
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
 
-import jest.grammar.JestParser.ExpressionContext;
-import jest.grammar.JestParser.TypeAnnotationContext;
 import org.antlr.v4.runtime.Token;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import static jest.compiler.Contexts.getFunctionSignature;
+import static jest.compiler.Contexts.getType;
 import static jest.compiler.DeclaredTypes.typesEqual;
 
 
@@ -26,12 +24,6 @@ public class Validator extends JestBaseListener {
     public Scope currentScope() {
         return scopes.peek();
     }
-
-
-    public static Type getExpressionType(Scope scope, ExpressionContext expression) {
-        return new ExpressionEvaluator(scope).visit(expression);
-    }
-
 
     public Validator() {
         scopes = new Stack<Scope>();
@@ -89,19 +81,18 @@ public class Validator extends JestBaseListener {
         }
     }
 
-
-    public static FunctionSignature getFunctionSignature(JestParser.FunctionDefContext function) {
-        return null;
-    }
-
-
     @Override
     public void enterFunctionDef(JestParser.FunctionDefContext ctx) {
         if (currentScope().isFunctionInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
         } else {
-            FunctionSignature sig = getFunctionSignature(ctx);
-            currentScope().addFunction(ctx.name.getText(), sig);
+            // TODO: Remove the "else" when we require all functions to be annotated
+            if (ctx.typeAnnotation() != null) {
+                FunctionSignature sig = getFunctionSignature(currentScope(), ctx);
+                currentScope().addFunction(ctx.name.getText(), sig);
+            } else {
+                currentScope().addFunction(ctx.name.getText(), null);
+            }
         }
 
         Scope functionBodyScope = createNewScope(scopes);
@@ -113,7 +104,6 @@ public class Validator extends JestBaseListener {
             // TODO: Add the signature types the scope
             currentScope().addVariable(node.getText(), null);
         }
-
     }
 
 
@@ -227,31 +217,24 @@ public class Validator extends JestBaseListener {
     }
 
 
-    public static Type getAnnotatedType(TypeAnnotationContext ctx) {
-        if (ctx.singleType != null) {
-            return new UserType(ctx.singleType.getText());
-        } else {
-            throw new NotYetImplemented(ctx);
-        }
-    }
-
     @Override
     public void enterDefAssignment(JestParser.DefAssignmentContext ctx) {
         if (currentScope().isVariableInCurrentScope(ctx.name.getText())) {
             throw new AlreadyDeclared(ctx.name);
         }
 
-        Type type = getExpressionType(currentScope(), ctx.expression());
+        Type expressionType = getType(currentScope(), ctx.expression());
 
         if (ctx.typeAnnotation() != null) {
-            Type annotatedType = getAnnotatedType(ctx.typeAnnotation());
+            Type annotatedType = getType(ctx.typeAnnotation());
 
-            if (!typesEqual(annotatedType, type)) {
+            if (!typesEqual(annotatedType, expressionType)) {
                 throw new TypeMismatchError(ctx);
             }
         }
 
-        currentScope().addVariable(ctx.name.getText(), type);
+        // TODO: This should be the annotated type
+        currentScope().addVariable(ctx.name.getText(), expressionType);
     }
 
     @Override

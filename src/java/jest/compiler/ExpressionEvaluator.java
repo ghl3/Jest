@@ -39,8 +39,8 @@ import jest.grammar.JestParser.StatementTermContext;
 import jest.grammar.JestParser.TypeAnnotationContext;
 import jest.grammar.JestParser.VarScopeContext;
 
-import static jest.util.combine;
-import static jest.util.last;
+import static jest.Utils.combine;
+import static jest.Utils.last;
 
 
 /**

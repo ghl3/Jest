@@ -1,9 +1,10 @@
 package jest;
 
 
+import java.util.function.Supplier;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import static jest.util.getLineInfo;
+import static jest.Utils.getLineInfo;
 
 public class Exception {
 
@@ -37,4 +38,27 @@ public class Exception {
         }
     }
 
+
+    public static  Supplier<BadSource> jestException(final ParserRuleContext ctx) {
+        return new Supplier<BadSource>() {
+            @Override
+            public BadSource get() {
+                return new BadSource(ctx);
+            }
+        };
+    }
+
+
+    public static <T extends JestCompilerException> Supplier<T> jestException(final Class<T> clazz, final ParserRuleContext ctx) {
+        return new Supplier<T>() {
+            @Override
+            public T get() {
+                try {
+                    return clazz.getConstructor(ParserRuleContext.class).newInstance(ctx);
+                } catch (Throwable thr) {
+                    throw new JestCompilerException("Error throwing exception!");
+                }
+            }
+        };
+    }
 }

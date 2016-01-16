@@ -163,18 +163,18 @@ lambda
 
 
 functionDef
-    : DEFN name=ID functionDefParams (COLON a=funcTypeAnnotation ARROW c=typeAnnotation)? block (SEMICOLON)?
+    : DEFN name=ID functionDefParams (ARROW returnType=typeAnnotation)? block (SEMICOLON)?
     ;
 
 
 methodDef
-    : DEFN name=ID functionDefParams (COLON a=funcTypeAnnotation ARROW c=typeAnnotation)? block (SEMICOLON)?
+    : DEFN name=ID functionDefParams (ARROW returnType=typeAnnotation)? block (SEMICOLON)?
     ;
 
 
 functionDefParams
     : '(' ')'
-    | '(' first=ID (COMMA rest+=ID)* ')'
+    | '(' first=ID (COLON firstType=typeAnnotation)? (COMMA rest+=ID (COLON restTypes+=typeAnnotation)? )* ')'
     ;
 
 

@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 
-public class util {
+public class Utils {
 
     public static String getLineInfo(ParserRuleContext context) {
         return String.format("%s (Line: %s Character: %s)",
