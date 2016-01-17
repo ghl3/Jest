@@ -37,12 +37,40 @@ public class DeclaredTypes {
         }
     }
 
+    public static class GenericType implements Type {
+
+        final String name;
+
+        public GenericType(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Boolean implementsType(Type type) {
+            if (!type.getClass().isAssignableFrom(GenericType.class)) {
+                return false;
+            } else {
+                return this.getName().equals(type.getName());
+            }
+        }
+
+    }
+
     public interface FunctionSignature {
         String getName();
         List<String> getParameterNames();
         List<Type> getParameterTypes();
         Type getReturnType();
+        Boolean isGeneric();
+
+        //List<Type> matches
     }
+
 
     public static class DeclaredFunctionSignature implements FunctionSignature {
 
@@ -80,6 +108,55 @@ public class DeclaredTypes {
         public String getName() {
             return name;
         }
+
+        @Override
+        public Boolean isGeneric() {
+            return false;
+        }
     }
 
+
+
+    public static class GenericFunctionSignature implements FunctionSignature {
+
+        final String name;
+
+        final List<String> parameterNames;
+
+        final List<Type> parameterTypes;
+
+        final Type returnType;
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public List<String> getParameterNames() {
+            return null;
+        }
+
+        @Override
+        public List<Type> getParameterTypes() {
+            return null;
+        }
+
+        @Override
+        public Type getReturnType() {
+            return null;
+        }
+
+        @Override
+        public Boolean isGeneric() {
+            return true;
+        }
+
+        public GenericFunctionSignature(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
+            this.name = name;
+            this.parameterNames = ImmutableList.copyOf(parameterNames);
+            this.parameterTypes = ImmutableList.copyOf(parameterTypes);
+            this.returnType = returnType;
+        }
+    }
 }

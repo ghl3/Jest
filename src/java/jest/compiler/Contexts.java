@@ -2,11 +2,17 @@ package jest.compiler;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import jest.Exception.BadSource;
 import jest.Exception.NotYetImplemented;
+import jest.Utils.Pair;
 import jest.compiler.DeclaredTypes.DeclaredFunctionSignature;
 import jest.compiler.DeclaredTypes.FunctionSignature;
+import jest.compiler.DeclaredTypes.GenericFunctionSignature;
+import jest.compiler.DeclaredTypes.GenericType;
 import jest.compiler.DeclaredTypes.Type;
 import jest.compiler.DeclaredTypes.UserType;
 import jest.grammar.JestParser.ExpressionContext;
@@ -22,6 +28,7 @@ import org.antlr.v4.runtime.Token;
 import static jest.Exception.jestException;
 import static jest.Utils.combine;
 import static jest.Utils.removeNulls;
+import static jest.Utils.zip;
 
 
 public class Contexts {
@@ -58,6 +65,10 @@ public class Contexts {
         return getArgumentTypes(scope, ctx.methodParams());
     }
 
+    //public static Boolean isFunctionSignatureGeneric(FunctionSignature ctx) {
+//        return
+//    }
+
 
     public static List<ExpressionContext> getExpressions(ExpressionListContext ctx) {
         return ImmutableList.copyOf(removeNulls(combine(ctx.a, ctx.b)));
@@ -85,19 +96,24 @@ public class Contexts {
 
 
     public static FunctionSignature getFunctionSignature(Scope scope, FunctionDefContext function) {
+        String name = getName(function);
         Type returnType = getReturnType(scope, function);
         List<String> parameterNames = getParameterNames(function.functionDefParams());
-        List<Type> parameterTypes = getParameterTypes(function.functionDefParams());
-        return new DeclaredFunctionSignature(getName(function), parameterNames, parameterTypes, returnType);
+
+        if (function.firstGenericParam==null) {
+            List<Type> parameterTypes = getParameterTypes(function.functionDefParams());
+            return new DeclaredFunctionSignature(name, parameterNames, parameterTypes, returnType);
+        } else {
+            Set<String> genericTypes = getGenericParameers(function); //Maps.newHashMap()
+            List<Type> parameterTypes = getGenericParameterTypes(function.functionDefParams(), genericTypes);
+            return new GenericFunctionSignature(name, parameterNames, parameterTypes, returnType);
+        }
     }
 
 
     public static FunctionSignature getMethodSignature(MethodDefContext function) {
         return null;
     }
-
-
-    //getParameterNames
 
 
     private static List<String> getParameterNames(FunctionDefParamsContext functionDefParamsContext) {
@@ -114,6 +130,26 @@ public class Contexts {
             types.add(getType(typeAnn));
         }
         return ImmutableList.copyOf(types);
+    }
+
+    private static List<Type> getGenericParameterTypes(FunctionDefParamsContext functionDefParamsContext, Set<String> genericParameters) {
+        List<Type> types = Lists.newArrayList();
+        for (Pair<String, TypeAnnotationContext> pair: zip(getParameterNames(functionDefParamsContext), combine(functionDefParamsContext.firstType, functionDefParamsContext.restTypes))) {
+            if (genericParameters.contains(pair.left)) {
+                types.add(new GenericType(pair.left));
+            } else {
+                types.add(getType(pair.right));
+            }
+        }
+        return ImmutableList.copyOf(types);
+    }
+
+    private static Set<String> getGenericParameers(FunctionDefContext function) {
+        Set<String> genericParameters = Sets.newHashSet();
+        for (Token foo: combine(function.firstGenericParam, function.genericParameter)) {
+            genericParameters.add(foo.getText());
+        }
+        return genericParameters;
     }
 
 }

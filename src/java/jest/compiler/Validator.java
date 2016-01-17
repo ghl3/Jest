@@ -11,6 +11,7 @@ import jest.Exception.VariableTypeMismatch;
 import jest.Exception.WrongNumberOfFunctionParameters;
 import jest.Utils.Triplet;
 import jest.compiler.DeclaredTypes.FunctionSignature;
+import jest.compiler.DeclaredTypes.GenericType;
 import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
@@ -84,15 +85,16 @@ public class Validator extends JestBaseListener {
 
         if (currentScope().isFunctionInCurrentScope(ctx.name.getText())) {
             throw new FunctionAlreadyDeclared(ctx, functionName);
-        } else {
-            // TODO: Remove the "else" when we require all functions to be annotated
-            if (ctx.typeAnnotation() != null) {
-                FunctionSignature sig = getFunctionSignature(currentScope(), ctx);
-                currentScope().addFunction(functionName, sig);
-            } else {
-                currentScope().addFunction(functionName, null);
-            }
         }
+
+        // TODO: Remove the "else" when we require all functions to be annotated
+        if (ctx.typeAnnotation() != null) {
+            FunctionSignature sig = getFunctionSignature(currentScope(), ctx);
+            currentScope().addFunction(functionName, sig);
+        } else {
+            currentScope().addFunction(functionName, null);
+        }
+
 
         Scope functionBodyScope = createNewScope(scopes);
 
@@ -272,6 +274,34 @@ public class Validator extends JestBaseListener {
 
         if (!currentScope().getFunctionSignature(functionName).isPresent()) {
             System.out.println(String.format("No present signature for function: %s", functionName));
+        } else if (currentScope().getFunctionSignature(functionName).get().isGeneric()) {
+
+            List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
+
+            FunctionSignature typeSignature = currentScope()
+                .getFunctionSignature(functionName)
+                .orElseThrow(jestException(ctx));
+
+            if (argumentTypes.size() != typeSignature.getParameterTypes().size()) {
+                throw new WrongNumberOfFunctionParameters(ctx,
+                    typeSignature.getParameterTypes().size(),
+                    argumentTypes.size());
+            }
+
+            // Check the non=genric parameters
+            for (Triplet<String, Type, Type> types : zip(typeSignature.getParameterNames(), typeSignature.getParameterTypes(), argumentTypes)) {
+                if (types._1.getClass().isAssignableFrom(GenericType.class)) {
+                    continue;
+                }
+                if (!typesEqual(types._1, types._2)) {
+                    throw new FunctionParameterTypeMismatch(ctx, functionName, types._0, types._1, types._2);
+                }
+            }
+
+            // Now, check that the generic parameters are consistent
+
+
+
         } else {
 
             List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
