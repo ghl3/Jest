@@ -51,15 +51,6 @@ public class JestCompiler {
         return parser.sourceCode();
     }
 
-    public static JestParser.ExpressionContext compileSourceCodeToExpression(String source)
-        throws org.antlr.v4.runtime.RecognitionException {
-
-        JestParser parser = createParser(source);
-
-        // Generate the AST of the source code
-        return parser.expression();
-    }
-
 
     public static void validate(String source) throws ValidationException{
         ParseTree tree = compileSourceCodeToParseTree(source);

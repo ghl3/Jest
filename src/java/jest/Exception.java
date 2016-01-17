@@ -16,6 +16,7 @@ public class Exception {
         }
     }
 
+
     public static class BadSource extends JestTranslationException {
         public BadSource(ParserRuleContext context) {
             super("Invalid Source Code", context);
@@ -38,11 +39,13 @@ public class Exception {
         }
     }
 
+
     public static class NotExpression extends ValidationException {
         public NotExpression(ParserRuleContext context) {
             super("Expected an expression, but encountered something else", context);
         }
     }
+
 
     public static class VariableTypeMismatch extends ValidationException {
         public VariableTypeMismatch(ParserRuleContext context, String varName, Type expected, Type encountered) {
@@ -51,12 +54,14 @@ public class Exception {
         }
     }
 
+
     public static class WrongNumberOfFunctionParameters extends ValidationException {
         public WrongNumberOfFunctionParameters(ParserRuleContext context, Integer expected, Integer encountered) {
             super(String.format("Expected %s function parameters but encountered %s",
                 expected, encountered), context);
         }
     }
+
 
     public static class FunctionParameterTypeMismatch extends ValidationException {
         public FunctionParameterTypeMismatch(ParserRuleContext context, String funcName, String paramName,
@@ -66,20 +71,6 @@ public class Exception {
         }
     }
 
-    /*
-    public static class TypeMismatch extends ValidationException {
-        public TypeMismatch(ParserRuleContext context) {
-            super(String.format("Bad Parameters - %s", getLineInfo(context)));
-        }
-    }
-
-
-    public static class BadParameters extends ValidationException {
-        public BadParameters(ParserRuleContext context) {
-            super(String.format("Bad Parameters - %s", getLineInfo(context)));
-        }
-    }
-*/
 
     public static class VariableAlreadyDeclared extends ValidationException {
         public VariableAlreadyDeclared(ParserRuleContext ctx, String variableName) {
@@ -88,6 +79,7 @@ public class Exception {
                 ctx);
         }
     }
+
 
     public static class FunctionAlreadyDeclared extends ValidationException {
         public FunctionAlreadyDeclared(ParserRuleContext ctx, String variableName) {
@@ -113,18 +105,6 @@ public class Exception {
         }
     }
 
-/*
-    public class NotDeclared extends ValidationException {
-        public NotDeclared(TerminalNode token) {
-            super(String.format("Error - Line %s: Attempting to use variable %s that has not been declared",
-                token.getSymbol().getLine(), token.getText()));
-        }
-    }*/
-
-
-
-
-
 
     public static  Supplier<BadSource> jestException(final ParserRuleContext ctx) {
         return new Supplier<BadSource>() {
@@ -135,19 +115,4 @@ public class Exception {
         };
     }
 
-
-    /*
-    public static <T extends Exception.JestTranslationException> Supplier<T> jestException(final Class<T> clazz, final ParserRuleContext ctx) {
-        return new Supplier<T>() {
-            @Override
-            public T get() {
-                try {
-                    return clazz.getConstructor(ParserRuleContext.class).newInstance(ctx);
-                } catch (Throwable thr) {
-                    throw new JestTranslationException("Error throwing exception!");
-                }
-            }
-        };
-    }
-    */
 }

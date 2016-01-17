@@ -2,7 +2,6 @@ package jest.compiler;
 
 import java.util.List;
 import java.util.Stack;
-
 import jest.Exception.FunctionAlreadyDeclared;
 import jest.Exception.FunctionParameterTypeMismatch;
 import jest.Exception.UnknownFunction;
@@ -15,12 +14,10 @@ import jest.compiler.DeclaredTypes.FunctionSignature;
 import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
-
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import static jest.Exception.jestException;
 import static jest.Utils.zip;
-
 import static jest.compiler.Contexts.getArgumentTypes;
 import static jest.compiler.Contexts.getFunctionName;
 import static jest.compiler.Contexts.getFunctionSignature;
@@ -56,7 +53,6 @@ public class Validator extends JestBaseListener {
     }
 
 
-
     /**
        Create a new scope and return that scope
      */
@@ -66,6 +62,7 @@ public class Validator extends JestBaseListener {
         scopes.push(newScope);
         return newScope;
     }
+
 
     /**
        Drop the highest scope and return the
@@ -250,8 +247,8 @@ public class Validator extends JestBaseListener {
 
         if (ctx.ID() != null) {
             String name = ctx.ID().getText();
-            if (!currentScope().isVariableOrFunctionInScope(name)) { //ctx.ID().getTextisVariableOrFunctionInScope(ctx.ID().getText())) {
-                throw new UnknownVariable(ctx, name); //ctx.ID());
+            if (!currentScope().isVariableOrFunctionInScope(name)) {
+                throw new UnknownVariable(ctx, name);
             }
         }
     }
@@ -262,7 +259,7 @@ public class Validator extends JestBaseListener {
         String functionName = getFunctionName(ctx);
 
         if (!currentScope().isFunctionInScope(functionName)) {
-            throw new UnknownFunction(ctx, functionName); //ctx.ID());
+            throw new UnknownFunction(ctx, functionName);
         }
 
         // Get the types of the parameters being called
