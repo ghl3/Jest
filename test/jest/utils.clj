@@ -71,6 +71,12 @@
     (is (= code-val val))))
 
 
+(defmacro test-code-valid
+  "Test that the given jest
+  code is valid."
+  [jest]
+  (is (JestCompiler/validate jest) true))
+
 
 
 (defmacro test-code-exception

@@ -225,7 +225,13 @@ public class Validator extends JestBaseListener {
             throw new VariableAlreadyDeclared(ctx, name);
         }
 
-        Type expressionType = getType(currentScope(), ctx.expression());
+        Type expressionType;
+        try {
+            expressionType = getType(currentScope(), ctx.expression());
+        } catch (Exception e) {
+            System.out.println("Cannot determine expression type");
+            expressionType = null;
+        }
 
         if (ctx.typeAnnotation() != null) {
             Type annotatedType = getType(ctx.typeAnnotation());
@@ -263,11 +269,12 @@ public class Validator extends JestBaseListener {
         }
 
         // Get the types of the parameters being called
-        List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
 
         if (!currentScope().getFunctionSignature(functionName).isPresent()) {
             System.out.println(String.format("No present signature for function: %s", functionName));
         } else {
+
+            List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
 
             FunctionSignature typeSignature = currentScope()
                 .getFunctionSignature(functionName)

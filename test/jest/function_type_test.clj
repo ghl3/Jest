@@ -12,6 +12,19 @@
     9.0))
 
 
+(deftest func-type-test-2
+  (test-code-valid
+    "def myList = range(0, 100, 10);
+    def incremented = map(inc, myList);
+    defn square(x: Number) -> Number {
+         x*x;}
+    def squared = map(square, incremented);
+    println(squared);
+    def halfRange = (squared.first() + squared.last()) / 2;
+    println(halfRange);"))
+
+
+
 (deftest func-type-mismatch-1
   (test-code-exception
     "defn square(x: Number) -> Number {x*x}; square(\"three\");"
