@@ -11,6 +11,7 @@ public class DeclaredTypes {
 
     public interface Type {
         String getName();
+        Boolean implementsType(Type type);
     }
 
     public static boolean typesEqual(Type left, Type right) {
@@ -29,14 +30,18 @@ public class DeclaredTypes {
         public String getName() {
             return name;
         }
+
+        @Override
+        public Boolean implementsType(Type type) {
+            return this.getName().equals(type.getName());
+        }
     }
 
-
     public interface FunctionSignature {
+        String getName();
         List<String> getParameterNames();
         List<Type> getParameterTypes();
         Type getReturnType();
-        String getName();
     }
 
     public static class DeclaredFunctionSignature implements FunctionSignature {

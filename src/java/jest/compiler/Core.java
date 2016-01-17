@@ -10,6 +10,13 @@ public class Core {
 
 
     enum BuiltInTypes implements Type {
+
+        Any {
+            @Override
+            public String getName() {
+                return "Any";
+            }
+        },
         String {
             @Override
             public String getName() {
@@ -57,6 +64,11 @@ public class Core {
             public String getName() {
                 return "Nil";
             }
+        };
+
+        @Override
+        public Boolean implementsType(Type type) {
+            return this.getName().equals(type.getName());
         }
     }
 

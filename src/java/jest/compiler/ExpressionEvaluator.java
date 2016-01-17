@@ -5,6 +5,7 @@ import jest.Exception.NotExpression;
 import jest.Exception.NotYetImplemented;
 import jest.compiler.Core.BuiltInTypes;
 import jest.compiler.DeclaredTypes.Type;
+import jest.compiler.DeclaredTypes.UserType;
 import jest.grammar.JestBaseVisitor;
 import jest.grammar.JestParser.ArithmeticExpressionContext;
 import jest.grammar.JestParser.ArithmeticTermContext;
@@ -195,12 +196,8 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
             //return this.visitMemberGetChain(ctx.memberGetChain());
         }
         else if (ctx.recordConstructor() != null) {
-            return new Type() {
-                @Override
-                public String getName() {
-                    return "RECORD";
-                }
-            };
+            // TODO: Add Records to type system
+            return new UserType("Record");
         }
         else if (ctx.block() != null) {
             return this.visitBlock(ctx.block());
