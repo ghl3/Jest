@@ -160,7 +160,11 @@ funcTypeAnnotation
 
 
 functionDef
-    : DEFN name=ID functionDefParams (ARROW returnType=typeAnnotation)? block (SEMICOLON)?
+    : DEFN
+    ('<' firstGenericParam=ID (COMMA? genericParameter+=ID)* '>')?
+    name=ID functionDefParams
+    (ARROW returnType=typeAnnotation)?
+    block (SEMICOLON)?
     ;
 
 

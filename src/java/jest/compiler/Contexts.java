@@ -28,7 +28,7 @@ public class Contexts {
 
 
     public static String getName(FunctionDefContext ctx) {
-        return ctx.ID().getText();
+        return ctx.name.getText();
     }
 
 
