@@ -1,42 +1,129 @@
 package jest;
 
-
 import java.util.function.Supplier;
+import jest.compiler.DeclaredTypes.Type;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import static jest.Utils.getLineInfo;
 
 public class Exception {
 
-    public static class JestCompilerException extends RuntimeException {
-        public JestCompilerException(String message) {
-            super(message);
+    // Translation Exceptions
+
+    public static class JestTranslationException extends RuntimeException {
+        public JestTranslationException(String message, ParserRuleContext ctx) {
+            super(String.format("%s - %s", message, getLineInfo(ctx)));
         }
     }
 
-    public static class BadSource extends JestCompilerException {
+    public static class BadSource extends JestTranslationException {
         public BadSource(ParserRuleContext context) {
-            super(String.format("Error - %s", getLineInfo(context)));
+            super("Invalid Source Code", context);
         }
     }
 
-    public static class NotExpressionError extends RuntimeException {
-        public NotExpressionError(ParserRuleContext context) {
-            super(String.format("Error - %s", getLineInfo(context)));
+
+    public static class NotYetImplemented extends JestTranslationException {
+        public NotYetImplemented(ParserRuleContext context, String feature) {
+            super(String.format("The Feature %s has not yet been implemented", feature), context);
         }
     }
 
-    public static class TypeMismatchError extends JestCompilerException {
-        public TypeMismatchError(ParserRuleContext context) {
-            super(String.format("Type Mismatch - %s", getLineInfo(context)));
+
+    // Validation Exceptions
+
+    public static class ValidationException extends RuntimeException {
+        public ValidationException(String message, ParserRuleContext ctx) {
+            super(String.format("%s - %s", message, getLineInfo(ctx)));
         }
     }
 
-    public static class NotYetImplemented extends JestCompilerException {
-        public NotYetImplemented(ParserRuleContext context) {
-            super(String.format("Feature Not Yet Implemented - %s", getLineInfo(context)));
+    public static class NotExpression extends ValidationException {
+        public NotExpression(ParserRuleContext context) {
+            super("Expected an expression, but encountered something else", context);
         }
     }
+
+    public static class VariableTypeMismatch extends ValidationException {
+        public VariableTypeMismatch(ParserRuleContext context, String varName, Type expected, Type encountered) {
+            super(String.format("Expected variable %s to have type %s but found type %s",
+                varName, expected, encountered), context);
+        }
+    }
+
+    public static class WrongNumberOfFunctionParameters extends ValidationException {
+        public WrongNumberOfFunctionParameters(ParserRuleContext context, Integer expected, Integer encountered) {
+            super(String.format("Expected %s function parameters but encountered %s",
+                expected, encountered), context);
+        }
+    }
+
+    public static class FunctionParameterTypeMismatch extends ValidationException {
+        public FunctionParameterTypeMismatch(ParserRuleContext context, String funcName, String paramName,
+                                             Type expected, Type encountered) {
+            super(String.format("Expected parameter %s for function %s to have type %s but has type %s",
+                paramName, funcName, expected, encountered), context);
+        }
+    }
+
+    /*
+    public static class TypeMismatch extends ValidationException {
+        public TypeMismatch(ParserRuleContext context) {
+            super(String.format("Bad Parameters - %s", getLineInfo(context)));
+        }
+    }
+
+
+    public static class BadParameters extends ValidationException {
+        public BadParameters(ParserRuleContext context) {
+            super(String.format("Bad Parameters - %s", getLineInfo(context)));
+        }
+    }
+*/
+
+    public static class VariableAlreadyDeclared extends ValidationException {
+        public VariableAlreadyDeclared(ParserRuleContext ctx, String variableName) {
+            super(String.format("Trying to declare a variable with name %s but a variable " +
+                "with that name has already been declared in this scope", variableName),
+                ctx);
+        }
+    }
+
+    public static class FunctionAlreadyDeclared extends ValidationException {
+        public FunctionAlreadyDeclared(ParserRuleContext ctx, String variableName) {
+            super(String.format("Trying to declare a function with name %s but a variable " +
+                    "with that name has already been declared in this scope", variableName),
+                ctx);
+        }
+    }
+
+
+    public static class UnknownVariable extends ValidationException {
+        public UnknownVariable(ParserRuleContext ctx, String variableName) {
+            super(String.format("Encountered an unknown variable with name %s", variableName),
+                ctx);
+        }
+    }
+
+
+    public static class UnknownFunction extends ValidationException {
+        public UnknownFunction(ParserRuleContext ctx, String variableName) {
+            super(String.format("Encountered an unknown function with name %s", variableName),
+                ctx);
+        }
+    }
+
+/*
+    public class NotDeclared extends ValidationException {
+        public NotDeclared(TerminalNode token) {
+            super(String.format("Error - Line %s: Attempting to use variable %s that has not been declared",
+                token.getSymbol().getLine(), token.getText()));
+        }
+    }*/
+
+
+
+
 
 
     public static  Supplier<BadSource> jestException(final ParserRuleContext ctx) {
@@ -49,16 +136,18 @@ public class Exception {
     }
 
 
-    public static <T extends JestCompilerException> Supplier<T> jestException(final Class<T> clazz, final ParserRuleContext ctx) {
+    /*
+    public static <T extends Exception.JestTranslationException> Supplier<T> jestException(final Class<T> clazz, final ParserRuleContext ctx) {
         return new Supplier<T>() {
             @Override
             public T get() {
                 try {
                     return clazz.getConstructor(ParserRuleContext.class).newInstance(ctx);
                 } catch (Throwable thr) {
-                    throw new JestCompilerException("Error throwing exception!");
+                    throw new JestTranslationException("Error throwing exception!");
                 }
             }
         };
     }
+    */
 }

@@ -1,7 +1,7 @@
 package jest.compiler;
 
 import jest.Exception.BadSource;
-import jest.Exception.NotExpressionError;
+import jest.Exception.NotExpression;
 import jest.Exception.NotYetImplemented;
 import jest.compiler.Core.BuiltInTypes;
 import jest.compiler.DeclaredTypes.Type;
@@ -61,7 +61,7 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
         if (ctx.expression() != null) {
             return this.visitExpression(ctx.expression());
         } else if (ctx.defAssignment() != null) {
-            throw new NotExpressionError(ctx);
+            throw new NotExpression(ctx);
         } else {
             throw new BadSource(ctx);
         }
@@ -175,22 +175,22 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
             return this.scope.getFunctionSignature(ctx.functionCall().ID().getText()).get().getReturnType();
         }
         else if (ctx.clojureGet() != null) {
-            throw new NotYetImplemented(ctx);
+            throw new NotYetImplemented(ctx, "clojureGet");
             //return this.visitClojureGet(ctx.clojureGet());
         }
         else if (ctx.forLoop() != null) {
-            throw new NotYetImplemented(ctx);
+            throw new NotYetImplemented(ctx, "forLoop");
         }
         else if (ctx.conditional() != null) {
             return this.visitConditional(ctx.conditional());
         }
         else if (ctx.lambda() != null) {
-            throw new NotYetImplemented(ctx);
+            throw new NotYetImplemented(ctx, "lambda");
 
             //return this.visitLambda(ctx.lambda());
         }
         else if (ctx.memberGetChain() != null) {
-            throw new NotYetImplemented(ctx);
+            throw new NotYetImplemented(ctx, "memberGetChain");
 
             //return this.visitMemberGetChain(ctx.memberGetChain());
         }
@@ -311,9 +311,9 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
             return this.visitStatement(ctx.statement());
             //throw new NotExpressionError(ctx);
         } else if (ctx.functionDef() != null) {
-            throw new NotExpressionError(ctx);
+            throw new NotExpression(ctx);
         } else if (ctx.recordDef() != null) {
-            throw new NotExpressionError(ctx);
+            throw new NotExpression(ctx);
         } else if (ctx.block() != null) {
             return this.visitBlock(ctx.block());
         } else if (ctx.varScope() != null) {

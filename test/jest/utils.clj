@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [jest.parser :refer :all]
             [environ.core :refer [env]])
-  (:import (clojure.lang ExceptionInfo)))
+  (:import (clojure.lang ExceptionInfo)
+           (jest.compiler JestCompiler)))
 
 
 (defn test-println [& log]
@@ -68,6 +69,23 @@
     (test-println "Code Val:")
     (test-println code-val)
     (is (= code-val val))))
+
+
+
+
+(defmacro test-code-exception
+  "Test that the given jest code
+  does not compile, and further
+  test the type of the exception
+  thrown"
+
+  ([jest exception-class]
+   `(is (try (jest->clojure ~jest) (JestCompiler/validate ~jest) false
+             (catch ~exception-class ~'e true))))
+
+  ([jest exception-class msg]
+   `(is (try (jest->clojure ~jest) (JestCompiler/validate ~jest) false
+             (catch ~exception-class ~'e (= ~msg (.getMessage ~'e)))))))
 
 
 (defn test-clojure-type-correct

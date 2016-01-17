@@ -1,12 +1,12 @@
 
 package jest.compiler;
 
+import jest.Exception.ValidationException;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import jest.compiler.Validator.ValidationError;
 
 import jest.grammar.JestLexer;
 import jest.grammar.JestParser;
@@ -61,18 +61,14 @@ public class JestCompiler {
     }
 
 
-    /**
-     * Takes a string of Jest code and
-     * validates it.  If it is invalid,
-     * this method prints validation errors
-     * and returns false.  Else, it returns true.
-     * @param source
-     * @return
-     * @throws ValidationError
-     */
-    public static Boolean validateSourceCode(String source) throws ValidationError {
+    public static void validate(String source) throws ValidationException{
         ParseTree tree = compileSourceCodeToParseTree(source);
-        return validateParseTree(tree);
+        validate(tree);
+    }
+
+
+    public static void validate(ParseTree tree) throws ValidationException {
+        ParseTreeWalker.DEFAULT.walk(new Validator(), tree);
     }
 
 
@@ -85,15 +81,31 @@ public class JestCompiler {
      * is consistent, etc.
      * @param tree
      * @return
-     * @throws ValidationError
+     * @throws ValidationException
      */
-    public static Boolean validateParseTree(ParseTree tree) {
+    public static Boolean isParseTreeValid(ParseTree tree) {
         try {
-            ParseTreeWalker.DEFAULT.walk(new Validator(), tree);
+            validate(tree);
             return true;
-        } catch (ValidationError e) {
+        } catch (ValidationException e) {
             System.out.println(e.getMessage());
             return false;
         }
     }
+
+
+    /**
+     * Takes a string of Jest code and
+     * validates it.  If it is invalid,
+     * this method prints validation errors
+     * and returns false.  Else, it returns true.
+     * @param source
+     * @return
+     * @throws ValidationException
+     */
+    public static Boolean isSourceCodeValid(String source) {
+        ParseTree tree = compileSourceCodeToParseTree(source);
+        return isParseTreeValid(tree);
+    }
+
 }

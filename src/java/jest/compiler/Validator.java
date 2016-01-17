@@ -1,18 +1,30 @@
 package jest.compiler;
 
+import java.util.List;
 import java.util.Stack;
 
-import jest.Exception.TypeMismatchError;
+import jest.Exception.FunctionAlreadyDeclared;
+import jest.Exception.FunctionParameterTypeMismatch;
+import jest.Exception.UnknownFunction;
+import jest.Exception.UnknownVariable;
+import jest.Exception.VariableAlreadyDeclared;
+import jest.Exception.VariableTypeMismatch;
+import jest.Exception.WrongNumberOfFunctionParameters;
+import jest.Utils.Triplet;
 import jest.compiler.DeclaredTypes.FunctionSignature;
 import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
 
-import org.antlr.v4.runtime.Token;
-
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import static jest.Exception.jestException;
+import static jest.Utils.zip;
+
+import static jest.compiler.Contexts.getArgumentTypes;
+import static jest.compiler.Contexts.getFunctionName;
 import static jest.compiler.Contexts.getFunctionSignature;
+import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
 import static jest.compiler.DeclaredTypes.typesEqual;
 
@@ -43,25 +55,7 @@ public class Validator extends JestBaseListener {
         }
     }
 
-    public class ValidationError extends RuntimeException {
-        public ValidationError(String message) {
-            super(message);
-        }
-    }
 
-    public class AlreadyDeclared extends ValidationError {
-        public AlreadyDeclared(Token token) {
-            super(String.format("Error - Line %s: Already declared variable with name: %s",
-                                token.getLine(), token.getText()));
-        }
-    }
-
-    public class NotDeclared extends ValidationError {
-        public NotDeclared(TerminalNode token) {
-            super(String.format("Error - Line %s: Attempting to use variable %s that has not been declared",
-                                token.getSymbol().getLine(), token.getText()));
-        }
-    }
 
     /**
        Create a new scope and return that scope
@@ -88,15 +82,18 @@ public class Validator extends JestBaseListener {
 
     @Override
     public void enterFunctionDef(JestParser.FunctionDefContext ctx) {
+
+        String functionName = getFunctionName(ctx);
+
         if (currentScope().isFunctionInCurrentScope(ctx.name.getText())) {
-            throw new AlreadyDeclared(ctx.name);
+            throw new FunctionAlreadyDeclared(ctx, functionName);
         } else {
             // TODO: Remove the "else" when we require all functions to be annotated
             if (ctx.typeAnnotation() != null) {
                 FunctionSignature sig = getFunctionSignature(currentScope(), ctx);
-                currentScope().addFunction(ctx.name.getText(), sig);
+                currentScope().addFunction(functionName, sig);
             } else {
-                currentScope().addFunction(ctx.name.getText(), null);
+                currentScope().addFunction(functionName, null);
             }
         }
 
@@ -129,21 +126,20 @@ public class Validator extends JestBaseListener {
         }
     }
 
+
     @Override
     public void exitForLoop(JestParser.ForLoopContext ctx) {
         dropCurrentScope(scopes);
     }
 
 
-    public static FunctionSignature getMethodSignature(JestParser.MethodDefContext function) {
-        return null;
-    }
-
-
     @Override
     public void enterMethodDef(JestParser.MethodDefContext ctx) {
+
+        String methodName = ctx.name.getText();
+
         if (currentScope().isFunctionInCurrentScope(ctx.name.getText())) {
-            throw new AlreadyDeclared(ctx.name);
+            throw new FunctionAlreadyDeclared(ctx, methodName);
         } else {
             FunctionSignature sig = getMethodSignature(ctx);
             currentScope().addFunction(ctx.name.getText(), sig);
@@ -206,10 +202,11 @@ public class Validator extends JestBaseListener {
 
     @Override
     public void enterVarScope(JestParser.VarScopeContext ctx) {
+
         for (TerminalNode node: ctx.ID()) {
             String name = node.getText();
             if (currentScope().isVariableInCurrentScope(name)) {
-                throw new AlreadyDeclared(node.getSymbol());
+                throw new VariableAlreadyDeclared(ctx, name);
             } else {
                 currentScope().addVariable(node.getText(), null);
             }
@@ -224,8 +221,11 @@ public class Validator extends JestBaseListener {
 
     @Override
     public void enterDefAssignment(JestParser.DefAssignmentContext ctx) {
-        if (currentScope().isVariableInCurrentScope(ctx.name.getText())) {
-            throw new AlreadyDeclared(ctx.name);
+
+        String name = ctx.name.getText();
+
+        if (currentScope().isVariableInCurrentScope(name)) {
+            throw new VariableAlreadyDeclared(ctx, name);
         }
 
         Type expressionType = getType(currentScope(), ctx.expression());
@@ -234,7 +234,7 @@ public class Validator extends JestBaseListener {
             Type annotatedType = getType(ctx.typeAnnotation());
 
             if (!typesEqual(annotatedType, expressionType)) {
-                throw new TypeMismatchError(ctx);
+                throw new VariableTypeMismatch(ctx, name, annotatedType, expressionType);
             }
         }
 
@@ -247,17 +247,46 @@ public class Validator extends JestBaseListener {
 
         // If the expression is a variable, ensure the variable
         // has been declared
+
         if (ctx.ID() != null) {
-            if (!currentScope().isVariableOrFunctionInScope(ctx.ID().getText())) {
-                throw new NotDeclared(ctx.ID());
+            String name = ctx.ID().getText();
+            if (!currentScope().isVariableOrFunctionInScope(name)) { //ctx.ID().getTextisVariableOrFunctionInScope(ctx.ID().getText())) {
+                throw new UnknownVariable(ctx, name); //ctx.ID());
             }
         }
     }
 
     @Override
     public void enterFunctionCall(JestParser.FunctionCallContext ctx) {
-        if (!currentScope().isVariableOrFunctionInScope(ctx.ID().getText())) {
-            throw new NotDeclared(ctx.ID());
+
+        String functionName = getFunctionName(ctx);
+
+        if (!currentScope().isFunctionInScope(functionName)) {
+            throw new UnknownFunction(ctx, functionName); //ctx.ID());
+        }
+
+        // Get the types of the parameters being called
+        List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
+
+        if (!currentScope().getFunctionSignature(functionName).isPresent()) {
+            System.out.println(String.format("No present signature for function: %s", functionName));
+        } else {
+
+            FunctionSignature typeSignature = currentScope()
+                .getFunctionSignature(functionName)
+                .orElseThrow(jestException(ctx));
+
+            if (argumentTypes.size() != typeSignature.getParameterTypes().size()) {
+                throw new WrongNumberOfFunctionParameters(ctx,
+                    typeSignature.getParameterTypes().size(),
+                    argumentTypes.size());
+            }
+
+            for (Triplet<String, Type, Type> types : zip(typeSignature.getParameterNames(), typeSignature.getParameterTypes(), argumentTypes)) {
+                if (!typesEqual(types._1, types._2)) {
+                    throw new FunctionParameterTypeMismatch(ctx, functionName, types._0, types._1, types._2);
+                }
+            }
         }
     }
 }

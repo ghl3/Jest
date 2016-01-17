@@ -33,6 +33,7 @@ public class DeclaredTypes {
 
 
     public interface FunctionSignature {
+        List<String> getParameterNames();
         List<Type> getParameterTypes();
         Type getReturnType();
         String getName();
@@ -42,14 +43,22 @@ public class DeclaredTypes {
 
         final String name;
 
+        final List<String> parameterNames;
+
         final List<Type> parameterTypes;
 
         final Type returnType;
 
-        public DeclaredFunctionSignature(String name, List<Type> parameterTypes, Type returnType) {
+        public DeclaredFunctionSignature(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
             this.name = name;
+            this.parameterNames = ImmutableList.copyOf(parameterNames);
             this.parameterTypes = ImmutableList.copyOf(parameterTypes);
             this.returnType = returnType;
+        }
+
+        @Override
+        public List<String> getParameterNames() {
+            return ImmutableList.copyOf(parameterNames);
         }
 
         @Override

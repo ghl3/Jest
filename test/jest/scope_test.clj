@@ -10,7 +10,7 @@
   "Ensures that the code is valid"
   ([src] (validate-code src true))
   ([src should-be-valid?]
-  (let [is-valid? (. JestCompiler validateSourceCode src)]
+  (let [is-valid? (. JestCompiler isSourceCodeValid src)]
     (if should-be-valid?
       (is is-valid?)
       (is (not is-valid?))))))

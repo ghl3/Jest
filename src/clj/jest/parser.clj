@@ -9,7 +9,7 @@
 (defn validate-source-code
   "Validate jest source code, returning
   true if it is valid and false if invalid"
-  [jest-code] (. JestCompiler (validateSourceCode jest-code)))
+  [jest-code] (. JestCompiler (isSourceCodeValid jest-code)))
 
 
 (defn jest->clojure
