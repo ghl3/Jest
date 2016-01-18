@@ -213,8 +213,9 @@ public class Types {
     public interface FunctionDeclaration {
         String getName();
         List<String> getParameterNames();
-        List<Type> getParameterTypes();
-        Type getReturnType();
+        FunctionSignature getSignature();
+        //List<Type> getParameterTypes();
+        //Type getReturnType();
         Boolean isGeneric();
     }
 
@@ -257,14 +258,24 @@ public class Types {
             return ImmutableList.copyOf(parameterNames);
         }
 
+        /*
         @Override
         public List<Type> getParameterTypes() {
             return ImmutableList.copyOf(signature.parameterTypes);
         }
 
+
+
         @Override
         public Type getReturnType() {
             return signature.returnType;
+        }
+
+        */
+
+        @Override
+        public FunctionSignature getSignature() {
+            return this.signature;
         }
 
         @Override
@@ -312,6 +323,11 @@ public class Types {
         }
 
         @Override
+        public FunctionSignature getSignature() {
+            return this.signature;
+        }
+/*
+        @Override
         public List<Type> getParameterTypes() {
             return signature.parameterTypes;
         }
@@ -320,7 +336,7 @@ public class Types {
         public Type getReturnType() {
             return signature.returnType;
         }
-
+*/
         @Override
         public Boolean isGeneric() {
             return true;
@@ -345,7 +361,7 @@ public class Types {
         public Map<GenericParameter, List<Integer>> getGenericTypeIndices() {
 
             Map<GenericParameter, List<Integer>> map = Maps.newHashMap();
-            for (Pair<Integer, Type> pair: enumerate(getParameterTypes())) {
+            for (Pair<Integer, Type> pair: enumerate(getSignature().parameterTypes)) { // getParameterTypes())) {
 
                 if (pair.right.getClass().isAssignableFrom(GenericParameter.class)) {
 

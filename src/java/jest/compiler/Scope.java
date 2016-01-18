@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
 import jest.compiler.Types.FunctionDeclaration;
+import jest.compiler.Types.FunctionSignature;
 import jest.compiler.Types.Type;
 
 
@@ -114,12 +115,17 @@ public class Scope {
         }
     }
 
-    void addFunction(String varName, FunctionDeclaration signature) {
-        functions.put(varName, signature);
+    void addFunction(String varName, FunctionDeclaration declaration) {
+        functions.put(varName, declaration);
     }
 
+    /*
+    void addFunction(String varName, FunctionDeclaration declaration) {
+        functions.put(varName, declaration.signature);
+    }
+*/
 
-    public Optional<FunctionDeclaration> getFunctionSignature(String name) {
+    public Optional<FunctionDeclaration> getFunctionDeclaration(String name) {
         return Optional.ofNullable(this.functions.get(name));
     }
 

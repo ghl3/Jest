@@ -29,4 +29,5 @@
      applyToFive(doubleNumber);"
     ['(clojure.core/defn doubleNumber [x] (+ x x))
      '(clojure.core/defn applyToFive [func] (func 5))
-     '(applyToFive doubleNumber)]))
+     '(applyToFive doubleNumber)]
+    true))

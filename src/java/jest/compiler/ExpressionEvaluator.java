@@ -1,8 +1,10 @@
 package jest.compiler;
 
+import jest.Exception;
 import jest.Exception.BadSource;
 import jest.Exception.NotExpression;
 import jest.Exception.NotYetImplemented;
+import jest.Exception.UnknownFunction;
 import jest.compiler.Core.PrimitiveType;
 import jest.compiler.Core.CollectionType;
 import jest.compiler.Types.Type;
@@ -41,6 +43,7 @@ import jest.grammar.JestParser.StatementTermContext;
 import jest.grammar.JestParser.TypeAnnotationContext;
 import jest.grammar.JestParser.VarScopeContext;
 
+import static jest.Exception.jestException;
 import static jest.Utils.combine;
 import static jest.Utils.last;
 
@@ -129,9 +132,11 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
         // Feels like that should fall naturally out of expressions and method calls.
 
         if (ctx.a != null) {
-            return this.scope.getFunctionSignature(ctx.a.getText()).get().getReturnType();
+            String functionName = ctx.a.getText();
+            return this.scope.getFunctionDeclaration(functionName).orElseThrow(jestException(new UnknownFunction(ctx, functionName))).getSignature().returnType;
         } else if (ctx.c != null) {
-            return this.scope.getFunctionSignature(ctx.c.getText()).get().getReturnType();
+            String functionName = ctx.c.getText();
+            return this.scope.getFunctionDeclaration(ctx.c.getText()).orElseThrow(jestException(new UnknownFunction(ctx, functionName))).getSignature().returnType;
         } else {
             throw new BadSource(ctx);
         }
@@ -139,7 +144,8 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
 
     @Override
     public Type visitMethodCall(MethodCallContext ctx) {
-        return this.scope.getFunctionSignature(ctx.func.getText()).get().getReturnType();
+        String methodName = ctx.func.getText();
+        return this.scope.getFunctionDeclaration(methodName).orElseThrow(jestException(new UnknownFunction(ctx, methodName))).getSignature().returnType;
     }
 
     @Override
@@ -176,7 +182,8 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
             return CollectionType.Map;
         }
         else if (ctx.functionCall() != null) {
-            return this.scope.getFunctionSignature(ctx.functionCall().ID().getText()).get().getReturnType();
+            String functionName = ctx.functionCall().ID().getText();
+            return this.scope.getFunctionDeclaration(functionName).orElseThrow(jestException(new UnknownFunction(ctx, functionName))).getSignature().returnType;
         }
         else if (ctx.clojureGet() != null) {
             throw new NotYetImplemented(ctx, "clojureGet");

@@ -2,15 +2,19 @@ package jest;
 
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 
@@ -191,5 +195,9 @@ public class Utils {
         } else {
             return ImmutableSet.of();
         }
+    }
+
+    public static Stream<Integer> range(Integer num) {
+        return ContiguousSet.create(Range.closed(0, num), DiscreteDomain.integers()).stream();
     }
 }

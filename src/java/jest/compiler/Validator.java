@@ -3,6 +3,7 @@ package jest.compiler;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.stream.Collectors;
 import jest.Exception.FunctionAlreadyDeclared;
 import jest.Exception.FunctionParameterTypeMismatch;
 import jest.Exception.InconsistentGenricTypes;
@@ -11,10 +12,15 @@ import jest.Exception.UnknownVariable;
 import jest.Exception.VariableAlreadyDeclared;
 import jest.Exception.VariableTypeMismatch;
 import jest.Exception.WrongNumberOfFunctionParameters;
+import jest.Utils.Pair;
 import jest.Utils.Triplet;
+import jest.compiler.Contexts.FunctionParameterSummary;
 import jest.compiler.Core.PrimitiveType;
 import jest.compiler.Core.CollectionType;
+import jest.compiler.Types.DeclaredFunctionDeclaration;
 import jest.compiler.Types.FunctionDeclaration;
+import jest.compiler.Types.FunctionSignature;
+import jest.compiler.Types.FunctionType;
 import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
@@ -24,10 +30,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import static jest.Exception.jestException;
 import static jest.Utils.getAll;
+import static jest.Utils.range;
 import static jest.Utils.zip;
 import static jest.compiler.Contexts.getArgumentTypes;
 import static jest.compiler.Contexts.getFunctionName;
 import static jest.compiler.Contexts.getFunctionDeclaration;
+import static jest.compiler.Contexts.getFunctionParameterSummary;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
 import static jest.compiler.Types.GenericFunctionDeclaration.typesConsistent;
@@ -113,10 +121,38 @@ public class Validator extends JestBaseListener {
         }
 
 
-        Scope functionBodyScope = createNewScope(scopes);
-
         // TODO: Include the function parameters in the current scope
         JestParser.FunctionDefParamsContext params = ctx.functionDefParams();
+
+        // We have to add the function parameters to the function body scope.
+        // There are 3 types of parameters we have to add:
+        // - Standard variable parameters, added to variables in scope
+        // - Function parameters, added to functions in scope (ie if a function takes a function)
+        // - Generic parameter types in scope, added to the list of types in scope
+        FunctionParameterSummary parameterSummary = getFunctionParameterSummary(currentScope(), ctx);
+
+        // Note that we create the body scope AFTER we get the parameter summary
+        // The parameterSummary should depend on the outer scope, not the inner scope
+        // that we're here creating and updating
+        Scope functionBodyScope = createNewScope(scopes);
+        for (Pair<String, Type> variableType: parameterSummary.variableTypes) {
+            functionBodyScope.addVariable(variableType.left, variableType.right);
+        }
+        for (Pair<String, GenericParameter> variableType: parameterSummary.genericTypes) {
+            functionBodyScope.addVariable(variableType.left, variableType.right);
+        }
+        for (Pair<String, FunctionType> variableType: parameterSummary.functionTypes) {
+            FunctionSignature signature =  variableType.right.signature;
+            List<String> functionNames = range(signature.parameterTypes.size())
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+
+            FunctionDeclaration declaration = new DeclaredFunctionDeclaration(variableType.left, functionNames,
+                signature.parameterTypes, signature.returnType);
+
+            functionBodyScope.addFunction(variableType.left, declaration);
+        }
+
 
         for (TerminalNode node: params.ID()) {
             // TODO: Add the signature types the scope
@@ -289,24 +325,24 @@ public class Validator extends JestBaseListener {
 
         // Get the types of the parameters being called
 
-        if (!currentScope().getFunctionSignature(functionName).isPresent()) {
+        if (!currentScope().getFunctionDeclaration(functionName).isPresent()) {
             System.out.println(String.format("No present signature for function: %s", functionName));
-        } else if (currentScope().getFunctionSignature(functionName).get().isGeneric()) {
+        } else if (currentScope().getFunctionDeclaration(functionName).get().isGeneric()) {
 
             List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
 
-            GenericFunctionDeclaration typeSignature = (GenericFunctionDeclaration) currentScope()
-                .getFunctionSignature(functionName)
+            GenericFunctionDeclaration typeDeclaration = (GenericFunctionDeclaration) currentScope()
+                .getFunctionDeclaration(functionName)
                 .orElseThrow(jestException(ctx));
 
-            if (argumentTypes.size() != typeSignature.getParameterTypes().size()) {
+            if (argumentTypes.size() != typeDeclaration.getSignature().parameterTypes.size()) {
                 throw new WrongNumberOfFunctionParameters(ctx,
-                    typeSignature.getParameterTypes().size(),
+                    typeDeclaration.getSignature().parameterTypes.size(),
                     argumentTypes.size());
             }
 
             // Check the non=genric parameters
-            for (Triplet<String, Type, Type> types : zip(typeSignature.getParameterNames(), typeSignature.getParameterTypes(), argumentTypes)) {
+            for (Triplet<String, Type, Type> types : zip(typeDeclaration.getParameterNames(), typeDeclaration.getSignature().parameterTypes, argumentTypes)) {
                 if (types._1.getClass().isAssignableFrom(GenericParameter.class)) {
                     continue;
                 }
@@ -316,7 +352,7 @@ public class Validator extends JestBaseListener {
             }
 
             // Now, check that the generic parameters are consistent
-            for (Entry<GenericParameter, List<Integer>> entry: typeSignature.getGenericTypeIndices().entrySet()) {
+            for (Entry<GenericParameter, List<Integer>> entry: typeDeclaration.getGenericTypeIndices().entrySet()) {
 
                 Iterable<Type> types = getAll(argumentTypes, entry.getValue());
                 if (!typesConsistent(types)) {
@@ -328,17 +364,17 @@ public class Validator extends JestBaseListener {
 
             List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
 
-            FunctionDeclaration typeSignature = currentScope()
-                .getFunctionSignature(functionName)
+            FunctionDeclaration typeDeclaration = currentScope()
+                .getFunctionDeclaration(functionName)
                 .orElseThrow(jestException(ctx));
 
-            if (argumentTypes.size() != typeSignature.getParameterTypes().size()) {
+            if (argumentTypes.size() != typeDeclaration.getSignature().parameterTypes.size()) {
                 throw new WrongNumberOfFunctionParameters(ctx,
-                    typeSignature.getParameterTypes().size(),
+                    typeDeclaration.getSignature().parameterTypes.size(),
                     argumentTypes.size());
             }
 
-            for (Triplet<String, Type, Type> types : zip(typeSignature.getParameterNames(), typeSignature.getParameterTypes(), argumentTypes)) {
+            for (Triplet<String, Type, Type> types : zip(typeDeclaration.getParameterNames(), typeDeclaration.getSignature().parameterTypes, argumentTypes)) {
                 if (!types._2.implementsType(types._1)) { //typesEqual(types._1, types._2)) {
                     throw new FunctionParameterTypeMismatch(ctx, functionName, types._0, types._1, types._2);
                 }
