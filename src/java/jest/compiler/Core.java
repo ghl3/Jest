@@ -1,15 +1,21 @@
 package jest.compiler;
 
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
-import jest.compiler.DeclaredTypes.Type;
+import jest.compiler.Types.DeclaredFunctionSignature;
+import jest.compiler.Types.FunctionSignature;
+import jest.compiler.Types.GenericType;
+import jest.compiler.Types.Type;
 
 
 public class Core {
 
 
-    enum BuiltInTypes implements Type {
+    enum PrimitiveTypes implements Type {
 
         Any {
             @Override
@@ -35,24 +41,6 @@ public class Core {
                 return "Number";
             }
         },
-        Map {
-            @Override
-            public String getName() {
-                return "Map";
-            }
-        },
-        List {
-            @Override
-            public String getName() {
-                return "List";
-            }
-        },
-        Vector {
-            @Override
-            public String getName() {
-                return "Vector";
-            }
-        },
         Boolean {
             @Override
             public String getName() {
@@ -73,8 +61,45 @@ public class Core {
     }
 
 
+    enum CollectionTypes implements Type {
 
-    public static final Set<String> clojureCoreFunctions = ImmutableSet.of("accessor","aclone","add-classpath","add-watch","agent","agent-error",
+
+        Map {
+            @Override
+            public String getName() {
+                return "Map";
+            }
+        },
+        List {
+            @Override
+            public String getName() {
+                return "List";
+            }
+        },
+        Vector {
+            @Override
+            public String getName() {
+                return "Vector";
+            }
+        };
+
+        @Override
+        public Boolean implementsType(Type type) {
+            return this.getName().equals(type.getName());
+        }
+    }
+
+    public static final Map<String, FunctionSignature> coreFunctions = ImmutableMap.<String, FunctionSignature>builder()
+
+        .put("range", new DeclaredFunctionSignature("range",
+            ImmutableList.of("start", "stop", "step"),
+            ImmutableList.<Type>of(PrimitiveTypes.Number, PrimitiveTypes.Number, PrimitiveTypes.Number),
+            new GenericType("List", PrimitiveTypes.Number)))
+
+        .build();
+
+
+    public static final Set<String> clojureCoreFunctionsNoSig = ImmutableSet.of("accessor","aclone","add-classpath","add-watch","agent","agent-error",
         "agent-errors","aget","alength","alias","all-ns","alter","alter-meta!","alter-var-root","amap","ancestors","and","apply","areduce",
         "array-map","as->","aset","aset-boolean","aset-byte","aset-char","aset-double","aset-float","aset-int","aset-long","aset-short","assert",
         "assoc","assoc!","assoc-in","associative?","atom","await","await-for","bases","bean","bigdec","bigint","biginteger","binding","bit-and",
@@ -127,7 +152,7 @@ public class Core {
 
 
     public static final Set<String> clojureCore = ImmutableSet.<String>builder()
-        .addAll(clojureCoreFunctions)
+        .addAll(clojureCoreFunctionsNoSig)
         .addAll(clojreCoreReducers)
         .build();
 

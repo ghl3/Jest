@@ -3,8 +3,8 @@ package jest.compiler;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
-import jest.compiler.DeclaredTypes.FunctionSignature;
-import jest.compiler.DeclaredTypes.Type;
+import jest.compiler.Types.FunctionSignature;
+import jest.compiler.Types.Type;
 
 
 public class Scope {

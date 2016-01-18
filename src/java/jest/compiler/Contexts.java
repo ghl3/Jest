@@ -4,17 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import jest.Exception.BadSource;
 import jest.Exception.NotYetImplemented;
-import jest.Utils.Pair;
-import jest.compiler.DeclaredTypes.DeclaredFunctionSignature;
-import jest.compiler.DeclaredTypes.FunctionSignature;
-import jest.compiler.DeclaredTypes.GenericFunctionSignature;
-import jest.compiler.DeclaredTypes.GenericType;
-import jest.compiler.DeclaredTypes.Type;
-import jest.compiler.DeclaredTypes.UserType;
+import jest.compiler.Types.DeclaredFunctionSignature;
+import jest.compiler.Types.FunctionSignature;
+import jest.compiler.Types.GenericFunctionSignature;
+import jest.compiler.Types.GenericParameter;
+import jest.compiler.Types.Type;
+import jest.compiler.Types.SimpleType;
 import jest.grammar.JestParser.ExpressionContext;
 import jest.grammar.JestParser.ExpressionListContext;
 import jest.grammar.JestParser.FunctionCallContext;
@@ -46,7 +44,7 @@ public class Contexts {
 
     public static Type getType(TypeAnnotationContext ctx) {
         if (ctx.singleType != null) {
-            return new UserType(ctx.singleType.getText());
+            return new SimpleType(ctx.singleType.getText());
         } else {
             throw new NotYetImplemented(ctx, "Type Not singleType");
         }
@@ -136,7 +134,7 @@ public class Contexts {
         List<Type> types = Lists.newArrayList();
         for (TypeAnnotationContext type: combine(functionDefParamsContext.firstType, functionDefParamsContext.restTypes)) {
             if (genericParameters.contains(type.getText())) {
-                types.add(new GenericType(type.getText()));
+                types.add(new GenericParameter(type.getText()));
             } else {
                 types.add(getType(type));
             }

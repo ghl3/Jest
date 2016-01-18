@@ -1,8 +1,8 @@
 package jest;
 
 import java.util.function.Supplier;
-import jest.compiler.DeclaredTypes.GenericType;
-import jest.compiler.DeclaredTypes.Type;
+import jest.compiler.Types.GenericParameter;
+import jest.compiler.Types.Type;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import static jest.Utils.getLineInfo;
@@ -107,7 +107,7 @@ public class Exception {
     }
 
     public static class InconsistentGenricTypes extends ValidationException {
-        public InconsistentGenricTypes(ParserRuleContext ctx, GenericType type, Iterable<Type> types) {
+        public InconsistentGenricTypes(ParserRuleContext ctx, GenericParameter type, Iterable<Type> types) {
             super(String.format("Encountered type(s) in function call that are inconsistent with expected type %s: %s",
                 type, types), ctx);
         }

@@ -12,10 +12,11 @@ import jest.Exception.VariableAlreadyDeclared;
 import jest.Exception.VariableTypeMismatch;
 import jest.Exception.WrongNumberOfFunctionParameters;
 import jest.Utils.Triplet;
-import jest.compiler.DeclaredTypes.FunctionSignature;
-import jest.compiler.DeclaredTypes.GenericFunctionSignature;
-import jest.compiler.DeclaredTypes.GenericType;
-import jest.compiler.DeclaredTypes.Type;
+import jest.compiler.Core.PrimitiveTypes;
+import jest.compiler.Types.FunctionSignature;
+import jest.compiler.Types.GenericFunctionSignature;
+import jest.compiler.Types.GenericParameter;
+import jest.compiler.Types.Type;
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -28,8 +29,7 @@ import static jest.compiler.Contexts.getFunctionName;
 import static jest.compiler.Contexts.getFunctionSignature;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
-import static jest.compiler.DeclaredTypes.GenericFunctionSignature.typesConsistent;
-import static jest.compiler.DeclaredTypes.typesEqual;
+import static jest.compiler.Types.GenericFunctionSignature.typesConsistent;
 
 
 public class Validator extends JestBaseListener {
@@ -46,14 +46,21 @@ public class Validator extends JestBaseListener {
         // Create the global scope
         scopes.push(new Scope(null));
 
+        for (Entry<String, FunctionSignature> entry: Core.coreFunctions.entrySet()) {
+            scopes.peek().addFunction(entry.getKey(), entry.getValue()); //, null);
+
+        }
+
         // Add core functions to the scope
         for (String func: Core.clojureCore) {
             // TODO: Add signature for core functions
-            scopes.peek().addFunction(func, null);
+            if (!Core.coreFunctions.containsKey(func)) {
+                scopes.peek().addFunction(func, null);
+            }
         }
 
         // Add built-in types to the scope
-        for (Type type: Core.BuiltInTypes.values()) {
+        for (Type type: PrimitiveTypes.values()) {
             scopes.peek().addType(type.getName(), type);
         }
     }
@@ -243,7 +250,7 @@ public class Validator extends JestBaseListener {
         if (ctx.typeAnnotation() != null) {
             Type annotatedType = getType(ctx.typeAnnotation());
 
-            if (!typesEqual(annotatedType, expressionType)) {
+            if (!expressionType.implementsType(annotatedType)) { //typesEqual(annotatedType, expressionType)) {
                 throw new VariableTypeMismatch(ctx, name, annotatedType, expressionType);
             }
         }
@@ -295,16 +302,16 @@ public class Validator extends JestBaseListener {
 
             // Check the non=genric parameters
             for (Triplet<String, Type, Type> types : zip(typeSignature.getParameterNames(), typeSignature.getParameterTypes(), argumentTypes)) {
-                if (types._1.getClass().isAssignableFrom(GenericType.class)) {
+                if (types._1.getClass().isAssignableFrom(GenericParameter.class)) {
                     continue;
                 }
-                if (!typesEqual(types._1, types._2)) {
+                if (!types._2.implementsType(types._1)) { //typesEqual(types._1, types._2)) {
                     throw new FunctionParameterTypeMismatch(ctx, functionName, types._0, types._1, types._2);
                 }
             }
 
             // Now, check that the generic parameters are consistent
-            for (Entry<GenericType, List<Integer>> entry: typeSignature.getGenericTypeIndices().entrySet()) {
+            for (Entry<GenericParameter, List<Integer>> entry: typeSignature.getGenericTypeIndices().entrySet()) {
 
                 Iterable<Type> types = getAll(argumentTypes, entry.getValue());
                 if (!typesConsistent(types)) {
@@ -327,7 +334,7 @@ public class Validator extends JestBaseListener {
             }
 
             for (Triplet<String, Type, Type> types : zip(typeSignature.getParameterNames(), typeSignature.getParameterTypes(), argumentTypes)) {
-                if (!typesEqual(types._1, types._2)) {
+                if (!types._2.implementsType(types._1)) { //typesEqual(types._1, types._2)) {
                     throw new FunctionParameterTypeMismatch(ctx, functionName, types._0, types._1, types._2);
                 }
             }

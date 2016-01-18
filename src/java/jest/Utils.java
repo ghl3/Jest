@@ -3,6 +3,7 @@ package jest;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -169,4 +170,22 @@ public class Utils {
         return pairs;
     }
 
+    /**
+     * Takes an object and a type.  Returns an iterable
+     * of that object cast as the given type if that object
+     * implements the given type.  Else, returns an empty
+     * iterator.  Useful for "pattern matching" via for loops.
+     * @param left
+     * @param type
+     * @param <T>
+     * @return
+     */
+    public static <T> Iterable<T> asType(Object left, Class<T> type) {
+        if (type.isAssignableFrom(left.getClass())) {
+            T leftAsT = (T) left;
+            return ImmutableSet.of(leftAsT);
+        } else {
+            return ImmutableSet.of();
+        }
+    }
 }

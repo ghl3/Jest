@@ -3,9 +3,10 @@ package jest.compiler;
 import jest.Exception.BadSource;
 import jest.Exception.NotExpression;
 import jest.Exception.NotYetImplemented;
-import jest.compiler.Core.BuiltInTypes;
-import jest.compiler.DeclaredTypes.Type;
-import jest.compiler.DeclaredTypes.UserType;
+import jest.compiler.Core.PrimitiveTypes;
+import jest.compiler.Core.CollectionTypes;
+import jest.compiler.Types.Type;
+import jest.compiler.Types.SimpleType;
 import jest.grammar.JestBaseVisitor;
 import jest.grammar.JestParser.ArithmeticExpressionContext;
 import jest.grammar.JestParser.ArithmeticTermContext;
@@ -78,13 +79,13 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
         if (ctx.op == null) {
             return this.visitArithmeticExpression(ctx.a);
         } else {
-            return BuiltInTypes.Boolean;
+            return PrimitiveTypes.Boolean;
         }
     }
 
 
     public static Type resolveArithmeticType(Iterable<ArithmeticTermContext> arithmeticTerms) {
-        return BuiltInTypes.Number;
+        return PrimitiveTypes.Number;
     }
 
     @Override
@@ -97,7 +98,7 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
     }
 
     public static Type resolveArithmeticTerm(Iterable<ExpressionComposedContext> expressionComposed) {
-        return BuiltInTypes.Number;
+        return PrimitiveTypes.Number;
     }
 
     @Override
@@ -145,32 +146,34 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
     public Type visitExpressionAtom(ExpressionAtomContext ctx) {
 
         if (ctx.NUMBER() != null) {
-            return BuiltInTypes.Number;
+            return PrimitiveTypes.Number;
         }
         else if (ctx.TRUE() != null) {
-            return BuiltInTypes.Boolean;
+            return PrimitiveTypes.Boolean;
         }
         else if (ctx.FALSE() != null) {
-            return BuiltInTypes.Boolean;
+            return PrimitiveTypes.Boolean;
         }
         else if (ctx.NIL() != null) {
-            return BuiltInTypes.Nil;
+            return PrimitiveTypes.Nil;
         }
         else if (ctx.ID() != null) {
             // TODO: Do we assume this is always a variable?
             return this.scope.getVariableType(ctx.ID().getText()).get();
         }
         else if (ctx.STRING() != null) {
-            return BuiltInTypes.String;
+            return PrimitiveTypes.String;
         }
         else if (ctx.SYMBOL() != null) {
-            return BuiltInTypes.Symbol;
+            return PrimitiveTypes.Symbol;
         }
         else if (ctx.clojureVector() != null) {
-            return BuiltInTypes.Vector;
+            // TODO: Actually parameterize this
+            return CollectionTypes.Vector;
         }
         else if (ctx.clojureMap() != null) {
-            return BuiltInTypes.Map;
+            // TODO: Actually parameterize this
+            return CollectionTypes.Map;
         }
         else if (ctx.functionCall() != null) {
             return this.scope.getFunctionSignature(ctx.functionCall().ID().getText()).get().getReturnType();
@@ -197,7 +200,7 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
         }
         else if (ctx.recordConstructor() != null) {
             // TODO: Add Records to type system
-            return new UserType("Record");
+            return new SimpleType("Record");
         }
         else if (ctx.block() != null) {
             return this.visitBlock(ctx.block());

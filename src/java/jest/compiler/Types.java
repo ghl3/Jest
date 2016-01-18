@@ -8,27 +8,34 @@ import java.util.Map;
 import java.util.Objects;
 import jest.Utils.Pair;
 
+import static jest.Utils.asType;
 import static jest.Utils.enumerate;
 import static jest.Utils.getAllPairs;
+import static jest.Utils.zip;
 
 
-public class DeclaredTypes {
+public class Types {
 
-
+    /**
+     * A type must declare its fully-qualified name and
+     * must be able to determine if it equals another type
+     * (this is EXACT equality) and must also expose if it
+     * implements another type (this is interface implementation
+     * and possibly invariance/covariance).
+     */
     public interface Type {
         String getName();
         Boolean implementsType(Type type);
+        boolean equals(Object other);
+        int hashCode();
     }
 
-    public static boolean typesEqual(Type left, Type right) {
-        return left.getName().equals(right.getName());
-    }
 
-    public static class UserType implements Type {
+    public static class SimpleType implements Type {
 
         final String name;
 
-        public UserType(String name) {
+        public SimpleType(String name) {
             this.name = name;
         }
 
@@ -44,12 +51,19 @@ public class DeclaredTypes {
 
         @Override
         public boolean equals(Object other) {
-            if (!Type.class.isAssignableFrom(other.getClass())) {
+            for (SimpleType otherSimpleType: asType(other, SimpleType.class)) {
+                return otherSimpleType.name.equals(this.name);
+            }
+            return false;
+
+/*
+            if (!SimpleType.class.isAssignableFrom(other.getClass())) {
                 return false;
             } else {
                 Type otherType = (Type) other;
                 return Objects.equals(otherType.getName(), getName());
             }
+            */
         }
 
         @Override
@@ -58,11 +72,83 @@ public class DeclaredTypes {
         }
     }
 
+
+    /**
+     * A specific implementation of a generic (parametrized?) type
+     */
     public static class GenericType implements Type {
 
         final String name;
 
-        public GenericType(String name) {
+        final List<Type> typeParameters;
+
+        public GenericType(String name, List<Type> typeParameters) {
+            this.name = name;
+            this.typeParameters = ImmutableList.copyOf(typeParameters);
+        }
+
+        public GenericType(String name, Type...typeParameters) {
+            this.name = name;
+            this.typeParameters = ImmutableList.copyOf(typeParameters);
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Boolean implementsType(Type other) {
+
+            if (!GenericType.class.isAssignableFrom(other.getClass())) {
+                return false;
+            }
+
+            GenericType genericOther = (GenericType) other;
+
+            if (!genericOther.name.equals(this.name)) {
+                return false;
+            }
+
+            if (genericOther.typeParameters.size() != this.typeParameters.size()) {
+                return false;
+            }
+
+            for (Pair<Type, Type> types: zip(this.typeParameters, genericOther.typeParameters)) {
+                // Invariance?  Covariance?
+                if (!types.right.implementsType(types.left)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            for (GenericType otherGenericType: asType(other, GenericType.class)) {
+                return otherGenericType.name.equals(this.name) &&
+                    otherGenericType.typeParameters.equals(this.typeParameters);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(getName());
+        }
+
+    }
+
+
+    /**
+     * A data structure to hold a "Type" in a function signature
+     * that is marked as generic (ie it holds "T" or "U", etc)
+     */
+    public static class GenericParameter implements Type {
+
+        final String name;
+
+        public GenericParameter(String name) {
             this.name = name;
         }
 
@@ -72,22 +158,19 @@ public class DeclaredTypes {
         }
 
         @Override
-        public Boolean implementsType(Type type) {
-            if (!type.getClass().isAssignableFrom(GenericType.class)) {
-                return false;
-            } else {
-                return this.getName().equals(type.getName());
+        public Boolean implementsType(Type other) {
+            for (GenericParameter otherGenericParameter: asType(other, GenericParameter.class)) {
+                return otherGenericParameter.name.equals(this.name);
             }
+            return false;
         }
 
         @Override
         public boolean equals(Object other) {
-            if (!Type.class.isAssignableFrom(other.getClass())) {
-                return false;
-            } else {
-                Type otherType = (Type) other;
-                return Objects.equals(otherType.getName(), getName());
+            for (GenericParameter otherGenericParameter: asType(other, GenericParameter.class)) {
+                return otherGenericParameter.name.equals(this.name);
             }
+            return false;
         }
 
         @Override
@@ -96,14 +179,13 @@ public class DeclaredTypes {
         }
     }
 
+
     public interface FunctionSignature {
         String getName();
         List<String> getParameterNames();
         List<Type> getParameterTypes();
         Type getReturnType();
         Boolean isGeneric();
-
-        //List<Type> matches
     }
 
 
@@ -202,14 +284,14 @@ public class DeclaredTypes {
          *
          * @return
          */
-        public Map<GenericType, List<Integer>> getGenericTypeIndices() {
+        public Map<GenericParameter, List<Integer>> getGenericTypeIndices() {
 
-            Map<GenericType, List<Integer>> map = Maps.newHashMap();
+            Map<GenericParameter, List<Integer>> map = Maps.newHashMap();
             for (Pair<Integer, Type> pair: enumerate(getParameterTypes())) {
 
-                if (pair.right.getClass().isAssignableFrom(GenericType.class)) {
+                if (pair.right.getClass().isAssignableFrom(GenericParameter.class)) {
 
-                    GenericType type = (GenericType) pair.right;
+                    GenericParameter type = (GenericParameter) pair.right;
 
                     if (!map.containsKey(type)) {
                         map.put(type, Lists.<Integer>newArrayList());
