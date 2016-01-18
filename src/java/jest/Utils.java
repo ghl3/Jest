@@ -16,6 +16,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class Utils {
 
+    public interface Named {
+        String getName();
+    }
+
     public static String getLineInfo(ParserRuleContext context) {
         return String.format("%s (Line: %s Character: %s)",
             context.getText(), context.start.getLine(), context.start.getCharPositionInLine());

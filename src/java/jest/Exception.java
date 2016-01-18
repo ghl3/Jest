@@ -106,6 +106,13 @@ public class Exception {
         }
     }
 
+    public static class UnknownType extends ValidationException {
+        public UnknownType(ParserRuleContext ctx, String variableName) {
+            super(String.format("Encountered an unknown type with name %s", variableName),
+                ctx);
+        }
+    }
+
     public static class InconsistentGenricTypes extends ValidationException {
         public InconsistentGenricTypes(ParserRuleContext ctx, GenericParameter type, Iterable<Type> types) {
             super(String.format("Encountered type(s) in function call that are inconsistent with expected type %s: %s",
@@ -113,6 +120,16 @@ public class Exception {
         }
     }
 
+
+
+    public static Supplier<RuntimeException> jestException(final RuntimeException e) {
+        return new Supplier<RuntimeException>() {
+            @Override
+            public RuntimeException get() {
+                return e;
+            }
+        };
+    }
 
 
     public static  Supplier<BadSource> jestException(final ParserRuleContext ctx) {

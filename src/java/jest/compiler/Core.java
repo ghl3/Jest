@@ -6,16 +6,19 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
-import jest.compiler.Types.DeclaredFunctionSignature;
-import jest.compiler.Types.FunctionSignature;
+import jest.Utils.Named;
+import jest.compiler.Types.DeclaredFunctionDeclaration;
+import jest.compiler.Types.FunctionDeclaration;
 import jest.compiler.Types.GenericType;
 import jest.compiler.Types.Type;
+
+import static jest.Utils.asType;
 
 
 public class Core {
 
 
-    enum PrimitiveTypes implements Type {
+    enum PrimitiveType implements Type, Named  {
 
         Any {
             @Override
@@ -55,14 +58,13 @@ public class Core {
         };
 
         @Override
-        public Boolean implementsType(Type type) {
-            return this.getName().equals(type.getName());
+        public Boolean implementsType(Type other) {
+            return this.equals(other);
         }
     }
 
 
-    enum CollectionTypes implements Type {
-
+    enum CollectionType implements Type, Named {
 
         Map {
             @Override
@@ -84,17 +86,19 @@ public class Core {
         };
 
         @Override
-        public Boolean implementsType(Type type) {
-            return this.getName().equals(type.getName());
+        public Boolean implementsType(Type other) {
+            // TODO: Fix this
+            return this.equals(other);
         }
+
     }
 
-    public static final Map<String, FunctionSignature> coreFunctions = ImmutableMap.<String, FunctionSignature>builder()
+    public static final Map<String, FunctionDeclaration> coreFunctions = ImmutableMap.<String, FunctionDeclaration>builder()
 
-        .put("range", new DeclaredFunctionSignature("range",
+        .put("range", new DeclaredFunctionDeclaration("range",
             ImmutableList.of("start", "stop", "step"),
-            ImmutableList.<Type>of(PrimitiveTypes.Number, PrimitiveTypes.Number, PrimitiveTypes.Number),
-            new GenericType("List", PrimitiveTypes.Number)))
+            ImmutableList.<Type>of(PrimitiveType.Number, PrimitiveType.Number, PrimitiveType.Number),
+            new GenericType("List", PrimitiveType.Number)))
 
         .build();
 

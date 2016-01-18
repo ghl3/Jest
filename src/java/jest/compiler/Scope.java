@@ -3,7 +3,7 @@ package jest.compiler;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
-import jest.compiler.Types.FunctionSignature;
+import jest.compiler.Types.FunctionDeclaration;
 import jest.compiler.Types.Type;
 
 
@@ -13,7 +13,7 @@ public class Scope {
 
     final Map<String, Type> variables = new HashMap<String, Type>();
 
-    final Map<String, FunctionSignature> functions = new HashMap<String, FunctionSignature>();
+    final Map<String, FunctionDeclaration> functions = new HashMap<String, FunctionDeclaration>();
 
     final Map<String, Type> types = new HashMap<String, Type>();
 
@@ -114,12 +114,12 @@ public class Scope {
         }
     }
 
-    void addFunction(String varName, FunctionSignature signature) {
+    void addFunction(String varName, FunctionDeclaration signature) {
         functions.put(varName, signature);
     }
 
 
-    public Optional<FunctionSignature> getFunctionSignature(String name) {
+    public Optional<FunctionDeclaration> getFunctionSignature(String name) {
         return Optional.ofNullable(this.functions.get(name));
     }
 

@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import jest.Utils.Named;
 import jest.Utils.Pair;
 
 import static jest.Utils.asType;
@@ -24,14 +25,14 @@ public class Types {
      * and possibly invariance/covariance).
      */
     public interface Type {
-        String getName();
+        //String getName();
         Boolean implementsType(Type type);
         boolean equals(Object other);
         int hashCode();
     }
 
 
-    public static class SimpleType implements Type {
+    public static class SimpleType implements Type, Named {
 
         final String name;
 
@@ -45,8 +46,12 @@ public class Types {
         }
 
         @Override
-        public Boolean implementsType(Type type) {
-            return this.getName().equals(type.getName());
+        public Boolean implementsType(Type other) {
+            // TODO: Leverage type hierarchy here
+            for (SimpleType simpleType: asType(other, SimpleType.class)) {
+                return this.getName().equals(simpleType.getName());
+            }
+            return false;
         }
 
         @Override
@@ -55,15 +60,6 @@ public class Types {
                 return otherSimpleType.name.equals(this.name);
             }
             return false;
-
-/*
-            if (!SimpleType.class.isAssignableFrom(other.getClass())) {
-                return false;
-            } else {
-                Type otherType = (Type) other;
-                return Objects.equals(otherType.getName(), getName());
-            }
-            */
         }
 
         @Override
@@ -76,7 +72,7 @@ public class Types {
     /**
      * A specific implementation of a generic (parametrized?) type
      */
-    public static class GenericType implements Type {
+    public static class GenericType implements Type, Named {
 
         final String name;
 
@@ -140,11 +136,45 @@ public class Types {
     }
 
 
+    public static class FunctionType implements Type {
+
+        final FunctionSignature signature;
+
+
+        public FunctionType(FunctionSignature signature) {
+            this.signature = signature;
+        }
+
+        @Override
+        public Boolean implementsType(Type other) {
+            for (FunctionType otherFunctionType: asType(other, FunctionType.class)) {
+                if (this.signature.parameterTypes.size() != otherFunctionType.signature.parameterTypes.size()) {
+                    return false;
+                }
+
+                // Note that we allow for subtyping here by using "implements" and not "equals"
+                // TODO: Is this what we want?
+                for (Pair<Type, Type> thisOtherTypes: zip(this.signature.parameterTypes, otherFunctionType.signature.parameterTypes)) {
+                    if (!thisOtherTypes.left.implementsType(thisOtherTypes.right)) {
+                        return false;
+                    }
+                }
+
+                if (!this.signature.returnType.implementsType(otherFunctionType.signature.returnType)) {
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+
+
     /**
      * A data structure to hold a "Type" in a function signature
      * that is marked as generic (ie it holds "T" or "U", etc)
      */
-    public static class GenericParameter implements Type {
+    public static class GenericParameter implements Type, Named {
 
         final String name;
 
@@ -180,7 +210,7 @@ public class Types {
     }
 
 
-    public interface FunctionSignature {
+    public interface FunctionDeclaration {
         String getName();
         List<String> getParameterNames();
         List<Type> getParameterTypes();
@@ -188,22 +218,38 @@ public class Types {
         Boolean isGeneric();
     }
 
+    public static class FunctionSignature {
+        public final List<Type> parameterTypes;
+        public final Type returnType;
 
-    public static class DeclaredFunctionSignature implements FunctionSignature {
+        public FunctionSignature(List<Type> parameterTypes, Type returnType) {
+            this.parameterTypes = parameterTypes;
+            this.returnType = returnType;
+        }
+    }
+
+
+    public static class DeclaredFunctionDeclaration implements FunctionDeclaration {
 
         final String name;
 
-        final List<String> parameterNames;
+        public final List<String> parameterNames;
 
-        final List<Type> parameterTypes;
+        final FunctionSignature signature;
 
-        final Type returnType;
+        //final List<String> parameterNames;
 
-        public DeclaredFunctionSignature(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
+        //final List<Type> parameterTypes;
+
+        //final Type returnType;
+
+        public DeclaredFunctionDeclaration(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
             this.name = name;
             this.parameterNames = ImmutableList.copyOf(parameterNames);
-            this.parameterTypes = ImmutableList.copyOf(parameterTypes);
-            this.returnType = returnType;
+            this.signature = new FunctionSignature(ImmutableList.copyOf(parameterTypes), returnType);
+            //this.parameterNames =
+            //this.parameterTypes =
+            //this.returnType = ;
         }
 
         @Override
@@ -213,12 +259,12 @@ public class Types {
 
         @Override
         public List<Type> getParameterTypes() {
-            return ImmutableList.copyOf(parameterTypes);
+            return ImmutableList.copyOf(signature.parameterTypes);
         }
 
         @Override
         public Type getReturnType() {
-            return returnType;
+            return signature.returnType;
         }
 
         @Override
@@ -233,15 +279,27 @@ public class Types {
     }
 
 
-    public static class GenericFunctionSignature implements FunctionSignature {
+    public static class GenericFunctionDeclaration implements FunctionDeclaration {
 
         final String name;
 
-        final List<String> parameterNames;
+        public final List<String> parameterNames;
 
-        final List<Type> parameterTypes;
+        final FunctionSignature signature;
 
-        final Type returnType;
+        //final List<String> parameterNames;
+
+        //final List<Type> parameterTypes;
+
+        //final Type returnType;
+
+        public GenericFunctionDeclaration(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
+            this.name = name;
+            this.parameterNames = ImmutableList.copyOf(parameterNames);
+            this.signature = new FunctionSignature(ImmutableList.copyOf(parameterTypes), returnType);
+            //this.parameterTypes =
+            //this.returnType = ;
+        }
 
         @Override
         public String getName() {
@@ -255,12 +313,12 @@ public class Types {
 
         @Override
         public List<Type> getParameterTypes() {
-            return parameterTypes;
+            return signature.parameterTypes;
         }
 
         @Override
         public Type getReturnType() {
-            return returnType;
+            return signature.returnType;
         }
 
         @Override
@@ -303,14 +361,6 @@ public class Types {
 
             return map;
         }
-
-        public GenericFunctionSignature(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
-            this.name = name;
-            this.parameterNames = ImmutableList.copyOf(parameterNames);
-            this.parameterTypes = ImmutableList.copyOf(parameterTypes);
-            this.returnType = returnType;
-        }
-
 
 
         public static Boolean typesConsistent(Iterable<Type> types) {

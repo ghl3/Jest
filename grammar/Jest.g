@@ -138,25 +138,31 @@ expressionList
     :  a=expression (COMMA b+=expression)+
     ;
 
-/* Consider adding '/t' as a prefix to all of these
-   and remove the hash notation to prefix that by hand*/
+/* A single type annotation
+   describing either a concrete variable type
+   or a function */
 typeAnnotation
-    : singleType=path
-    | '#' hashType=ID
-    | typeleft=ID num=NUMBER
-    | '(' thing=typeAnnotation ')'
-    | container=ID '[' (inner+=typeAnnotation)+ ']'
-        /* This is a bit of a hack to get nested containers to work */
-        /* The issue is that in jest: HVec[[(?) (?) (?)]] could be parsed */
-        /* by allowing a '[' typeAnnotation ']' branch, but this breaks */
-        /* the jest container branch style below */
-    | nestedContainer=ID '[[' (nestedInner+=typeAnnotation)+ ']]'
+    : a=variableType
+    | b=functionType
     ;
+
+
+variableType
+    : path
+    ;
+
+
+/* The type of a function must include the full
+   signature, including types for all parameters
+   and for the return type */
+functionType
+    : '(' first=typeAnnotation (COMMA rest+=typeAnnotation)* ')' ARROW returnType=typeAnnotation
+    ;
+
 
 funcTypeAnnotation
     : first=typeAnnotation (next+=typeAnnotation)*
     ;
-
 
 
 functionDef

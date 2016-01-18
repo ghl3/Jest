@@ -12,9 +12,10 @@ import jest.Exception.VariableAlreadyDeclared;
 import jest.Exception.VariableTypeMismatch;
 import jest.Exception.WrongNumberOfFunctionParameters;
 import jest.Utils.Triplet;
-import jest.compiler.Core.PrimitiveTypes;
-import jest.compiler.Types.FunctionSignature;
-import jest.compiler.Types.GenericFunctionSignature;
+import jest.compiler.Core.PrimitiveType;
+import jest.compiler.Core.CollectionType;
+import jest.compiler.Types.FunctionDeclaration;
+import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
 import jest.grammar.JestBaseListener;
@@ -26,10 +27,10 @@ import static jest.Utils.getAll;
 import static jest.Utils.zip;
 import static jest.compiler.Contexts.getArgumentTypes;
 import static jest.compiler.Contexts.getFunctionName;
-import static jest.compiler.Contexts.getFunctionSignature;
+import static jest.compiler.Contexts.getFunctionDeclaration;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
-import static jest.compiler.Types.GenericFunctionSignature.typesConsistent;
+import static jest.compiler.Types.GenericFunctionDeclaration.typesConsistent;
 
 
 public class Validator extends JestBaseListener {
@@ -46,7 +47,7 @@ public class Validator extends JestBaseListener {
         // Create the global scope
         scopes.push(new Scope(null));
 
-        for (Entry<String, FunctionSignature> entry: Core.coreFunctions.entrySet()) {
+        for (Entry<String, FunctionDeclaration> entry: Core.coreFunctions.entrySet()) {
             scopes.peek().addFunction(entry.getKey(), entry.getValue()); //, null);
 
         }
@@ -60,7 +61,11 @@ public class Validator extends JestBaseListener {
         }
 
         // Add built-in types to the scope
-        for (Type type: PrimitiveTypes.values()) {
+        for (PrimitiveType type: PrimitiveType.values()) {
+            scopes.peek().addType(type.getName(), type);
+        }
+
+        for (CollectionType type: CollectionType.values()) {
             scopes.peek().addType(type.getName(), type);
         }
     }
@@ -101,7 +106,7 @@ public class Validator extends JestBaseListener {
 
         // TODO: Remove the "else" when we require all functions to be annotated
         if (ctx.typeAnnotation() != null) {
-            FunctionSignature sig = getFunctionSignature(currentScope(), ctx);
+            FunctionDeclaration sig = getFunctionDeclaration(currentScope(), ctx);
             currentScope().addFunction(functionName, sig);
         } else {
             currentScope().addFunction(functionName, null);
@@ -152,7 +157,7 @@ public class Validator extends JestBaseListener {
         if (currentScope().isFunctionInCurrentScope(ctx.name.getText())) {
             throw new FunctionAlreadyDeclared(ctx, methodName);
         } else {
-            FunctionSignature sig = getMethodSignature(ctx);
+            FunctionDeclaration sig = getMethodSignature(ctx);
             currentScope().addFunction(ctx.name.getText(), sig);
         }
 
@@ -290,7 +295,7 @@ public class Validator extends JestBaseListener {
 
             List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
 
-            GenericFunctionSignature typeSignature = (GenericFunctionSignature) currentScope()
+            GenericFunctionDeclaration typeSignature = (GenericFunctionDeclaration) currentScope()
                 .getFunctionSignature(functionName)
                 .orElseThrow(jestException(ctx));
 
@@ -323,7 +328,7 @@ public class Validator extends JestBaseListener {
 
             List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
 
-            FunctionSignature typeSignature = currentScope()
+            FunctionDeclaration typeSignature = currentScope()
                 .getFunctionSignature(functionName)
                 .orElseThrow(jestException(ctx));
 

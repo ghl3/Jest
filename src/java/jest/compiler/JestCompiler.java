@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import jest.grammar.JestLexer;
 import jest.grammar.JestParser;
@@ -79,7 +80,13 @@ public class JestCompiler {
             validate(tree);
             return true;
         } catch (ValidationException e) {
+            System.out.println(String.format("Encountered Error during Validation: %s", e.getClass()));
             System.out.println(e.getMessage());
+
+            String space = "-------------------------";
+            String stackTrace = ExceptionUtils.getStackTrace(e);
+            System.out.println(String.format("\n%s\n%s%s\n", space, stackTrace, space));
+            //e.printStackTrace()
             return false;
         }
     }

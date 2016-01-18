@@ -3,8 +3,8 @@ package jest.compiler;
 import jest.Exception.BadSource;
 import jest.Exception.NotExpression;
 import jest.Exception.NotYetImplemented;
-import jest.compiler.Core.PrimitiveTypes;
-import jest.compiler.Core.CollectionTypes;
+import jest.compiler.Core.PrimitiveType;
+import jest.compiler.Core.CollectionType;
 import jest.compiler.Types.Type;
 import jest.compiler.Types.SimpleType;
 import jest.grammar.JestBaseVisitor;
@@ -79,13 +79,13 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
         if (ctx.op == null) {
             return this.visitArithmeticExpression(ctx.a);
         } else {
-            return PrimitiveTypes.Boolean;
+            return PrimitiveType.Boolean;
         }
     }
 
 
     public static Type resolveArithmeticType(Iterable<ArithmeticTermContext> arithmeticTerms) {
-        return PrimitiveTypes.Number;
+        return PrimitiveType.Number;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
     }
 
     public static Type resolveArithmeticTerm(Iterable<ExpressionComposedContext> expressionComposed) {
-        return PrimitiveTypes.Number;
+        return PrimitiveType.Number;
     }
 
     @Override
@@ -146,34 +146,34 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
     public Type visitExpressionAtom(ExpressionAtomContext ctx) {
 
         if (ctx.NUMBER() != null) {
-            return PrimitiveTypes.Number;
+            return PrimitiveType.Number;
         }
         else if (ctx.TRUE() != null) {
-            return PrimitiveTypes.Boolean;
+            return PrimitiveType.Boolean;
         }
         else if (ctx.FALSE() != null) {
-            return PrimitiveTypes.Boolean;
+            return PrimitiveType.Boolean;
         }
         else if (ctx.NIL() != null) {
-            return PrimitiveTypes.Nil;
+            return PrimitiveType.Nil;
         }
         else if (ctx.ID() != null) {
             // TODO: Do we assume this is always a variable?
             return this.scope.getVariableType(ctx.ID().getText()).get();
         }
         else if (ctx.STRING() != null) {
-            return PrimitiveTypes.String;
+            return PrimitiveType.String;
         }
         else if (ctx.SYMBOL() != null) {
-            return PrimitiveTypes.Symbol;
+            return PrimitiveType.Symbol;
         }
         else if (ctx.clojureVector() != null) {
             // TODO: Actually parameterize this
-            return CollectionTypes.Vector;
+            return CollectionType.Vector;
         }
         else if (ctx.clojureMap() != null) {
             // TODO: Actually parameterize this
-            return CollectionTypes.Map;
+            return CollectionType.Map;
         }
         else if (ctx.functionCall() != null) {
             return this.scope.getFunctionSignature(ctx.functionCall().ID().getText()).get().getReturnType();
