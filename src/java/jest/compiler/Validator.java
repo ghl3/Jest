@@ -1,9 +1,11 @@
 package jest.compiler;
 
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Stack;
 import jest.Exception.FunctionAlreadyDeclared;
 import jest.Exception.FunctionParameterTypeMismatch;
+import jest.Exception.InconsistentGenricTypes;
 import jest.Exception.UnknownFunction;
 import jest.Exception.UnknownVariable;
 import jest.Exception.VariableAlreadyDeclared;
@@ -11,6 +13,7 @@ import jest.Exception.VariableTypeMismatch;
 import jest.Exception.WrongNumberOfFunctionParameters;
 import jest.Utils.Triplet;
 import jest.compiler.DeclaredTypes.FunctionSignature;
+import jest.compiler.DeclaredTypes.GenericFunctionSignature;
 import jest.compiler.DeclaredTypes.GenericType;
 import jest.compiler.DeclaredTypes.Type;
 import jest.grammar.JestBaseListener;
@@ -18,12 +21,14 @@ import jest.grammar.JestParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import static jest.Exception.jestException;
+import static jest.Utils.getAll;
 import static jest.Utils.zip;
 import static jest.compiler.Contexts.getArgumentTypes;
 import static jest.compiler.Contexts.getFunctionName;
 import static jest.compiler.Contexts.getFunctionSignature;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
+import static jest.compiler.DeclaredTypes.GenericFunctionSignature.typesConsistent;
 import static jest.compiler.DeclaredTypes.typesEqual;
 
 
@@ -278,7 +283,7 @@ public class Validator extends JestBaseListener {
 
             List<Type> argumentTypes = getArgumentTypes(currentScope(), ctx);
 
-            FunctionSignature typeSignature = currentScope()
+            GenericFunctionSignature typeSignature = (GenericFunctionSignature) currentScope()
                 .getFunctionSignature(functionName)
                 .orElseThrow(jestException(ctx));
 
@@ -299,8 +304,13 @@ public class Validator extends JestBaseListener {
             }
 
             // Now, check that the generic parameters are consistent
+            for (Entry<GenericType, List<Integer>> entry: typeSignature.getGenericTypeIndices().entrySet()) {
 
-
+                Iterable<Type> types = getAll(argumentTypes, entry.getValue());
+                if (!typesConsistent(types)) {
+                    throw new InconsistentGenricTypes(ctx, entry.getKey(), types);
+                }
+            }
 
         } else {
 

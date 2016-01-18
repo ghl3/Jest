@@ -104,7 +104,7 @@ public class Contexts {
             List<Type> parameterTypes = getParameterTypes(function.functionDefParams());
             return new DeclaredFunctionSignature(name, parameterNames, parameterTypes, returnType);
         } else {
-            Set<String> genericTypes = getGenericParameers(function); //Maps.newHashMap()
+            Set<String> genericTypes = getGenericParameers(function);
             List<Type> parameterTypes = getGenericParameterTypes(function.functionDefParams(), genericTypes);
             return new GenericFunctionSignature(name, parameterNames, parameterTypes, returnType);
         }
@@ -134,11 +134,11 @@ public class Contexts {
 
     private static List<Type> getGenericParameterTypes(FunctionDefParamsContext functionDefParamsContext, Set<String> genericParameters) {
         List<Type> types = Lists.newArrayList();
-        for (Pair<String, TypeAnnotationContext> pair: zip(getParameterNames(functionDefParamsContext), combine(functionDefParamsContext.firstType, functionDefParamsContext.restTypes))) {
-            if (genericParameters.contains(pair.left)) {
-                types.add(new GenericType(pair.left));
+        for (TypeAnnotationContext type: combine(functionDefParamsContext.firstType, functionDefParamsContext.restTypes)) {
+            if (genericParameters.contains(type.getText())) {
+                types.add(new GenericType(type.getText()));
             } else {
-                types.add(getType(pair.right));
+                types.add(getType(type));
             }
         }
         return ImmutableList.copyOf(types);

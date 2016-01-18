@@ -5,6 +5,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -125,4 +126,47 @@ public class Utils {
 
         return result;
     }
+
+    public static <T> Iterable<Pair<Integer, T>> enumerate(List<T> lst) {
+        List<Pair<Integer, T>> pairs = Lists.newArrayList();
+        for (int i=0; i < lst.size(); ++i) {
+            pairs.add(new Pair<Integer, T>(i, lst.get(i)));
+        }
+        return pairs;
+    }
+
+
+    public static <T> Iterable<T> getAll(List<T> items, Iterable<Integer> indices) {
+
+        List<T> returnItems = Lists.newArrayList();
+
+        for (Integer idx: indices) {
+            returnItems.add(items.get(idx));
+        }
+
+        return ImmutableList.copyOf(returnItems);
+    }
+
+
+    /**
+     * Return all possible pairs of distinct items
+     * from the given iterable.
+     * @param items
+     * @param <T>
+     * @return
+     */
+    public static <T> List<Pair<T, T>> getAllPairs(Iterable<T> items) {
+
+        List<T> itemsList = Lists.newArrayList(Sets.newHashSet(items));
+
+        List<Pair<T ,T>> pairs = Lists.newArrayList();
+
+        for (int i=0; i < itemsList.size(); ++i) {
+            for (int j=i+1; j < itemsList.size(); ++j){
+                pairs.add(new Pair<T, T>(itemsList.get(i), itemsList.get(j)));
+            }
+        }
+        return pairs;
+    }
+
 }
