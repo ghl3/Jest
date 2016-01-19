@@ -75,7 +75,7 @@
   "Test that the given jest
   code is valid."
   [jest]
-  (is (JestCompiler/validate jest) true))
+  (is (do (JestCompiler/isValidOrThrow jest) true)))
 
 
 
@@ -86,11 +86,11 @@
   thrown"
 
   ([jest exception-class]
-   `(is (try (jest->clojure ~jest) (JestCompiler/validate ~jest) false
+   `(is (try (jest->clojure ~jest) (JestCompiler/isValidOrThrow ~jest) false
              (catch ~exception-class ~'e true))))
 
   ([jest exception-class msg]
-   `(is (try (jest->clojure ~jest) (JestCompiler/validate ~jest) false
+   `(is (try (jest->clojure ~jest) (JestCompiler/isValidOrThrow ~jest) false
              (catch ~exception-class ~'e (= ~msg (.getMessage ~'e)))))))
 
 

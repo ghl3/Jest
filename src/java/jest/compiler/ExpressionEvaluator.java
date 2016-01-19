@@ -5,8 +5,11 @@ import jest.Exception.BadSource;
 import jest.Exception.NotExpression;
 import jest.Exception.NotYetImplemented;
 import jest.Exception.UnknownFunction;
+import jest.Exception.UnknownVariable;
 import jest.compiler.Core.PrimitiveType;
 import jest.compiler.Core.CollectionType;
+import jest.compiler.Types.FunctionDeclaration;
+import jest.compiler.Types.FunctionType;
 import jest.compiler.Types.Type;
 import jest.compiler.Types.SimpleType;
 import jest.grammar.JestBaseVisitor;
@@ -46,6 +49,7 @@ import jest.grammar.JestParser.VarScopeContext;
 import static jest.Exception.jestException;
 import static jest.Utils.combine;
 import static jest.Utils.last;
+import static jest.compiler.Contexts.getVariableOrFunctionType;
 
 
 /**
@@ -164,8 +168,21 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
             return PrimitiveType.Nil;
         }
         else if (ctx.ID() != null) {
+
+            String name = ctx.ID().getText();
+            return getVariableOrFunctionType(this.scope, name, ctx);
+            /*
+            if (this.scope.isVariableInCurrentScope(name)) {
+                return this.scope.getVariableType(name).orElseThrow(jestException(new UnknownVariable(ctx, name)));
+            } else if (this.scope.isFunctionInCurrentScope(name)) {
+                FunctionDeclaration decl = this.scope.getFunctionDeclaration(name).orElseThrow(jestException(new UnknownFunction(ctx, name)));
+                return new FunctionType(decl.getSignature());
+            } else {
+                throw new BadSource(ctx);
+            }
+*/
             // TODO: Do we assume this is always a variable?
-            return this.scope.getVariableType(ctx.ID().getText()).get();
+            //return this.scope.getVariableType(ctx.ID().getText()).get();
         }
         else if (ctx.STRING() != null) {
             return PrimitiveType.String;

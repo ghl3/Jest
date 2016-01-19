@@ -1,5 +1,6 @@
 package jest.compiler;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -245,6 +246,8 @@ public class Types {
         //final Type returnType;
 
         public DeclaredFunctionDeclaration(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
+            Preconditions.checkArgument(parameterNames.size()==parameterTypes.size(),
+                "Must have same number of parameter names and tyeps");
             this.name = name;
             this.parameterNames = ImmutableList.copyOf(parameterNames);
             this.signature = new FunctionSignature(ImmutableList.copyOf(parameterTypes), returnType);

@@ -36,8 +36,10 @@ import static jest.compiler.Contexts.getArgumentTypes;
 import static jest.compiler.Contexts.getFunctionName;
 import static jest.compiler.Contexts.getFunctionDeclaration;
 import static jest.compiler.Contexts.getFunctionParameterSummary;
+import static jest.compiler.Contexts.getGenericParameters;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
+import static jest.compiler.Contexts.getVariableOrFunctionType;
 import static jest.compiler.Types.GenericFunctionDeclaration.typesConsistent;
 
 
@@ -117,24 +119,29 @@ public class Validator extends JestBaseListener {
             FunctionDeclaration sig = getFunctionDeclaration(currentScope(), ctx);
             currentScope().addFunction(functionName, sig);
         } else {
+            // TODO: Infer the function return type...
             currentScope().addFunction(functionName, null);
         }
-
 
         // TODO: Include the function parameters in the current scope
         JestParser.FunctionDefParamsContext params = ctx.functionDefParams();
 
-        // We have to add the function parameters to the function body scope.
-        // There are 3 types of parameters we have to add:
+        // Create a new scope for the function body
+        Scope functionBodyScope = createNewScope(scopes);
+
+        // Add all generic types to the function body scope
+        for (String genericType: getGenericParameters(ctx)) {
+            functionBodyScope.addType(genericType, new GenericParameter(genericType));
+        }
+
+        // We now have to add all variables appearing in the argument list of the
+        // function to the function body's scope.
+        // There are 3 types of variables appearing in the argument list:
         // - Standard variable parameters, added to variables in scope
         // - Function parameters, added to functions in scope (ie if a function takes a function)
         // - Generic parameter types in scope, added to the list of types in scope
         FunctionParameterSummary parameterSummary = getFunctionParameterSummary(currentScope(), ctx);
 
-        // Note that we create the body scope AFTER we get the parameter summary
-        // The parameterSummary should depend on the outer scope, not the inner scope
-        // that we're here creating and updating
-        Scope functionBodyScope = createNewScope(scopes);
         for (Pair<String, Type> variableType: parameterSummary.variableTypes) {
             functionBodyScope.addVariable(variableType.left, variableType.right);
         }
@@ -142,7 +149,7 @@ public class Validator extends JestBaseListener {
             functionBodyScope.addVariable(variableType.left, variableType.right);
         }
         for (Pair<String, FunctionType> variableType: parameterSummary.functionTypes) {
-            FunctionSignature signature =  variableType.right.signature;
+            FunctionSignature signature = variableType.right.signature;
             List<String> functionNames = range(signature.parameterTypes.size())
                 .map(String::valueOf)
                 .collect(Collectors.toList());
@@ -153,10 +160,12 @@ public class Validator extends JestBaseListener {
             functionBodyScope.addFunction(variableType.left, declaration);
         }
 
-
+        // TODO: Remove this when we require all functuions to be annotated
         for (TerminalNode node: params.ID()) {
-            // TODO: Add the signature types the scope
-            currentScope().addVariable(node.getText(), null);
+            String name = node.getText();
+            if (!functionBodyScope.isVariableOrFunctionInScope(name)) {
+                currentScope().addVariable(name, null);
+            }
         }
     }
 
@@ -289,7 +298,7 @@ public class Validator extends JestBaseListener {
         }
 
         if (ctx.typeAnnotation() != null) {
-            Type annotatedType = getType(ctx.typeAnnotation());
+            Type annotatedType = getType(currentScope(), ctx.typeAnnotation());
 
             if (!expressionType.implementsType(annotatedType)) { //typesEqual(annotatedType, expressionType)) {
                 throw new VariableTypeMismatch(ctx, name, annotatedType, expressionType);

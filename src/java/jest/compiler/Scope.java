@@ -57,9 +57,14 @@ public class Scope {
         variables.put(varName, type);
     }
 
-
     public Optional<Type> getVariableType(String name) {
-        return Optional.ofNullable(this.variables.get(name));
+        if (this.variables.containsKey(name)) {
+            return Optional.ofNullable(this.variables.get(name));
+        } else if (parent != null) {
+            return this.parent.getVariableType(name);
+        } else {
+            return Optional.empty();
+        }
     }
 
     // Types
@@ -90,7 +95,13 @@ public class Scope {
 
 
     public Optional<Type> getType(String name) {
-        return Optional.ofNullable(this.types.get(name));
+        if (this.types.containsKey(name)) {
+            return Optional.ofNullable(this.types.get(name));
+        } else if (parent != null) {
+            return this.parent.getType(name);
+        } else {
+            return Optional.empty();
+        }
     }
 
     // Functions
@@ -126,7 +137,13 @@ public class Scope {
 */
 
     public Optional<FunctionDeclaration> getFunctionDeclaration(String name) {
-        return Optional.ofNullable(this.functions.get(name));
+        if (this.functions.containsKey(name)) {
+            return Optional.ofNullable(this.functions.get(name));
+        } else if (parent != null) {
+            return this.parent.getFunctionDeclaration(name);
+        } else {
+            return Optional.empty();
+        }
     }
 
     public boolean isVariableOrFunctionInScope(String name) {

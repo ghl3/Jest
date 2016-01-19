@@ -198,6 +198,6 @@ public class Utils {
     }
 
     public static Stream<Integer> range(Integer num) {
-        return ContiguousSet.create(Range.closed(0, num), DiscreteDomain.integers()).stream();
+        return ContiguousSet.create(Range.closedOpen(0, num), DiscreteDomain.integers()).stream();
     }
 }

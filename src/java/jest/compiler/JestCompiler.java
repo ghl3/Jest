@@ -53,13 +53,13 @@ public class JestCompiler {
     }
 
 
-    public static void validate(String source) throws ValidationException{
+    public static void isValidOrThrow(String source) throws ValidationException {
         ParseTree tree = compileSourceCodeToParseTree(source);
-        validate(tree);
+        isValidOrThrow(tree);
     }
 
 
-    public static void validate(ParseTree tree) throws ValidationException {
+    public static void isValidOrThrow(ParseTree tree) throws ValidationException {
         ParseTreeWalker.DEFAULT.walk(new Validator(), tree);
     }
 
@@ -77,7 +77,7 @@ public class JestCompiler {
      */
     public static Boolean isParseTreeValid(ParseTree tree) {
         try {
-            validate(tree);
+            isValidOrThrow(tree);
             return true;
         } catch (ValidationException e) {
             System.out.println(String.format("Encountered Error during Validation: %s", e.getClass()));

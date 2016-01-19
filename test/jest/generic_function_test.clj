@@ -22,10 +22,10 @@
     Exception$InconsistentGenricTypes))
 
 
-(deftest func-test-2
+(deftest func-test-3
   (test-code
     "defn doubleNumber(x: Number) -> Number {x+x};
-     defn applyToFive(func: (Number) -> Number) {func(5)};
+     defn applyToFive(func: (Number) -> Number) -> Number {func(5)};
      applyToFive(doubleNumber);"
     ['(clojure.core/defn doubleNumber [x] (+ x x))
      '(clojure.core/defn applyToFive [func] (func 5))
