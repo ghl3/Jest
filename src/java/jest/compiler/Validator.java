@@ -6,7 +6,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 import jest.Exception.FunctionAlreadyDeclared;
 import jest.Exception.FunctionParameterTypeMismatch;
-import jest.Exception.InconsistentGenricTypes;
+import jest.Exception.InconsistentGenericTypes;
 import jest.Exception.UnknownFunction;
 import jest.Exception.UnknownVariable;
 import jest.Exception.VariableAlreadyDeclared;
@@ -39,7 +39,6 @@ import static jest.compiler.Contexts.getFunctionParameterSummary;
 import static jest.compiler.Contexts.getGenericParameters;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
-import static jest.compiler.Contexts.getVariableOrFunctionType;
 import static jest.compiler.Types.GenericFunctionDeclaration.typesConsistent;
 
 
@@ -365,7 +364,7 @@ public class Validator extends JestBaseListener {
 
                 Iterable<Type> types = getAll(argumentTypes, entry.getValue());
                 if (!typesConsistent(types)) {
-                    throw new InconsistentGenricTypes(ctx, entry.getKey(), types);
+                    throw new InconsistentGenericTypes(ctx, entry.getKey(), types);
                 }
             }
 

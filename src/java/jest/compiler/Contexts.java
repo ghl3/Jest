@@ -136,14 +136,23 @@ public class Contexts {
 
     public static FunctionDeclaration getFunctionDeclaration(Scope scope, FunctionDefContext function) {
         String name = getFunctionName(function);
-        Type returnType = getReturnType(scope, function);
         List<String> parameterNames = getParameterNames(function.functionDefParams());
 
         if (function.firstGenericParam==null) {
+            Type returnType = getReturnType(scope, function);
             List<Type> parameterTypes = getParameterTypes(scope, function.functionDefParams());
             return new DeclaredFunctionDeclaration(name, parameterNames, parameterTypes, returnType);
         } else {
             Set<String> genericTypes = getGenericParameters(function);
+
+            String returnTypeIdentifier = function.returnType.getText();
+            Type returnType;
+            if (genericTypes.contains(returnTypeIdentifier)) {
+                returnType = new GenericParameter(returnTypeIdentifier);
+            } else {
+                returnType = getReturnType(scope, function);
+            }
+
             List<Type> parameterTypes = getGenericParameterTypes(scope, function.functionDefParams(), genericTypes);
             return new GenericFunctionDeclaration(name, parameterNames, parameterTypes, returnType);
         }

@@ -113,14 +113,18 @@ public class Exception {
         }
     }
 
-    public static class InconsistentGenricTypes extends ValidationException {
-        public InconsistentGenricTypes(ParserRuleContext ctx, GenericParameter type, Iterable<Type> types) {
+    public static class InconsistentGenericTypes extends ValidationException {
+        public InconsistentGenericTypes(ParserRuleContext ctx, GenericParameter type, Iterable<Type> types) {
             super(String.format("Encountered type(s) in function call that are inconsistent with expected type %s: %s",
                 type, types), ctx);
         }
     }
 
-
+    public static class NoCommonType extends ValidationException {
+        public NoCommonType(ParserRuleContext ctx, Iterable<Type> types) {
+            super(String.format("Cannot find common type among: %s", types), ctx);
+        }
+    }
 
     public static Supplier<RuntimeException> jestException(final RuntimeException e) {
         return new Supplier<RuntimeException>() {

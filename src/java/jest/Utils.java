@@ -145,7 +145,7 @@ public class Utils {
     }
 
 
-    public static <T> Iterable<T> getAll(List<T> items, Iterable<Integer> indices) {
+    public static <T> List<T> getAll(List<T> items, Iterable<Integer> indices) {
 
         List<T> returnItems = Lists.newArrayList();
 

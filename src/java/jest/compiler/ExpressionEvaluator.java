@@ -1,15 +1,18 @@
 package jest.compiler;
 
-import jest.Exception;
+import java.util.List;
+import java.util.Optional;
 import jest.Exception.BadSource;
+import jest.Exception.InconsistentGenericTypes;
+import jest.Exception.NoCommonType;
 import jest.Exception.NotExpression;
 import jest.Exception.NotYetImplemented;
 import jest.Exception.UnknownFunction;
-import jest.Exception.UnknownVariable;
 import jest.compiler.Core.PrimitiveType;
 import jest.compiler.Core.CollectionType;
 import jest.compiler.Types.FunctionDeclaration;
-import jest.compiler.Types.FunctionType;
+import jest.compiler.Types.GenericFunctionDeclaration;
+import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
 import jest.compiler.Types.SimpleType;
 import jest.grammar.JestBaseVisitor;
@@ -45,10 +48,13 @@ import jest.grammar.JestParser.StatementContext;
 import jest.grammar.JestParser.StatementTermContext;
 import jest.grammar.JestParser.TypeAnnotationContext;
 import jest.grammar.JestParser.VarScopeContext;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import static jest.Exception.jestException;
 import static jest.Utils.combine;
+import static jest.Utils.getAll;
 import static jest.Utils.last;
+import static jest.compiler.Contexts.getFunctionName;
 import static jest.compiler.Contexts.getVariableOrFunctionType;
 
 
@@ -145,6 +151,49 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
             throw new BadSource(ctx);
         }
     }
+
+    @Override
+    public Type visitFunctionCall(FunctionCallContext ctx) {
+
+        String functionName = getFunctionName(ctx);
+
+        FunctionDeclaration declaration = this.scope
+            .getFunctionDeclaration(functionName)
+            .orElseThrow(jestException(new UnknownFunction(ctx, functionName)));
+
+
+        if (declaration.isGeneric() &&
+            GenericParameter.class.isAssignableFrom(declaration.getSignature().returnType.getClass())) {
+            GenericParameter returnParam = (GenericParameter) declaration.getSignature().returnType;
+            GenericFunctionDeclaration funcDeclaration = (GenericFunctionDeclaration) declaration;
+            return inferGenricFunctionReurnType(ctx, funcDeclaration, returnParam);
+        } else {
+            return declaration.getSignature().returnType;
+        }
+
+        //return this.scope.getFunctionDeclaration(methodName).orElseThrow(jestException(new UnknownFunction(ctx, methodName))).getSignature().returnType;
+    }
+
+    public Type inferGenricFunctionReurnType(FunctionCallContext ctx, GenericFunctionDeclaration declaration, GenericParameter returnParam) {
+        // First, get the parameter name for the return type
+        String parameterName = returnParam.getName();
+
+        // Now, get the other variables that use this parameter
+        // TODO: Ensure we don't infer functions on return type
+        // ie ensure that a generic return type is also shared by a parameter
+        List<Integer> argumentsWithReturnValParam = declaration.getGenericTypeIndices().get(returnParam);
+
+        List<Type> matchingTypes = getAll(declaration.signature.parameterTypes, argumentsWithReturnValParam);
+
+        return getCommonType(ctx, matchingTypes)
+            .orElseThrow(jestException(new NoCommonType(ctx, matchingTypes)));
+    }
+
+
+    public static Optional<Type> getCommonType(ParserRuleContext ctx, Iterable<Type> types) {
+        throw new NotYetImplemented(ctx, "Type inference not yet implemented");
+    }
+
 
     @Override
     public Type visitMethodCall(MethodCallContext ctx) {
@@ -289,11 +338,12 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
         return super.visitFunctionDefParams(ctx);
     }
 
+    /*
     @Override
     public Type visitFunctionCall(FunctionCallContext ctx) {
         return super.visitFunctionCall(ctx);
     }
-
+*/
     @Override
     public Type visitRecordDef(RecordDefContext ctx) {
         return super.visitRecordDef(ctx);
