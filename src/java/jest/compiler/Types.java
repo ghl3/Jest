@@ -18,6 +18,35 @@ import static jest.Utils.zip;
 
 public class Types {
 
+
+    /**
+     * A type is defined by the following "grammar":
+     *
+     *
+     * type
+     *      : concreteType
+     *      | type+
+     *      ;
+     *
+     * Where a concreteType is a non-generic type
+     * and the second version is a type that depends
+     * on other types (ie a generic type).
+     *
+     * Examples:
+     *
+     *
+     * concreteType: String, Integer, Double
+     *
+     * genericType: Map<String, Integer>
+     *
+     *
+     *
+     *
+     *
+     */
+
+
+
     /**
      * A type must declare its fully-qualified name and
      * must be able to determine if it equals another type
@@ -26,7 +55,10 @@ public class Types {
      * and possibly invariance/covariance).
      */
     public interface Type {
-        //String getName();
+
+        Type getBaseType();
+        List<Type> getDependentTypes();
+
         Boolean implementsType(Type type);
         boolean equals(Object other);
         int hashCode();
@@ -44,6 +76,16 @@ public class Types {
         @Override
         public String getName() {
             return name;
+        }
+
+        @Override
+        public Type getBaseType() {
+            return this;
+        }
+
+        @Override
+        public List<Type> getDependentTypes() {
+            return ImmutableList.of();
         }
 
         @Override
@@ -77,21 +119,35 @@ public class Types {
 
         final String name;
 
+        final Type baseType;
+
         final List<Type> typeParameters;
 
         public GenericType(String name, List<Type> typeParameters) {
             this.name = name;
+            this.baseType = new AbstractGenericType(name);
             this.typeParameters = ImmutableList.copyOf(typeParameters);
         }
 
         public GenericType(String name, Type...typeParameters) {
             this.name = name;
+            this.baseType = new AbstractGenericType(name);
             this.typeParameters = ImmutableList.copyOf(typeParameters);
         }
 
         @Override
         public String getName() {
             return name;
+        }
+
+        @Override
+        public Type getBaseType() {
+            return this.baseType;
+        }
+
+        @Override
+        public List<Type> getDependentTypes() {
+            return ImmutableList.copyOf(typeParameters);
         }
 
         @Override
@@ -133,17 +189,107 @@ public class Types {
         public int hashCode() {
             return Objects.hashCode(getName());
         }
-
     }
 
 
+    public static class AbstractGenericType implements Type, Named {
+
+        final String name;
+
+        public AbstractGenericType(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Type getBaseType() {
+            return this;
+        }
+
+        @Override
+        public List<Type> getDependentTypes() {
+            return ImmutableList.of();
+        }
+
+        @Override
+        public Boolean implementsType(Type type) {
+            return false;
+        }
+    }
+
+
+    /**
+     * A data structure to hold a "Type" in a function signature
+     * that is marked as generic (ie it holds "T" or "U", etc)
+     */
+    public static class GenericParameter implements Type, Named {
+
+        final String name;
+
+        public GenericParameter(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Type getBaseType() {
+            return this;
+        }
+
+        @Override
+        public List<Type> getDependentTypes() {
+            return ImmutableList.of();
+        }
+
+        @Override
+        public Boolean implementsType(Type other) {
+            for (GenericParameter otherGenericParameter: asType(other, GenericParameter.class)) {
+                return otherGenericParameter.name.equals(this.name);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            for (GenericParameter otherGenericParameter: asType(other, GenericParameter.class)) {
+                return otherGenericParameter.name.equals(this.name);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(getName());
+        }
+    }
+
+
+    // Is a function a concrete type or a generic type...?
+    // It's concrete... unless the function is generic...
     public static class FunctionType implements Type {
 
         final FunctionSignature signature;
 
-
         public FunctionType(FunctionSignature signature) {
             this.signature = signature;
+        }
+
+        @Override
+        public Type getBaseType() {
+            return this;
+        }
+
+        @Override
+        public List<Type> getDependentTypes() {
+            return ImmutableList.of();
         }
 
         @Override
@@ -170,45 +316,6 @@ public class Types {
         }
     }
 
-
-    /**
-     * A data structure to hold a "Type" in a function signature
-     * that is marked as generic (ie it holds "T" or "U", etc)
-     */
-    public static class GenericParameter implements Type, Named {
-
-        final String name;
-
-        public GenericParameter(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public Boolean implementsType(Type other) {
-            for (GenericParameter otherGenericParameter: asType(other, GenericParameter.class)) {
-                return otherGenericParameter.name.equals(this.name);
-            }
-            return false;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            for (GenericParameter otherGenericParameter: asType(other, GenericParameter.class)) {
-                return otherGenericParameter.name.equals(this.name);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(getName());
-        }
-    }
 
 
     public interface FunctionDeclaration {

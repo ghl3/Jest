@@ -1,7 +1,10 @@
 package jest.compiler;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import jest.Exception.FunctionAlreadyDeclared;
@@ -17,6 +20,8 @@ import jest.Utils.Triplet;
 import jest.compiler.Contexts.FunctionParameterSummary;
 import jest.compiler.Core.PrimitiveType;
 import jest.compiler.Core.CollectionType;
+import jest.compiler.Generics.GenericArguments;
+import jest.compiler.Generics.GenericMismatch;
 import jest.compiler.Types.DeclaredFunctionDeclaration;
 import jest.compiler.Types.FunctionDeclaration;
 import jest.compiler.Types.FunctionSignature;
@@ -29,7 +34,6 @@ import jest.grammar.JestParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import static jest.Exception.jestException;
-import static jest.Utils.getAll;
 import static jest.Utils.range;
 import static jest.Utils.zip;
 import static jest.compiler.Contexts.getArgumentTypes;
@@ -39,6 +43,7 @@ import static jest.compiler.Contexts.getFunctionParameterSummary;
 import static jest.compiler.Contexts.getGenericParameters;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
+import static jest.compiler.Generics.getTypesOfGenericParameter;
 import static jest.compiler.Types.GenericFunctionDeclaration.typesConsistent;
 
 
@@ -322,6 +327,7 @@ public class Validator extends JestBaseListener {
         }
     }
 
+
     @Override
     public void enterFunctionCall(JestParser.FunctionCallContext ctx) {
 
@@ -359,14 +365,56 @@ public class Validator extends JestBaseListener {
                 }
             }
 
+            for (GenericArguments arguments: Generics.getGenericArguments(typeDeclaration, argumentTypes)) {
+
+                GenericParameter param = arguments.parameter;
+
+                Set<Type> allUsageTypes = Sets.newHashSet();
+
+                for (Pair<Type, Type> types: zip(arguments.argumentTypes, arguments.argumentTypes)) {
+
+                    Type declaration = types.left;
+                    Type usage = types.right;
+
+                    try {
+                        allUsageTypes.addAll(getTypesOfGenericParameter(param, declaration, usage));
+                    } catch (GenericMismatch genericMismatch) {
+                        // TODO: Make this a different exception
+                        // Properly propagate the GenericMismatch exception's information upward
+                        throw new InconsistentGenericTypes(ctx, param, ImmutableList.of(declaration, usage)); //entry.getKey(), types);
+                    }
+                }
+
+                if (!typesConsistent(allUsageTypes)) {
+                    throw new InconsistentGenericTypes(ctx, param, allUsageTypes); //
+                }
+            }
+
+            /*
             // Now, check that the generic parameters are consistent
+            for (Entry<GenericPrameter, List<Pair<Type typeDeclaration, Type
+
             for (Entry<GenericParameter, List<Integer>> entry: typeDeclaration.getGenericTypeIndices().entrySet()) {
 
+                // For a given GenericParameter (eg "T", "U", etc), get all of
+                // the arguments in the function call that refer to this
+                // generic parameter.  So, for example, if our function signature is:
+                //   defn func(mapper: (T) -> T, val: T, other: U)
+                // and we call it with:
+                //   func(myMapper, myVal, myOtherVal)
+                // we would pull out:
+                // {T: [myMapper, myVal], U: [myOtherVal]}
                 Iterable<Type> types = getAll(argumentTypes, entry.getValue());
+
+                // Now, we need to "extract" the generic parameter from the
+                // called argument.
+
+
                 if (!typesConsistent(types)) {
                     throw new InconsistentGenericTypes(ctx, entry.getKey(), types);
                 }
             }
+            */
 
         } else {
 

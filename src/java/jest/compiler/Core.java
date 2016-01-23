@@ -3,6 +3,7 @@ package jest.compiler;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
@@ -61,6 +62,16 @@ public class Core {
         public Boolean implementsType(Type other) {
             return this.equals(other);
         }
+
+        @Override
+        public List<Type> getDependentTypes() {
+            return ImmutableList.of();
+        }
+
+        @Override
+        public Type getBaseType() {
+            return this;
+        }
     }
 
 
@@ -89,6 +100,16 @@ public class Core {
         public Boolean implementsType(Type other) {
             // TODO: Fix this
             return this.equals(other);
+        }
+
+        @Override
+        public List<Type> getDependentTypes() {
+            return ImmutableList.of();
+        }
+
+        @Override
+        public Type getBaseType() {
+            return this;
         }
 
     }

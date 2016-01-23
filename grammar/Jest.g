@@ -148,7 +148,7 @@ typeAnnotation
 
 
 variableType
-    : path
+    : path ('<' (genericParameter+=typeAnnotation)+ '>')?
     ;
 
 
