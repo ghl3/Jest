@@ -9,6 +9,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 import jest.Exception.FunctionAlreadyDeclared;
 import jest.Exception.FunctionParameterTypeMismatch;
+import jest.Exception.GenericError;
 import jest.Exception.InconsistentGenericTypes;
 import jest.Exception.UnknownFunction;
 import jest.Exception.UnknownVariable;
@@ -21,6 +22,7 @@ import jest.compiler.Contexts.FunctionParameterSummary;
 import jest.compiler.Core.PrimitiveType;
 import jest.compiler.Core.CollectionType;
 import jest.compiler.Generics.GenericArguments;
+import jest.compiler.Generics.GenericFunctionCallResult;
 import jest.compiler.Generics.GenericMismatch;
 import jest.compiler.Types.DeclaredFunctionDeclaration;
 import jest.compiler.Types.FunctionDeclaration;
@@ -43,6 +45,7 @@ import static jest.compiler.Contexts.getFunctionParameterSummary;
 import static jest.compiler.Contexts.getGenericParameters;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
+import static jest.compiler.Generics.checkGenericFunctionCall;
 import static jest.compiler.Generics.getTypesOfGenericParameter;
 import static jest.compiler.Types.GenericFunctionDeclaration.typesConsistent;
 
@@ -349,6 +352,13 @@ public class Validator extends JestBaseListener {
                 .getFunctionDeclaration(functionName)
                 .orElseThrow(jestException(ctx));
 
+            GenericFunctionCallResult result = checkGenericFunctionCall(typeDeclaration, argumentTypes);
+
+            if (!result.passesTypeChecks()) {
+                throw new GenericError(ctx, typeDeclaration, argumentTypes);
+            }
+
+            /*
             if (argumentTypes.size() != typeDeclaration.getSignature().parameterTypes.size()) {
                 throw new WrongNumberOfFunctionParameters(ctx,
                     typeDeclaration.getSignature().parameterTypes.size(),
@@ -389,6 +399,7 @@ public class Validator extends JestBaseListener {
                     throw new InconsistentGenericTypes(ctx, param, allUsageTypes); //
                 }
             }
+*/
 
             /*
             // Now, check that the generic parameters are consistent

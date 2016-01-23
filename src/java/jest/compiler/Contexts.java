@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import jest.Exception.BadSource;
 import jest.Exception.NotYetImplemented;
 import jest.Exception.UnknownFunction;
@@ -143,18 +144,24 @@ public class Contexts {
             List<Type> parameterTypes = getParameterTypes(scope, function.functionDefParams());
             return new DeclaredFunctionDeclaration(name, parameterNames, parameterTypes, returnType);
         } else {
-            Set<String> genericTypes = getGenericParameters(function);
+            Set<String> genericParameterNames = getGenericParameters(function);
 
             String returnTypeIdentifier = function.returnType.getText();
             Type returnType;
-            if (genericTypes.contains(returnTypeIdentifier)) {
+            if (genericParameterNames.contains(returnTypeIdentifier)) {
                 returnType = new GenericParameter(returnTypeIdentifier);
             } else {
                 returnType = getReturnType(scope, function);
             }
 
-            List<Type> parameterTypes = getGenericParameterTypes(scope, function.functionDefParams(), genericTypes);
-            return new GenericFunctionDeclaration(name, parameterNames, parameterTypes, returnType);
+            List<GenericParameter> genericParameters = genericParameterNames.stream()
+                .map(GenericParameter::new)
+                .collect(Collectors.toList());
+
+            List<Type> parameterTypes = getGenericParameterTypes(scope, function.functionDefParams(), genericParameterNames);
+            return new GenericFunctionDeclaration(name, genericParameters,
+                parameterNames, parameterTypes,
+                returnType);
         }
     }
 

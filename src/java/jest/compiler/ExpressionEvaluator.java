@@ -161,9 +161,8 @@ public class ExpressionEvaluator extends JestBaseVisitor<Type> {
             .getFunctionDeclaration(functionName)
             .orElseThrow(jestException(new UnknownFunction(ctx, functionName)));
 
-
-        if (declaration.isGeneric() &&
-            GenericParameter.class.isAssignableFrom(declaration.getSignature().returnType.getClass())) {
+        if (declaration.isGeneric() &&declaration.getSignature().returnType.isGeneric()) {
+            //GenericParameter.class.isAssignableFrom(.getClass())) {
             GenericParameter returnParam = (GenericParameter) declaration.getSignature().returnType;
             GenericFunctionDeclaration funcDeclaration = (GenericFunctionDeclaration) declaration;
             return inferGenricFunctionReurnType(ctx, funcDeclaration, returnParam);

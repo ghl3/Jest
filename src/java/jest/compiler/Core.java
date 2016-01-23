@@ -19,7 +19,7 @@ import static jest.Utils.asType;
 public class Core {
 
 
-    enum PrimitiveType implements Type, Named  {
+    public enum PrimitiveType implements Type, Named  {
 
         Any {
             @Override
@@ -72,10 +72,16 @@ public class Core {
         public Type getBaseType() {
             return this;
         }
+
+        @Override
+        public Boolean isGeneric() {
+            return false;
+        }
+
     }
 
 
-    enum CollectionType implements Type, Named {
+    public enum CollectionType implements Type, Named {
 
         Map {
             @Override
@@ -112,6 +118,10 @@ public class Core {
             return this;
         }
 
+        @Override
+        public Boolean isGeneric() {
+            return false;
+        }
     }
 
     public static final Map<String, FunctionDeclaration> coreFunctions = ImmutableMap.<String, FunctionDeclaration>builder()

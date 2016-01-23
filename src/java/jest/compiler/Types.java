@@ -59,6 +59,8 @@ public class Types {
         Type getBaseType();
         List<Type> getDependentTypes();
 
+        Boolean isGeneric();
+
         Boolean implementsType(Type type);
         boolean equals(Object other);
         int hashCode();
@@ -86,6 +88,11 @@ public class Types {
         @Override
         public List<Type> getDependentTypes() {
             return ImmutableList.of();
+        }
+
+        @Override
+        public Boolean isGeneric() {
+            return false;
         }
 
         @Override
@@ -148,6 +155,11 @@ public class Types {
         @Override
         public List<Type> getDependentTypes() {
             return ImmutableList.copyOf(typeParameters);
+        }
+
+        @Override
+        public Boolean isGeneric() {
+            return true;
         }
 
         @Override
@@ -216,8 +228,40 @@ public class Types {
         }
 
         @Override
-        public Boolean implementsType(Type type) {
+        public Boolean isGeneric() {
+            // I think this is false...?
+            // Is the "Map" part in Map<T, U> generic...?
+            // Probably need to re-think the type structure here...
             return false;
+        }
+
+        @Override
+        public Boolean implementsType(Type type) {
+            for (AbstractGenericType otherSimpleType: asType(type, AbstractGenericType.class)) {
+                if(otherSimpleType.name.equals(this.name)) {
+                    return true;
+                }
+            }
+            for (AbstractGenericType otherSimpleType: asType(type.getBaseType(), AbstractGenericType.class)) {
+                if(otherSimpleType.name.equals(this.name)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        @Override
+        public boolean equals(Object other) {
+            for (AbstractGenericType otherSimpleType: asType(other, AbstractGenericType.class)) {
+                return otherSimpleType.name.equals(this.name);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(getName());
         }
     }
 
@@ -247,6 +291,11 @@ public class Types {
         @Override
         public List<Type> getDependentTypes() {
             return ImmutableList.of();
+        }
+
+        @Override
+        public Boolean isGeneric() {
+            return true;
         }
 
         @Override
@@ -290,6 +339,11 @@ public class Types {
         @Override
         public List<Type> getDependentTypes() {
             return ImmutableList.of();
+        }
+
+        @Override
+        public Boolean isGeneric() {
+            return false;
         }
 
         @Override
@@ -404,6 +458,8 @@ public class Types {
 
         final String name;
 
+        final List<GenericParameter> genericParameters;
+
         public final List<String> parameterNames;
 
         final FunctionSignature signature;
@@ -414,8 +470,9 @@ public class Types {
 
         //final Type returnType;
 
-        public GenericFunctionDeclaration(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
+        public GenericFunctionDeclaration(String name, List<GenericParameter> genericParameters, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
             this.name = name;
+            this.genericParameters = ImmutableList.copyOf(genericParameters);
             this.parameterNames = ImmutableList.copyOf(parameterNames);
             this.signature = new FunctionSignature(ImmutableList.copyOf(parameterTypes), returnType);
             //this.parameterTypes =
@@ -471,17 +528,21 @@ public class Types {
         public Map<GenericParameter, List<Integer>> getGenericTypeIndices() {
 
             Map<GenericParameter, List<Integer>> map = Maps.newHashMap();
-            for (Pair<Integer, Type> pair: enumerate(getSignature().parameterTypes)) { // getParameterTypes())) {
 
-                if (pair.right.getClass().isAssignableFrom(GenericParameter.class)) {
+            for (GenericParameter param: this.genericParameters) {
 
-                    GenericParameter type = (GenericParameter) pair.right;
+                for (Pair<Integer, Type> pair : enumerate(getSignature().parameterTypes)) {
 
-                    if (!map.containsKey(type)) {
-                        map.put(type, Lists.<Integer>newArrayList());
+                    if (pair.right.isGeneric() && containsType(pair.right, param)) {
+
+                        Type type = pair.right;
+
+                        if (!map.containsKey(param)) {
+                            map.put(param, Lists.<Integer>newArrayList());
+                        }
+
+                        map.get(param).add(pair.left);
                     }
-
-                    map.get(type).add(pair.left);
                 }
             }
 
@@ -496,6 +557,25 @@ public class Types {
                 }
             }
             return true;
+        }
+    }
+
+
+    public static Boolean containsType(Type toCheck, Type mayContain) {
+
+        if (toCheck.equals(mayContain)) {
+            return true;
+        } else if (toCheck.getDependentTypes().size() == 0) {
+            return false;
+        } else {
+
+            for (Type dependentType: toCheck.getDependentTypes()) {
+                if (containsType(dependentType, mayContain)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 
