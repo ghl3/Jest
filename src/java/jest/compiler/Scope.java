@@ -10,6 +10,12 @@ import jest.compiler.Types.Type;
 
 public class Scope {
 
+    // TODO: Create a class called ImmutableScope
+    // Leverage that to ensure that scopes are only
+    // edited in the "enter" and "exit" functions
+    // in the Validator, and dependent functions that
+    // need the scope are read-only
+
     final Scope parent;
 
     final Map<String, Type> variables = new HashMap<String, Type>();

@@ -55,4 +55,4 @@
         map->Number->String (new Types$GenericType "Map" [Core$PrimitiveType/Number Core$PrimitiveType/String])
         usageTypes [map->Number->String Core$PrimitiveType/String]]
 
-    (is (.. (Generics/checkGenericFunctionCall sig usageTypes) isPresent))))
+    (is (.. (Generics/checkGenericFunctionCall sig usageTypes) isPresent)))))

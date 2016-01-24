@@ -43,6 +43,14 @@ public class Exception {
         }
     }
 
+    public static class InvalidSource extends ValidationException {
+        public InvalidSource(ParserRuleContext context) {
+            super("Invalid Source Code", context);
+        }
+    }
+
+
+
 
     public static class NotExpression extends ValidationException {
         public NotExpression(ParserRuleContext context) {
@@ -146,11 +154,11 @@ public class Exception {
     }
 
 
-    public static  Supplier<BadSource> jestException(final ParserRuleContext ctx) {
-        return new Supplier<BadSource>() {
+    public static Supplier<InvalidSource> jestException(final ParserRuleContext ctx) {
+        return new Supplier<InvalidSource>() {
             @Override
-            public BadSource get() {
-                return new BadSource(ctx);
+            public InvalidSource get() {
+                return new InvalidSource(ctx);
             }
         };
     }

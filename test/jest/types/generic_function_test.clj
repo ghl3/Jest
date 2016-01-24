@@ -1,4 +1,4 @@
-(ns jest.generic-function-test
+(ns jest.types.generic-function-test
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all])
   (:import (jest Exception$InconsistentGenericTypes)))
@@ -35,11 +35,24 @@
 
 (deftest func-test-4
   (test-code
-    "defn <T> addNumbers(x: T, y: T) -> T {x + y};
-     defn applyToNums(func: (Number, Number) -> Number) -> Number {
-         func(5.0, 3.0);
+    "defn <T> getSelf(t: T) -> T {t};
+     defn <T> applyIt(func: (T) -> T, t: T) -> T {
+         func(t);
      };
-     applyToNums(addNumbers);"
+     applyIt(getSelf, 5);"
+    ['(clojure.core/defn doubleNumber [x] (+ x x))
+     '(clojure.core/defn applyToFive [func] (func 5))
+     '(applyToFive doubleNumber)]
+    true))
+
+
+(deftest func-test-5
+  (test-code
+    "defn numToString(x: Number) -> String {\"foobar\"};
+     defn <T, U> applyIt(func: (T) -> U, t: T) -> U {
+         func(t);
+     };
+     applyIt(numToString, 5);"
     ['(clojure.core/defn doubleNumber [x] (+ x x))
      '(clojure.core/defn applyToFive [func] (func 5))
      '(applyToFive doubleNumber)]

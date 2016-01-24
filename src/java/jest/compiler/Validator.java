@@ -7,7 +7,6 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 import jest.Exception.FunctionAlreadyDeclared;
 import jest.Exception.FunctionParameterTypeMismatch;
-import jest.Exception.GenericError;
 import jest.Exception.UnknownFunction;
 import jest.Exception.UnknownVariable;
 import jest.Exception.ValidationException;
@@ -116,6 +115,15 @@ public class Validator extends JestBaseListener {
             throw new FunctionAlreadyDeclared(ctx, functionName);
         }
 
+        // Create a new scope for the function signature and add generic
+        // types to it.  This allows us to think about generic types
+        // in the function declaration as any other type, thus
+        // simplifying the code downstream
+        Scope functionSignatureScope = createNewScope(scopes);
+        for (GenericParameter genericParameter: getGenericParameters(ctx)) {
+            functionSignatureScope.addType(genericParameter.getName(), genericParameter);
+        }
+
         // TODO: Remove the "else" when we require all functions to be annotated
         if (ctx.typeAnnotation() != null) {
             FunctionDeclaration sig = getFunctionDeclaration(currentScope(), ctx);
@@ -125,16 +133,7 @@ public class Validator extends JestBaseListener {
             currentScope().addFunction(functionName, null);
         }
 
-        // TODO: Include the function parameters in the current scope
-        JestParser.FunctionDefParamsContext params = ctx.functionDefParams();
-
-        // Create a new scope for the function body
         Scope functionBodyScope = createNewScope(scopes);
-
-        // Add all generic types to the function body scope
-        for (String genericType: getGenericParameters(ctx)) {
-            functionBodyScope.addType(genericType, new GenericParameter(genericType));
-        }
 
         // We now have to add all variables appearing in the argument list of the
         // function to the function body's scope.
@@ -145,9 +144,6 @@ public class Validator extends JestBaseListener {
         FunctionParameterSummary parameterSummary = getFunctionParameterSummary(currentScope(), ctx);
 
         for (Pair<String, Type> variableType: parameterSummary.variableTypes) {
-            functionBodyScope.addVariable(variableType.left, variableType.right);
-        }
-        for (Pair<String, GenericParameter> variableType: parameterSummary.genericTypes) {
             functionBodyScope.addVariable(variableType.left, variableType.right);
         }
         for (Pair<String, FunctionType> variableType: parameterSummary.functionTypes) {
@@ -163,6 +159,7 @@ public class Validator extends JestBaseListener {
         }
 
         // TODO: Remove this when we require all functuions to be annotated
+        JestParser.FunctionDefParamsContext params = ctx.functionDefParams();
         for (TerminalNode node: params.ID()) {
             String name = node.getText();
             if (!functionBodyScope.isVariableOrFunctionInScope(name)) {

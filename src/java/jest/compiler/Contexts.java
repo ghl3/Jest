@@ -2,16 +2,13 @@ package jest.compiler;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import jest.Exception.BadSource;
 import jest.Exception.NotYetImplemented;
 import jest.Exception.UnknownFunction;
 import jest.Exception.UnknownType;
 import jest.Exception.UnknownVariable;
+import jest.Exception.ValidationException;
 import jest.Utils.Pair;
 import jest.compiler.Types.DeclaredFunctionDeclaration;
 import jest.compiler.Types.FunctionDeclaration;
@@ -20,7 +17,6 @@ import jest.compiler.Types.FunctionType;
 import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
-import jest.compiler.Types.SimpleType;
 import jest.grammar.JestParser.ExpressionContext;
 import jest.grammar.JestParser.ExpressionListContext;
 import jest.grammar.JestParser.FunctionCallContext;
@@ -52,7 +48,7 @@ public class Contexts {
         if (ctx.a != null) {
             return getType(scope, ctx.a);
         } else if (ctx.b != null) {
-            return getType(scope, ctx.b);
+            return getFunctionType(scope, ctx.b);
         } else {
             throw new NotYetImplemented(ctx, "Type Not singleType");
         }
@@ -61,18 +57,14 @@ public class Contexts {
     public static Type getType(Scope scope, VariableTypeContext ctx) {
         String typeName = ctx.path().getText();
         return scope.getType(typeName).orElseThrow(jestException(new UnknownType(ctx, typeName)));
-       //return new SimpleType(ctx.path().getText());
     }
 
-    public static Type getType(Scope scope, FunctionTypeContext ctx) {
-        return getFunctionType(scope, ctx);
-    }
 
     public static FunctionType getFunctionType(Scope scope, FunctionTypeContext ctx) {
 
         List<Type> types = Lists.newArrayList();
         for (TypeAnnotationContext annotation: combine(ctx.first, ctx.rest)) {
-            Type type = getType(scope, annotation); //getType(annotation);
+            Type type = getType(scope, annotation);
             types.add(type);
         }
 
@@ -80,9 +72,7 @@ public class Contexts {
 
         FunctionSignature signature = new FunctionSignature(types, returnType);
         return new FunctionType(signature);
-
     }
-
 
 
     public static Type getVariableOrFunctionType(Scope scope, String name, ParserRuleContext ctx) {
@@ -129,42 +119,60 @@ public class Contexts {
     }
 
 
-    public static Type getReturnType(Scope scope, FunctionDefContext function) {
+    public static Type getReturnType(Scope scope, FunctionDefContext function) throws ValidationException {
         String returnTypeName = function.returnType.getText();
         return scope.getType(returnTypeName).orElseThrow(jestException(function));
     }
 
 
+    /**
+     * Takes a Parsed FunctionDefContext and returns a function
+     * declaration object representing that declared function.
+     * The return FunctionDeclaration may possibly be generic.
+     * The Scope argument is used to ensure that types used
+     * in the function declaration are legitimate types in the
+     * current scope (and to reference those type objects in the
+     * declaration object itself)
+     * @param scope
+     * @param function
+     * @return
+     */
     public static FunctionDeclaration getFunctionDeclaration(Scope scope, FunctionDefContext function) {
-        String name = getFunctionName(function);
-        List<String> parameterNames = getParameterNames(function.functionDefParams());
-
-        if (function.firstGenericParam==null) {
-            Type returnType = getReturnType(scope, function);
-            List<Type> parameterTypes = getParameterTypes(scope, function.functionDefParams());
-            return new DeclaredFunctionDeclaration(name, parameterNames, parameterTypes, returnType);
+        if (isGenericDeclaration(function)) {
+            return getGenericFunctionDeclaration(scope, function);
         } else {
-            Set<String> genericParameterNames = getGenericParameters(function);
-
-            String returnTypeIdentifier = function.returnType.getText();
-            Type returnType;
-            if (genericParameterNames.contains(returnTypeIdentifier)) {
-                returnType = new GenericParameter(returnTypeIdentifier);
-            } else {
-                returnType = getReturnType(scope, function);
-            }
-
-            List<GenericParameter> genericParameters = genericParameterNames.stream()
-                .map(GenericParameter::new)
-                .collect(Collectors.toList());
-
-            List<Type> parameterTypes = getGenericParameterTypes(scope, function.functionDefParams(), genericParameterNames);
-            return new GenericFunctionDeclaration(name, genericParameters,
-                parameterNames, parameterTypes,
-                returnType);
+            return getNonGenericFunctionDeclaration(scope, function);
         }
     }
 
+    public static boolean isGenericDeclaration(FunctionDefContext ctx) {
+        return ctx.firstGenericParam != null;
+    }
+
+    private static DeclaredFunctionDeclaration getNonGenericFunctionDeclaration(Scope scope, FunctionDefContext function) {
+        String name = getFunctionName(function);
+        List<String> parameterNames = getParameterNames(function.functionDefParams());
+        Type returnType = getReturnType(scope, function);
+        List<Type> parameterTypes = getParameterTypes(scope, function.functionDefParams());
+        return new DeclaredFunctionDeclaration(name, parameterNames, parameterTypes, returnType);
+    }
+
+    private static GenericFunctionDeclaration getGenericFunctionDeclaration(Scope scope, FunctionDefContext function)
+        throws ValidationException {
+
+        String name = getFunctionName(function);
+        List<String> parameterNames = getParameterNames(function.functionDefParams());
+
+        List<GenericParameter> genericParameters = getGenericParameters(function);
+
+        Type returnType = getReturnType(scope, function);
+
+        List<Type> parameterTypes = getParameterTypes(scope, function.functionDefParams());
+
+        return new GenericFunctionDeclaration(name, genericParameters,
+            parameterNames, parameterTypes,
+            returnType);
+    }
 
     public static FunctionDeclaration getMethodSignature(MethodDefContext function) {
         return null;
@@ -175,10 +183,6 @@ public class Contexts {
         return ctx.a != null;
     }
 
-    public static Boolean isGenericVariableType(TypeAnnotationContext ctx, Set<String> genericParameters) {
-        return isVariableType(ctx) && genericParameters.contains(ctx.a.getText());
-    }
-
     public static Boolean isFunctionType(TypeAnnotationContext ctx) {
         return ctx.b != null;
     }
@@ -187,14 +191,11 @@ public class Contexts {
     public static class FunctionParameterSummary {
 
         public final List<Pair<String, Type>> variableTypes;
-        public final List<Pair<String, GenericParameter>> genericTypes;
         public final List<Pair<String, FunctionType>> functionTypes;
 
         public FunctionParameterSummary(List<Pair<String, Type>> variableTypes,
-                                        List<Pair<String, GenericParameter>> genericTypes,
                                         List<Pair<String, FunctionType>> functionTypes) {
             this.variableTypes = ImmutableList.copyOf(variableTypes);
-            this.genericTypes = ImmutableList.copyOf(genericTypes);
             this.functionTypes = ImmutableList.copyOf(functionTypes);
         }
     }
@@ -203,10 +204,8 @@ public class Contexts {
     public static FunctionParameterSummary getFunctionParameterSummary(Scope scope, FunctionDefContext functionDef) {
 
         FunctionDefParamsContext params = functionDef.functionDefParams();
-        Set<String> genericParameterNames = getGenericParameters(functionDef);
 
         List<Pair<String, Type>> variableTypes = Lists.newArrayList();
-        List<Pair<String, GenericParameter>> genericTypes = Lists.newArrayList();
         List<Pair<String, FunctionType>> functionTypes = Lists.newArrayList();
 
         for (Pair<Token, TypeAnnotationContext> pair: zip(
@@ -215,38 +214,20 @@ public class Contexts {
 
             String parameterName = pair.left.getText();
 
-            if (isGenericVariableType(pair.right, genericParameterNames)) { //  genericParameterNames.contains(parameterName)) {
-                String genericTokenName = pair.right.a.getText();
-                genericTypes.add(new Pair<String, GenericParameter>(parameterName, new GenericParameter(genericTokenName)));
-            }
-
-            else if (isVariableType(pair.right)) {
+            if (isFunctionType(pair.right)) {
+                FunctionType type = getFunctionType(scope, pair.right.b);
+                functionTypes.add(new Pair<>(parameterName, type));
+            } else if (isVariableType(pair.right)) {
                 String typeName = pair.right.a.getText();
                 Type variableType = scope.getType(typeName).orElseThrow(jestException(new UnknownType(functionDef, typeName)));
-                variableTypes.add(new Pair<String, Type>(parameterName, variableType));
-            }
-
-            else if (isFunctionType(pair.right)) {
-                FunctionType type = getFunctionType(scope, pair.right.b);
-                functionTypes.add(new Pair<String, FunctionType>(parameterName, type));
-            }
-
-            else {
+                variableTypes.add(new Pair<>(parameterName, variableType));
+            } else {
                 throw new BadSource(functionDef);
             }
         }
-
-        return new FunctionParameterSummary(variableTypes, genericTypes, functionTypes);
+        return new FunctionParameterSummary(variableTypes, functionTypes);
     }
 
-
-    public static List<Pair<String, GenericParameter>> getGenricParameters(FunctionDefParamsContext params) {
-        return null;
-    }
-
-    public static List<Pair<String, FunctionType>> getFunctionParameters(FunctionDefParamsContext params) {
-        return null;
-    }
 
     private static List<String> getParameterNames(FunctionDefParamsContext functionDefParamsContext) {
         List<String> names = Lists.newArrayList();
@@ -259,35 +240,17 @@ public class Contexts {
     private static List<Type> getParameterTypes(Scope scope, FunctionDefParamsContext functionDefParamsContext) {
         List<Type> types = Lists.newArrayList();
         for (TypeAnnotationContext typeAnn: combine(functionDefParamsContext.firstType, functionDefParamsContext.restTypes)) {
-
             Type type = getType(scope, typeAnn);
             types.add(type);
-            // TODO: Handle function type parameters here
-            //String typeName = typeAnn.getText();
-            // Ensure that types are declared
-            //types.add(scope.getType(typeName).orElseThrow(jestException(new UnknownType(typeAnn, typeName))));
         }
         return ImmutableList.copyOf(types);
     }
 
-    private static List<Type> getGenericParameterTypes(Scope scope, FunctionDefParamsContext functionDefParamsContext, Set<String> genericParameters) {
-        List<Type> types = Lists.newArrayList();
-        for (TypeAnnotationContext typeAnn: combine(functionDefParamsContext.firstType, functionDefParamsContext.restTypes)) {
-            if (genericParameters.contains(typeAnn.getText())) {
-                types.add(new GenericParameter(typeAnn.getText()));
-            } else {
-                String typeName = typeAnn.getText();
-                // Ensure that types are declared
-                types.add(scope.getType(typeName).orElseThrow(jestException(new UnknownType(typeAnn, typeName))));
-            }
-        }
-        return ImmutableList.copyOf(types);
-    }
 
-    public static Set<String> getGenericParameters(FunctionDefContext function) {
-        Set<String> genericParameters = Sets.newHashSet();
+    public static List<GenericParameter> getGenericParameters(FunctionDefContext function) {
+        List<GenericParameter> genericParameters = Lists.newArrayList();
         for (Token foo: combine(function.firstGenericParam, function.genericParameter)) {
-            genericParameters.add(foo.getText());
+            genericParameters.add(new GenericParameter(foo.getText()));
         }
         return genericParameters;
     }

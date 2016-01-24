@@ -1,4 +1,4 @@
-(ns jest.function-type-test
+(ns jest.types.function-type-test
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all]
             [jest.parser :refer :all])
