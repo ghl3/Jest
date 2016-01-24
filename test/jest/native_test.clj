@@ -1,4 +1,4 @@
-(ns jest.native.native-test
+(ns jest.native-test
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all]
             [jest.parser :refer [jest->clojure]]))

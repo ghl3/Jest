@@ -13,3 +13,5 @@ pom.xml.asc
 
 src/java/jest/grammar/*.java
 src/java/jest/grammar/*.tokens
+
+setup.sh

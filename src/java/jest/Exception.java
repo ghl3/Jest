@@ -1,6 +1,8 @@
 package jest;
 
+import java.util.List;
 import java.util.function.Supplier;
+import jest.compiler.Types.FunctionDeclaration;
 import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
@@ -58,9 +60,9 @@ public class Exception {
 
 
     public static class WrongNumberOfFunctionParameters extends ValidationException {
-        public WrongNumberOfFunctionParameters(ParserRuleContext context, Integer expected, Integer encountered) {
-            super(String.format("Expected %s function parameters but encountered %s",
-                expected, encountered), context);
+        public WrongNumberOfFunctionParameters(ParserRuleContext context, String functionName, Integer expected, Integer encountered) {
+            super(String.format("Expected %s parameters for function %s but encountered %s",
+                expected, functionName, encountered), context);
         }
     }
 
@@ -115,14 +117,14 @@ public class Exception {
     }
 
     public static class InconsistentGenericTypes extends ValidationException {
-        public InconsistentGenericTypes(ParserRuleContext ctx, GenericParameter type, Iterable<Type> types) {
-            super(String.format("Encountered type(s) in function call that are inconsistent with expected type %s: %s",
-                type, types), ctx);
+        public InconsistentGenericTypes(ParserRuleContext ctx, String functionName, GenericParameter type, Iterable<Type> types) {
+            super(String.format("Encountered type(s) in function call for function %s that are inconsistent with expected type %s: %s",
+                functionName, type, types), ctx);
         }
     }
 
     public static class GenericError extends ValidationException {
-        public GenericError(ParserRuleContext ctx, GenericFunctionDeclaration decl,Iterable<Type> types) {
+        public GenericError(ParserRuleContext ctx, GenericFunctionDeclaration decl, Iterable<Type> types) {
             super(String.format("Encountered type(s) in function call that are inconsistent with expected type %s: %s",
                 decl, types), ctx);
         }

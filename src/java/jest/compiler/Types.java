@@ -18,7 +18,6 @@ import static jest.Utils.zip;
 
 public class Types {
 
-
     /**
      * A type is defined by the following "grammar":
      *
@@ -44,7 +43,6 @@ public class Types {
      *
      *
      */
-
 
 
     /**
@@ -400,42 +398,18 @@ public class Types {
 
         final FunctionSignature signature;
 
-        //final List<String> parameterNames;
-
-        //final List<Type> parameterTypes;
-
-        //final Type returnType;
-
         public DeclaredFunctionDeclaration(String name, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
             Preconditions.checkArgument(parameterNames.size()==parameterTypes.size(),
                 "Must have same number of parameter names and tyeps");
             this.name = name;
             this.parameterNames = ImmutableList.copyOf(parameterNames);
             this.signature = new FunctionSignature(ImmutableList.copyOf(parameterTypes), returnType);
-            //this.parameterNames =
-            //this.parameterTypes =
-            //this.returnType = ;
         }
 
         @Override
         public List<String> getParameterNames() {
             return ImmutableList.copyOf(parameterNames);
         }
-
-        /*
-        @Override
-        public List<Type> getParameterTypes() {
-            return ImmutableList.copyOf(signature.parameterTypes);
-        }
-
-
-
-        @Override
-        public Type getReturnType() {
-            return signature.returnType;
-        }
-
-        */
 
         @Override
         public FunctionSignature getSignature() {
@@ -464,19 +438,11 @@ public class Types {
 
         final FunctionSignature signature;
 
-        //final List<String> parameterNames;
-
-        //final List<Type> parameterTypes;
-
-        //final Type returnType;
-
         public GenericFunctionDeclaration(String name, List<GenericParameter> genericParameters, List<String> parameterNames, List<Type> parameterTypes, Type returnType) {
             this.name = name;
             this.genericParameters = ImmutableList.copyOf(genericParameters);
             this.parameterNames = ImmutableList.copyOf(parameterNames);
             this.signature = new FunctionSignature(ImmutableList.copyOf(parameterTypes), returnType);
-            //this.parameterTypes =
-            //this.returnType = ;
         }
 
         @Override
@@ -493,17 +459,7 @@ public class Types {
         public FunctionSignature getSignature() {
             return this.signature;
         }
-/*
-        @Override
-        public List<Type> getParameterTypes() {
-            return signature.parameterTypes;
-        }
 
-        @Override
-        public Type getReturnType() {
-            return signature.returnType;
-        }
-*/
         @Override
         public Boolean isGeneric() {
             return true;
@@ -535,8 +491,6 @@ public class Types {
 
                     if (pair.right.isGeneric() && containsType(pair.right, param)) {
 
-                        Type type = pair.right;
-
                         if (!map.containsKey(param)) {
                             map.put(param, Lists.<Integer>newArrayList());
                         }
@@ -562,21 +516,17 @@ public class Types {
 
 
     public static Boolean containsType(Type toCheck, Type mayContain) {
-
         if (toCheck.equals(mayContain)) {
             return true;
         } else if (toCheck.getDependentTypes().size() == 0) {
             return false;
         } else {
-
             for (Type dependentType: toCheck.getDependentTypes()) {
                 if (containsType(dependentType, mayContain)) {
                     return true;
                 }
             }
-
             return false;
         }
     }
-
 }

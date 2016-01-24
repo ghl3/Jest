@@ -1,16 +1,23 @@
 package jest.compiler;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import jest.Exception.FunctionParameterTypeMismatch;
+import jest.Exception.InconsistentGenericTypes;
+import jest.Exception.ValidationException;
+import jest.Exception.WrongNumberOfFunctionParameters;
 import jest.Utils.Pair;
 import jest.Utils.Triplet;
 import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import static jest.Utils.getAll;
 import static jest.Utils.zip;
@@ -85,42 +92,70 @@ public class Generics {
 
 
 
-    interface GenericFunctionCallResult {
-        Boolean passesTypeChecks();
-    };
+    interface GenericFunctionCallTypeError {
+        ValidationException createException(String functionName, ParserRuleContext context);
+    }
 
-    public static class GenericFunctionCallMatch implements GenericFunctionCallResult {
+    public static class ArgumentNumberError implements GenericFunctionCallTypeError {
+
+        public final Integer numExpected;
+
+        public final Integer numEncountered;
+
+        public ArgumentNumberError(Integer numExpected, Integer numEncountered) {
+            this.numExpected = numExpected;
+            this.numEncountered = numEncountered;
+        }
+
         @Override
-        public Boolean passesTypeChecks() {
-            return true;
+        public ValidationException createException(String functionName, ParserRuleContext context) {
+            return new WrongNumberOfFunctionParameters(context, functionName, numExpected, numEncountered);
+        }
+    }
+
+    public static class InconsistentGenericError implements GenericFunctionCallTypeError {
+
+        public final GenericParameter param;
+
+        public final Set<Type> encountered;
+
+        public InconsistentGenericError(GenericParameter param, Set<Type> encounteredTypes) {
+            this.param = param;
+            this.encountered = ImmutableSet.copyOf(encounteredTypes);
+        }
+
+        @Override
+        public ValidationException createException(String functionName, ParserRuleContext context) {
+            return new InconsistentGenericTypes(context, functionName, param, encountered);
+        }
+    }
+
+    public static class GenericTypeError implements GenericFunctionCallTypeError {
+
+        public final String paramName;
+
+        public final Type expected;
+
+        public final Type encountered;
+
+        public GenericTypeError(String paramName, Type expected, Type encountered) {
+            this.paramName = paramName;
+            this.expected = expected;
+            this.encountered = encountered;
+        }
+
+        @Override
+        public ValidationException createException(String functionName, ParserRuleContext context) {
+            return new FunctionParameterTypeMismatch(context, functionName, paramName, expected, encountered);
         }
     }
 
 
-    public static class ArgumentNumberMismatch implements GenericFunctionCallResult {
-        @Override
-        public Boolean passesTypeChecks() {
-            return false;
-        }
-    }
-
-    public static class GenericTypeParameterMismatch implements GenericFunctionCallResult {
-        @Override
-        public Boolean passesTypeChecks() {
-            return false;
-        }
-    }
-
-
-
-    public static GenericFunctionCallResult checkGenericFunctionCall(GenericFunctionDeclaration typeDeclaration,
-                                                                     List<Type> argumentTypes) {
+    public static Optional<GenericFunctionCallTypeError> checkGenericFunctionCall(GenericFunctionDeclaration typeDeclaration,
+                                                                                  List<Type> argumentTypes) {
 
         if (argumentTypes.size() != typeDeclaration.getSignature().parameterTypes.size()) {
-            return new ArgumentNumberMismatch();
-            //throw new WrongNumberOfFunctionParameters(ctx,
-//                typeDeclaration.getSignature().parameterTypes.size(),
-//                argumentTypes.size());
+            return Optional.of(new ArgumentNumberError(typeDeclaration.getSignature().parameterTypes.size(), argumentTypes.size()));
         }
 
         // Check the non=genric parameters
@@ -128,9 +163,8 @@ public class Generics {
             if (types._1.isGeneric()) {
                 continue;
             }
-            if (!types._2.implementsType(types._1)) { //typesEqual(types._1, types._2)) {
-                return new GenericTypeParameterMismatch();
-                //throw new FunctionParameterTypeMismatch(ctx, functionName, types._0, types._1, types._2);
+            if (!types._2.implementsType(types._1)) {
+                return Optional.of(new GenericTypeError(types._0, types._1, types._2));
             }
         }
 
@@ -148,19 +182,16 @@ public class Generics {
                 try {
                     allUsageTypes.addAll(getTypesOfGenericParameter(param, declaration, usage));
                 } catch (GenericMismatch genericMismatch) {
-                    return new GenericTypeParameterMismatch();
-                    // TODO: Make this a different exception
-                    // Properly propagate the GenericMismatch exception's information upward
-                    //throw new InconsistentGenericTypes(ctx, param, ImmutableList.of(declaration, usage)); //entry.getKey(), types);
+                    return Optional.of(new GenericTypeError(param.name, types.left, types.right));
                 }
             }
 
             if (!typesConsistent(allUsageTypes)) {
-                return new GenericTypeParameterMismatch();
-                //throw new InconsistentGenericTypes(ctx, param, allUsageTypes); //
+                return Optional.of(new InconsistentGenericError(param, allUsageTypes));
             }
         }
-        return new GenericFunctionCallMatch();
+
+        return Optional.empty();
     }
 
 

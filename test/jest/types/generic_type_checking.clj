@@ -14,7 +14,7 @@
                  (new Types$GenericParameter "T"))
         usageTypes [Core$PrimitiveType/String Core$PrimitiveType/String]]
 
-    (is (.. (Generics/checkGenericFunctionCall sig usageTypes) passesTypeChecks))))
+    (is (not (.. (Generics/checkGenericFunctionCall sig usageTypes) isPresent)))))
 
 
 (deftest generic-invalid-test-1
@@ -27,7 +27,7 @@
                  (new Types$GenericParameter "T"))
         usageTypes [Core$PrimitiveType/String Core$PrimitiveType/Number]]
 
-    (is (not (.. (Generics/checkGenericFunctionCall sig usageTypes) passesTypeChecks)))))
+    (is (.. (Generics/checkGenericFunctionCall sig usageTypes) isPresent))))
 
 
 (deftest generic-valid-test-2
@@ -41,7 +41,7 @@
         map->Number->String (new Types$GenericType "Map" [Core$PrimitiveType/Number Core$PrimitiveType/String])
         usageTypes [map->Number->String Core$PrimitiveType/Number]]
 
-    (is (.. (Generics/checkGenericFunctionCall sig usageTypes) passesTypeChecks))))
+    (is (not (.. (Generics/checkGenericFunctionCall sig usageTypes) isPresent)))))
 
 
 (deftest generic-invalid-test-2
@@ -55,4 +55,4 @@
         map->Number->String (new Types$GenericType "Map" [Core$PrimitiveType/Number Core$PrimitiveType/String])
         usageTypes [map->Number->String Core$PrimitiveType/String]]
 
-    (is (not (.. (Generics/checkGenericFunctionCall sig usageTypes) passesTypeChecks)))))
+    (is (.. (Generics/checkGenericFunctionCall sig usageTypes) isPresent))))
