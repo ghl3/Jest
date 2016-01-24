@@ -163,7 +163,7 @@ public class Contexts {
         String name = getFunctionName(function);
         List<String> parameterNames = getParameterNames(function.functionDefParams());
 
-        List<GenericParameter> genericParameters = getGenericParameters(function);
+        List<GenericParameter> genericParameters = getGenericParameters(name, function);
 
         Type returnType = getReturnType(scope, function);
 
@@ -247,10 +247,10 @@ public class Contexts {
     }
 
 
-    public static List<GenericParameter> getGenericParameters(FunctionDefContext function) {
+    public static List<GenericParameter> getGenericParameters(String name, FunctionDefContext function) {
         List<GenericParameter> genericParameters = Lists.newArrayList();
         for (Token foo: combine(function.firstGenericParam, function.genericParameter)) {
-            genericParameters.add(new GenericParameter(foo.getText()));
+            genericParameters.add(new GenericParameter(name, foo.getText()));
         }
         return genericParameters;
     }

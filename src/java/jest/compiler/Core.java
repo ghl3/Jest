@@ -69,11 +69,6 @@ public class Core {
         }
 
         @Override
-        public Type getBaseType() {
-            return this;
-        }
-
-        @Override
         public Boolean isGeneric() {
             return false;
         }
@@ -111,11 +106,6 @@ public class Core {
         @Override
         public List<Type> getDependentTypes() {
             return ImmutableList.of();
-        }
-
-        @Override
-        public Type getBaseType() {
-            return this;
         }
 
         @Override

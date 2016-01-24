@@ -8,15 +8,18 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Stack;
 import jest.Exception.FunctionParameterTypeMismatch;
 import jest.Exception.InconsistentGenericTypes;
 import jest.Exception.ValidationException;
 import jest.Exception.WrongNumberOfFunctionParameters;
 import jest.Utils.Pair;
 import jest.Utils.Triplet;
+import jest.compiler.Types.FunctionType;
 import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
+import jest.compiler.Validator.ParameterTypeMismatch;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import static jest.Utils.getAll;
@@ -180,13 +183,14 @@ public class Generics {
                 Type usage = types.right;
 
                 try {
+                    ensureMatchingShapesOfTypes(declaration, usage);
                     allUsageTypes.addAll(getTypesOfGenericParameter(param, declaration, usage));
                 } catch (GenericMismatch genericMismatch) {
-                    return Optional.of(new GenericTypeError(param.name, types.left, types.right));
+                    return Optional.of(new GenericTypeError(param.name, declaration, usage)); //types.left, types.right));
                 }
             }
 
-            if (!typesConsistent(allUsageTypes)) {
+              if (!typesConsistent(allUsageTypes)) {
                 return Optional.of(new InconsistentGenericError(param, allUsageTypes));
             }
         }
@@ -194,6 +198,8 @@ public class Generics {
         return Optional.empty();
     }
 
+
+    // OLD VERSION
 
     // TODO: Need to support ID types
 
@@ -246,7 +252,9 @@ public class Generics {
 
         if (declaration.getDependentTypes().size() != usage.getDependentTypes().size()) {
             throw new GenericMismatch();
-        } else if (declaration.getDependentTypes().size() == 0) {
+        }
+
+        if (declaration.getDependentTypes().size() == 0) {
             // This is the base case
             // If we get to a leaf in the tree and the
             // left side is equal to the generic parameter in question,
@@ -257,16 +265,10 @@ public class Generics {
             } else {
                 return ImmutableList.of();
             }
-
-
         } else {
 
             // Recursive case: If we get to a dependent type, we
             // assert that the two types match up
-
-            if (!usage.getBaseType().implementsType(declaration.getBaseType())) {
-                throw new GenericMismatch();
-            }
 
             List<Type> parameterTypesInUsage = Lists.newArrayList();
 
@@ -277,4 +279,125 @@ public class Generics {
             return ImmutableList.copyOf(parameterTypesInUsage);
         }
     }
+
+
+
+    // NEW VERSION
+
+
+    /**
+     * Check the "shape" of the declaration and usage parameters
+     * This ensures that:
+     * - They have the same number of dependent types
+     * - They are both variables or functions
+     * - Their generic parameters line up (we will try to infer
+     *   the types of generic parameters later)
+     * @param declaration
+     * @param usage
+     * @return
+     * @throws GenericMismatch
+     */
+    public static Optional<ParameterTypeMismatch> ensureMatchingShapesOfTypes(Type declaration, Type usage)
+        throws GenericMismatch {
+
+        if (declaration.getDependentTypes().size() != usage.getDependentTypes().size()) {
+            throw new GenericMismatch();
+        }
+
+        if (FunctionType.class.isAssignableFrom(declaration.getClass()) &&
+            !FunctionType.class.isAssignableFrom(usage.getClass())) {
+            throw new GenericMismatch();
+        }
+
+        if (declaration.getDependentTypes().size() == 0) {
+            // If neither are generic, then they must match
+            if (!declaration.isGeneric() && !usage.isGeneric()) {
+                if (!usage.implementsType(declaration)) {
+                    // TODO: Make this a better error
+                    return Optional.of(new ParameterTypeMismatch("foobar", declaration, usage));
+                }
+            }
+        } else {
+            for (Pair<Type, Type> types: zip(declaration.getDependentTypes(), usage.getDependentTypes())) {
+                Optional<ParameterTypeMismatch> error = ensureMatchingShapesOfTypes(types.left, types.right);
+                if (error.isPresent()) {
+                    return error;
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+
+    /**
+     * Takes a single type, which may have deeply
+     * nested dependent types, and return a single
+     * iterable that walks over all of the dependent
+     * types (using a depth-first strategy)
+     * @param type
+     * @return
+     */
+    public static Iterable<Type> walkTypeDependencies(Type type) {
+
+        Stack<Type> types = new Stack<>();
+
+        if (type.getDependentTypes().size()==0) {
+            types.push(type);
+        } else {
+            for (Type dependentType: type.getDependentTypes()) {
+                for (Type node: walkTypeDependencies(dependentType)) {
+                    types.push(node);
+                }
+            }
+        }
+
+        return types;
+    }
+
+
+    /**
+     * Given two types, which may be nested, walk through all
+     * types and return a list of type constraints for generic
+     * parameters.  A constraint is simply defined as any time
+     * that a generic parameter lines up with another parameter
+     * (which may also be generic).
+     *
+     * So, if our type structure looks like:
+     *
+     * [A [B] D]
+     * [E [F] Number]
+     *
+     * assuming all letters are generics,
+     * we emit the following pairs:
+     *
+     * [
+     *   [A E]
+     *   [E A]
+     *   [B F]
+     *   [F B]
+     *   [D Number]
+     * ]
+     *
+     * @param declaration
+     * @param usage
+     * @return
+     */
+    public static List<Pair<Type, Type>> getGenericTypeConstraints(Type declaration, Type usage) {
+
+        List<Pair<Type, Type>> pairs = Lists.newArrayList();
+
+        for (Pair<Type, Type> types: zip(walkTypeDependencies(declaration), walkTypeDependencies(usage))) {
+
+            if (GenericParameter.class.isAssignableFrom(types.left.getClass())) {
+                pairs.add(new Pair<>(types.left, types.right));
+            }
+            if (GenericParameter.class.isAssignableFrom(types.right.getClass())) {
+                pairs.add(new Pair<>(types.right, types.left));
+            }
+        }
+        return pairs;
+    }
+
+
 }

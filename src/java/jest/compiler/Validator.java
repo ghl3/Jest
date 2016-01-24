@@ -127,7 +127,7 @@ public class Validator extends JestBaseListener {
         // in the function declaration as any other type, thus
         // simplifying the code downstream
         Scope functionSignatureScope = createNewScope(scopes);
-        for (GenericParameter genericParameter: getGenericParameters(ctx)) {
+        for (GenericParameter genericParameter: getGenericParameters(functionName, ctx)) {
             functionSignatureScope.addType(genericParameter.getName(), genericParameter);
         }
 

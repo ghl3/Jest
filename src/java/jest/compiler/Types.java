@@ -54,7 +54,6 @@ public class Types {
      */
     public interface Type {
 
-        Type getBaseType();
         List<Type> getDependentTypes();
 
         Boolean isGeneric();
@@ -76,11 +75,6 @@ public class Types {
         @Override
         public String getName() {
             return name;
-        }
-
-        @Override
-        public Type getBaseType() {
-            return this;
         }
 
         @Override
@@ -124,19 +118,19 @@ public class Types {
 
         final String name;
 
-        final Type baseType;
+        final GenericBaseType baseType;
 
         final List<Type> typeParameters;
 
         public GenericType(String name, List<Type> typeParameters) {
             this.name = name;
-            this.baseType = new AbstractGenericType(name);
+            this.baseType = new GenericBaseType(name);
             this.typeParameters = ImmutableList.copyOf(typeParameters);
         }
 
         public GenericType(String name, Type...typeParameters) {
             this.name = name;
-            this.baseType = new AbstractGenericType(name);
+            this.baseType = new GenericBaseType(name);
             this.typeParameters = ImmutableList.copyOf(typeParameters);
         }
 
@@ -146,13 +140,11 @@ public class Types {
         }
 
         @Override
-        public Type getBaseType() {
-            return this.baseType;
-        }
-
-        @Override
         public List<Type> getDependentTypes() {
-            return ImmutableList.copyOf(typeParameters);
+            return ImmutableList.<Type>builder()
+                .add(baseType)
+                .addAll(typeParameters)
+                .build();
         }
 
         @Override
@@ -202,22 +194,17 @@ public class Types {
     }
 
 
-    public static class AbstractGenericType implements Type, Named {
+    public static class GenericBaseType implements Type, Named {
 
         final String name;
 
-        public AbstractGenericType(String name) {
+        public GenericBaseType(String name) {
             this.name = name;
         }
 
         @Override
         public String getName() {
             return name;
-        }
-
-        @Override
-        public Type getBaseType() {
-            return this;
         }
 
         @Override
@@ -235,12 +222,7 @@ public class Types {
 
         @Override
         public Boolean implementsType(Type type) {
-            for (AbstractGenericType otherSimpleType: asType(type, AbstractGenericType.class)) {
-                if(otherSimpleType.name.equals(this.name)) {
-                    return true;
-                }
-            }
-            for (AbstractGenericType otherSimpleType: asType(type.getBaseType(), AbstractGenericType.class)) {
+            for (GenericBaseType otherSimpleType: asType(type, GenericBaseType.class)) {
                 if(otherSimpleType.name.equals(this.name)) {
                     return true;
                 }
@@ -251,7 +233,7 @@ public class Types {
 
         @Override
         public boolean equals(Object other) {
-            for (AbstractGenericType otherSimpleType: asType(other, AbstractGenericType.class)) {
+            for (GenericBaseType otherSimpleType: asType(other, GenericBaseType.class)) {
                 return otherSimpleType.name.equals(this.name);
             }
             return false;
@@ -270,20 +252,18 @@ public class Types {
      */
     public static class GenericParameter implements Type, Named {
 
+        final String functionName;
+
         final String name;
 
-        public GenericParameter(String name) {
+        public GenericParameter(String functionName, String name) {
             this.name = name;
+            this.functionName = functionName;
         }
 
         @Override
         public String getName() {
             return name;
-        }
-
-        @Override
-        public Type getBaseType() {
-            return this;
         }
 
         @Override
@@ -307,7 +287,8 @@ public class Types {
         @Override
         public boolean equals(Object other) {
             for (GenericParameter otherGenericParameter: asType(other, GenericParameter.class)) {
-                return otherGenericParameter.name.equals(this.name);
+                return otherGenericParameter.name.equals(this.name) &&
+                    otherGenericParameter.functionName.equals(this.functionName);
             }
             return false;
         }
@@ -327,11 +308,6 @@ public class Types {
 
         public FunctionType(FunctionSignature signature) {
             this.signature = signature;
-        }
-
-        @Override
-        public Type getBaseType() {
-            return this;
         }
 
         @Override
