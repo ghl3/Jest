@@ -76,9 +76,9 @@ public class Contexts {
 
 
     public static Type getVariableOrFunctionType(Scope scope, String name, ParserRuleContext ctx) {
-        if (scope.isVariableInCurrentScope(name)) {
+        if (scope.isVariableInScope(name)) {
             return scope.getVariableType(name).orElseThrow(jestException(new UnknownVariable(ctx, name)));
-        } else if (scope.isFunctionInCurrentScope(name)) {
+        } else if (scope.isFunctionInScope(name)) {
             FunctionDeclaration decl = scope.getFunctionDeclaration(name).orElseThrow(jestException(new UnknownFunction(ctx, name)));
             return new FunctionType(decl.getSignature());
         } else {

@@ -336,11 +336,19 @@ public class Types {
 
         @Override
         public List<Type> getDependentTypes() {
-            return ImmutableList.of();
+            return ImmutableList.<Type>builder()
+                .addAll(this.signature.parameterTypes)
+                .add(this.signature.returnType)
+                .build();
         }
 
         @Override
         public Boolean isGeneric() {
+            for (Type type: this.getDependentTypes()) {
+                if (type.isGeneric()) {
+                    return true;
+                }
+            }
             return false;
         }
 

@@ -40,9 +40,9 @@
          func(t);
      };
      applyIt(getSelf, 5);"
-    ['(clojure.core/defn doubleNumber [x] (+ x x))
-     '(clojure.core/defn applyToFive [func] (func 5))
-     '(applyToFive doubleNumber)]
+    ['(clojure.core/defn getSelf [t] t)
+     '(clojure.core/defn applyIt [func t] (func t))
+     '(applyIt getSelf 5)]
     true))
 
 
@@ -53,7 +53,7 @@
          func(t);
      };
      applyIt(numToString, 5);"
-    ['(clojure.core/defn doubleNumber [x] (+ x x))
-     '(clojure.core/defn applyToFive [func] (func 5))
-     '(applyToFive doubleNumber)]
+    ['(clojure.core/defn numToString [x] "foobar")
+     '(clojure.core/defn applyIt [func t] (func t))
+     '(applyIt numToString 5)]
     true))

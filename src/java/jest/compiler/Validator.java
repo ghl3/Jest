@@ -79,6 +79,11 @@ public class Validator extends JestBaseListener {
         for (CollectionType type: CollectionType.values()) {
             scopes.peek().addType(type.getName(), type);
         }
+
+        // The above scope is the "core" scope
+        // We create a sub-scope of this where the
+        // user places their variables and functions
+        Scope userScope = createNewScope(scopes);
     }
 
 
@@ -115,6 +120,8 @@ public class Validator extends JestBaseListener {
             throw new FunctionAlreadyDeclared(ctx, functionName);
         }
 
+        Scope outsideOfFunctionScope = currentScope();
+
         // Create a new scope for the function signature and add generic
         // types to it.  This allows us to think about generic types
         // in the function declaration as any other type, thus
@@ -125,12 +132,19 @@ public class Validator extends JestBaseListener {
         }
 
         // TODO: Remove the "else" when we require all functions to be annotated
+        // Note that we add the function declaration to the outer scope
+        // This ensures that the function name is available to other expressions
+        // in that scope.
+        // Note that it is important that the functionSignatureScope be created
+        // above so that the generic parameters can be available in scope
+        // in the "getFunctionDeclaration" below but also so they don't leak
+        // out of the function declaration
         if (ctx.typeAnnotation() != null) {
             FunctionDeclaration sig = getFunctionDeclaration(currentScope(), ctx);
-            currentScope().addFunction(functionName, sig);
+            outsideOfFunctionScope.addFunction(functionName, sig);
         } else {
             // TODO: Infer the function return type...
-            currentScope().addFunction(functionName, null);
+            outsideOfFunctionScope.addFunction(functionName, null);
         }
 
         Scope functionBodyScope = createNewScope(scopes);
@@ -171,6 +185,9 @@ public class Validator extends JestBaseListener {
 
     @Override
     public void exitFunctionDef(JestParser.FunctionDefContext ctx) {
+        // Drop both the function body scope
+        // and the parameter scope
+        dropCurrentScope(scopes);
         dropCurrentScope(scopes);
     }
 
