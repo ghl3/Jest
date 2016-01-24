@@ -84,6 +84,15 @@ public class Exception {
     }
 
 
+    public static class GenericInferenceError extends ValidationException {
+        public GenericInferenceError(ParserRuleContext context, String funcName,
+                               GenericFunctionDeclaration declaration, List<Type> callingTypes) {
+            super(String.format("With function %s, unable to get solution to generics for function %s with calling types %s",
+                funcName, declaration, callingTypes), context);
+        }
+    }
+
+
     public static class VariableAlreadyDeclared extends ValidationException {
         public VariableAlreadyDeclared(ParserRuleContext ctx, String variableName) {
             super(String.format("Trying to declare a variable with name %s but a variable " +

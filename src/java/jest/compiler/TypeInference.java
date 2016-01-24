@@ -51,7 +51,7 @@ public class TypeInference {
     }
 
 
-    public static boolean hasGenericsSolution(List<Pair<GenericParameter, Type>> constraints) {
+    public static boolean hasGenericsSolution(Iterable<Pair<GenericParameter, Type>> constraints) {
 
         Set<Type> allTypes = Sets.newHashSet();
         for(Pair<GenericParameter, Type> types: constraints) {

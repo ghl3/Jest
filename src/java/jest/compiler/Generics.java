@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import jest.Exception.FunctionParameterTypeMismatch;
+import jest.Exception.GenericInferenceError;
 import jest.Exception.InconsistentGenericTypes;
 import jest.Exception.ValidationException;
 import jest.Exception.WrongNumberOfFunctionParameters;
@@ -122,7 +123,7 @@ public class Generics {
 
         public final Set<Type> encountered;
 
-        public InconsistentGenericError(GenericParameter param, Set<Type> encounteredTypes) {
+        public InconsistentGenericError(GenericParameter param, List<Type> encounteredTypes) {
             this.param = param;
             this.encountered = ImmutableSet.copyOf(encounteredTypes);
         }
@@ -153,6 +154,23 @@ public class Generics {
         }
     }
 
+    public static class GenericError implements GenericFunctionCallTypeError {
+
+        public final GenericFunctionDeclaration declaration;
+
+        public final List<Type> callingTypes;
+
+        public GenericError(GenericFunctionDeclaration typeDeclaration, List<Type> callingTypes) {
+            this.declaration = typeDeclaration;
+            this.callingTypes = ImmutableList.copyOf(callingTypes);
+        }
+
+        @Override
+        public ValidationException createException(String functionName, ParserRuleContext context) {
+            return new GenericInferenceError(context, functionName, declaration, callingTypes);
+        }
+    }
+
 
     public static Optional<GenericFunctionCallTypeError> checkGenericFunctionCall(GenericFunctionDeclaration typeDeclaration,
                                                                                   List<Type> argumentTypes) {
@@ -171,25 +189,22 @@ public class Generics {
             }
         }
 
-        Set<Pair<Type, Type>> genericConstraints = Sets.newHashSet();
+        Set<Pair<GenericParameter, Type>> genericConstraints = Sets.newHashSet();
 
         for (Pair<Type, Type> types: zip(typeDeclaration.signature.parameterTypes, argumentTypes)) {
             try {
                 ensureMatchingShapesOfTypes(types.left, types.right);
             } catch (GenericMismatch genericMismatch) {
                 return Optional.of(new GenericTypeError("", types.left, types.right)); //param.name, declaration, usage)); //types.left, types.right));
-
-                //genericMismatch.printStackTrace();
             }
             genericConstraints.addAll(getGenericTypeConstraints(types.left, types.right));
         }
 
-        //if (!genericConstraintsConsistent(genericConstraints)) {
-          //
-        //}
+        if (!TypeInference.hasGenericsSolution(genericConstraints)) {
+            return Optional.of(new GenericError(typeDeclaration, argumentTypes));
+        }
 
-
-
+        /*
         for (GenericArguments arguments: Generics.getGenericArguments(typeDeclaration, argumentTypes)) {
 
             GenericParameter param = arguments.parameter;
@@ -215,7 +230,7 @@ public class Generics {
                 return Optional.of(new InconsistentGenericError(param, allUsageTypes));
             }
         }
-
+*/
         return Optional.empty();
     }
 
@@ -404,17 +419,17 @@ public class Generics {
      * @param usage
      * @return
      */
-    public static List<Pair<Type, Type>> getGenericTypeConstraints(Type declaration, Type usage) {
+    public static List<Pair<GenericParameter, Type>> getGenericTypeConstraints(Type declaration, Type usage) {
 
-        List<Pair<Type, Type>> pairs = Lists.newArrayList();
+        List<Pair<GenericParameter, Type>> pairs = Lists.newArrayList();
 
         for (Pair<Type, Type> types: zip(walkTypeDependencies(declaration), walkTypeDependencies(usage))) {
 
             if (GenericParameter.class.isAssignableFrom(types.left.getClass())) {
-                pairs.add(new Pair<>(types.left, types.right));
+                pairs.add(new Pair<>((GenericParameter)types.left, types.right));
             }
             if (GenericParameter.class.isAssignableFrom(types.right.getClass())) {
-                pairs.add(new Pair<>(types.right, types.left));
+                pairs.add(new Pair<>((GenericParameter)types.right, types.left));
             }
         }
         return pairs;
