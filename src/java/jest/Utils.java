@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -86,6 +87,22 @@ public class Utils {
             this.left = left;
             this.right = right;
         }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof Pair) {
+                Pair otherPair = (Pair) other;
+                return Objects.equals(this.left, otherPair.left) &&
+                    Objects.equals(this.right, otherPair.right);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.left, this.right);
+        }
     }
 
     public static class Triplet<T, U, V> {
@@ -143,6 +160,7 @@ public class Utils {
         }
         return pairs;
     }
+
 
 
     public static <T> List<T> getAll(List<T> items, Iterable<Integer> indices) {

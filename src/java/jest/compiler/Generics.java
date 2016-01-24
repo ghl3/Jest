@@ -171,11 +171,32 @@ public class Generics {
             }
         }
 
+        Set<Pair<Type, Type>> genericConstraints = Sets.newHashSet();
+
+        for (Pair<Type, Type> types: zip(typeDeclaration.signature.parameterTypes, argumentTypes)) {
+            try {
+                ensureMatchingShapesOfTypes(types.left, types.right);
+            } catch (GenericMismatch genericMismatch) {
+                return Optional.of(new GenericTypeError("", types.left, types.right)); //param.name, declaration, usage)); //types.left, types.right));
+
+                //genericMismatch.printStackTrace();
+            }
+            genericConstraints.addAll(getGenericTypeConstraints(types.left, types.right));
+        }
+
+        //if (!genericConstraintsConsistent(genericConstraints)) {
+          //
+        //}
+
+
+
         for (GenericArguments arguments: Generics.getGenericArguments(typeDeclaration, argumentTypes)) {
 
             GenericParameter param = arguments.parameter;
 
             Set<Type> allUsageTypes = Sets.newHashSet();
+
+
 
             for (Pair<Type, Type> types: zip(arguments.typeDeclarations, arguments.argumentTypes)) {
 
@@ -398,6 +419,10 @@ public class Generics {
         }
         return pairs;
     }
+
+
+
+
 
 
 }
