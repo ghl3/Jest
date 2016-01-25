@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all]
             [jest.parser :refer :all])
-  (:import (jest Exception$FunctionParameterTypeMismatch)))
+  (:import (jest.compiler Exceptions$FunctionParameterTypeMismatch)))
 
 
 (deftest func-type-test-1
@@ -24,9 +24,8 @@
     println(halfRange);"))
 
 
-
 (deftest func-type-mismatch-1
   (test-code-exception
     "defn square(x: Number) -> Number {x*x}; square(\"three\");"
-    Exception$FunctionParameterTypeMismatch))
+    Exceptions$FunctionParameterTypeMismatch))
 

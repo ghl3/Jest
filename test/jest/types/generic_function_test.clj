@@ -1,7 +1,7 @@
 (ns jest.types.generic-function-test
   (:require [clojure.test :refer :all]
             [jest.utils :refer :all])
-  (:import (jest Exception$InconsistentGenericTypes Exception$GenericInferenceError)))
+  (:import (jest.compiler Exceptions$GenericInferenceException)))
 
 (deftest func-test-0
   (test-code
@@ -19,7 +19,7 @@
 (deftest func-test-2
   (test-code-exception
     "defn <T> addNumbers(x: T, y: T) -> Number {x+y}; addNumbers(3, \"four\");"
-    Exception$GenericInferenceError))
+    Exceptions$GenericInferenceException))
 
 
 (deftest func-test-3
@@ -65,4 +65,4 @@
          func(t);
      };
      applyIt(numToString, 5, \"Foo\");"
-    Exception$GenericInferenceError))
+    Exceptions$GenericInferenceException))

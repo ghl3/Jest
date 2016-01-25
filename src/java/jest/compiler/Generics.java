@@ -15,8 +15,6 @@ import jest.Utils.Pair;
 import jest.Utils.Triplet;
 import jest.compiler.Errors.ParameterCategoryMismatch;
 import jest.compiler.Errors.ParameterNumberMismatch;
-import jest.compiler.Errors.ParameterTypeMismatch;
-import jest.compiler.Exceptions.GenericMismatch;
 import jest.compiler.Types.FunctionType;
 import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
@@ -28,6 +26,7 @@ import static jest.Utils.zip;
 
 
 public class Generics {
+
 
     public static Optional<FunctionCallError> checkGenericFunctionCall(GenericFunctionDeclaration typeDeclaration,
                                                                        List<Type> argumentTypes) {
@@ -51,18 +50,10 @@ public class Generics {
         for (Pair<Type, Type> types: zip(typeDeclaration.signature.parameterTypes, argumentTypes)) {
 
             Optional<FunctionCallError> result = ensureMatchingShapesOfTypes(types.left, types.right);
-
             if (result.isPresent()) {
                 return result;
             }
 
-/*
-            try {
-                ensureMatchingShapesOfTypes(types.left, types.right);
-            } catch (GenericMismatch genericMismatch) {
-                return Optional.of(new GenericTypeError("", types.left, types.right));
-            }
-            */
             genericConstraints.addAll(getGenericTypeConstraints(types.left, types.right));
         }
 
@@ -86,7 +77,6 @@ public class Generics {
      * @param declaration
      * @param usage
      * @return
-     * @throws GenericMismatch
      */
     public static Optional<FunctionCallError> ensureMatchingShapesOfTypes(Type declaration, Type usage) {
 
