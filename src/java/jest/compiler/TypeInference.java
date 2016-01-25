@@ -15,7 +15,8 @@ import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
-import org.chocosolver.solver.trace.Chatterbox;
+import org.chocosolver.solver.search.bind.DefaultSearchBinder;
+import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
 
@@ -75,6 +76,9 @@ public class TypeInference {
                 throw new RuntimeException();
             }
         }
+
+        // Set a reasonable search strategy
+        solver.set(IntStrategyFactory.domOverWDeg(typeMap.values().toArray(new IntVar[typeMap.size()]), 0));
 
         if (solver.findSolution()) {
             Map<GenericParameter, Type> inferredTypes = Maps.newHashMap();

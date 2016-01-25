@@ -75,20 +75,25 @@ public class JestCompiler {
      * @return
      * @throws ValidationException
      */
-    public static Boolean isParseTreeValid(ParseTree tree) {
+    public static Boolean isParseTreeValid(ParseTree tree, Boolean verbose) {
         try {
             isValidOrThrow(tree);
             return true;
         } catch (ValidationException e) {
-            System.out.println(String.format("Encountered Error during Validation: %s", e.getClass()));
-            System.out.println(e.getMessage());
+            if (verbose) {
+                System.out.println(String.format("Encountered Error during Validation: %s", e.getClass()));
+                System.out.println(e.getMessage());
 
-            String space = "-------------------------";
-            String stackTrace = ExceptionUtils.getStackTrace(e);
-            System.out.println(String.format("\n%s\n%s%s\n", space, stackTrace, space));
-            //e.printStackTrace()
+                String space = "-------------------------";
+                String stackTrace = ExceptionUtils.getStackTrace(e);
+                System.out.println(String.format("\n%s\n%s%s\n", space, stackTrace, space));
+            }
             return false;
         }
+    }
+
+    public static Boolean isParseTreeValid(ParseTree tree) {
+        return isParseTreeValid(tree, false);
     }
 
 
