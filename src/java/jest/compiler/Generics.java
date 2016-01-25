@@ -1,17 +1,16 @@
 package jest.compiler;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import jest.Exception.FunctionParameterTypeMismatch;
 import jest.Exception.GenericInferenceError;
-import jest.Exception.InconsistentGenericTypes;
 import jest.Exception.ValidationException;
 import jest.Exception.WrongNumberOfFunctionParameters;
 import jest.Utils.Pair;
@@ -23,78 +22,13 @@ import jest.compiler.Types.Type;
 import jest.compiler.Validator.ParameterTypeMismatch;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import static jest.Utils.getAll;
 import static jest.Utils.zip;
-import static jest.compiler.Types.GenericFunctionDeclaration.typesConsistent;
 
 
 public class Generics {
 
-    public static class GenericArguments {
-        public final GenericParameter parameter;
-        public final List<Type> typeDeclarations;
-        public final List<Type> argumentTypes;
-
-        public GenericArguments(GenericParameter parameter,
-                                List<Type> typeDeclarations,
-                                List<Type> argumentTypes) {
-            this.parameter = parameter;
-            this.typeDeclarations = ImmutableList.copyOf(typeDeclarations);
-            this.argumentTypes = ImmutableList.copyOf(argumentTypes);
-        }
-    }
-
-
-    /**
-     * Takes the declaration of a generic function and a
-     * list of types for the arguments that are used in a
-     * specific call of that function and return a list of
-     * those arguments (and the corresponding declared types
-     * for those arguments) grouped by generic parameters
-     * used in the function declaration.
-     * These lists of types and arguments MAY overlap in the
-     * case that a single argument in the function type
-     * signature uses two generic parameters.
-     *
-     * Example:
-     *
-     * defn <T, U> mapIt(mapper: (T)->U, t: T, u: U) {...}
-     *
-     * and a call of
-     *
-     * mapIt(myMapper, t, u)
-     *
-     * would be grouped (using information notation) as:
-     *
-     * {T: [myMapper, t], U: [myMapper, u]}
-     *
-     * @param functionDeclaration
-     * @param argumentTypes
-     * @return
-     */
-    public static Iterable<GenericArguments> getGenericArguments(GenericFunctionDeclaration functionDeclaration,
-                                                                 List<Type> argumentTypes) {
-
-        List<GenericArguments> genericArguments = Lists.newArrayList();
-
-        for (Entry<GenericParameter, List<Integer>> entry: functionDeclaration.getGenericTypeIndices().entrySet()) {
-
-            GenericParameter parameter = entry.getKey();
-            List<Integer> indices = entry.getValue();
-            List<Type> declarations = getAll(functionDeclaration.getSignature().parameterTypes, indices);
-            List<Type> arguments =  getAll(argumentTypes, indices);
-
-            genericArguments.add(new GenericArguments(parameter, declarations, arguments));
-        }
-
-        return ImmutableList.copyOf(genericArguments);
-    }
-
-
     public static class GenericMismatch extends Exception {
     };
-
-
 
     interface GenericFunctionCallTypeError {
         ValidationException createException(String functionName, ParserRuleContext context);
@@ -114,23 +48,6 @@ public class Generics {
         @Override
         public ValidationException createException(String functionName, ParserRuleContext context) {
             return new WrongNumberOfFunctionParameters(context, functionName, numExpected, numEncountered);
-        }
-    }
-
-    public static class InconsistentGenericError implements GenericFunctionCallTypeError {
-
-        public final GenericParameter param;
-
-        public final Set<Type> encountered;
-
-        public InconsistentGenericError(GenericParameter param, List<Type> encounteredTypes) {
-            this.param = param;
-            this.encountered = ImmutableSet.copyOf(encounteredTypes);
-        }
-
-        @Override
-        public ValidationException createException(String functionName, ParserRuleContext context) {
-            return new InconsistentGenericTypes(context, functionName, param, encountered);
         }
     }
 
@@ -195,130 +112,19 @@ public class Generics {
             try {
                 ensureMatchingShapesOfTypes(types.left, types.right);
             } catch (GenericMismatch genericMismatch) {
-                return Optional.of(new GenericTypeError("", types.left, types.right)); //param.name, declaration, usage)); //types.left, types.right));
+                return Optional.of(new GenericTypeError("", types.left, types.right));
             }
             genericConstraints.addAll(getGenericTypeConstraints(types.left, types.right));
         }
 
-        if (!TypeInference.hasGenericsSolution(genericConstraints)) {
+        GenericInferenceSummary result = TypeInference.inferGenericTypes(genericConstraints);
+
+        if (!result.inferenceSuccessful) {
             return Optional.of(new GenericError(typeDeclaration, argumentTypes));
         }
 
-        /*
-        for (GenericArguments arguments: Generics.getGenericArguments(typeDeclaration, argumentTypes)) {
-
-            GenericParameter param = arguments.parameter;
-
-            Set<Type> allUsageTypes = Sets.newHashSet();
-
-
-
-            for (Pair<Type, Type> types: zip(arguments.typeDeclarations, arguments.argumentTypes)) {
-
-                Type declaration = types.left;
-                Type usage = types.right;
-
-                try {
-                    ensureMatchingShapesOfTypes(declaration, usage);
-                    allUsageTypes.addAll(getTypesOfGenericParameter(param, declaration, usage));
-                } catch (GenericMismatch genericMismatch) {
-                    return Optional.of(new GenericTypeError(param.name, declaration, usage)); //types.left, types.right));
-                }
-            }
-
-              if (!typesConsistent(allUsageTypes)) {
-                return Optional.of(new InconsistentGenericError(param, allUsageTypes));
-            }
-        }
-*/
         return Optional.empty();
     }
-
-
-    // OLD VERSION
-
-    // TODO: Need to support ID types
-
-    /**
-     * Take a generic parameter declaration and
-     * the type of an expression being used as an
-     * argument for that declaration and return a list
-     * of the concrete types used in the location
-     * of the given generic parameter.  Throws an
-     * exception if the generic type structure of the
-     * usage type doesn't match the generic type structure
-     * of the declaration type.
-     *
-     * Examples:
-     *
-     * parameter:   T
-     * declaration: Map<T, U>
-     * usage:       Map<Integer, String>
-     * -----------
-     * result:      Integer
-     *
-     *
-     * parameter:   T
-     * declaration: Map<T, U>, T
-     * usage:       Map<Integer, Integer>, Double
-     * -----------
-     * result:      Integer, Double
-     *
-     *
-     * parameter: T
-     * declaration: Map<T, U>
-     * usage:       Double
-     * -----------
-     * result:      GenericMismatch
-     *
-     * To do this, is has to recursively walk the Type-Tree defined
-     * a generic parameter.
-     *
-     * Really, this should be a
-     *
-     * @param parameter
-     * @param declaration
-     * @param usage
-     * @return
-     */
-    public static List<Type> getTypesOfGenericParameter(GenericParameter parameter,
-                                                        Type declaration,
-                                                        Type usage)
-        throws GenericMismatch {
-
-        if (declaration.getDependentTypes().size() != usage.getDependentTypes().size()) {
-            throw new GenericMismatch();
-        }
-
-        if (declaration.getDependentTypes().size() == 0) {
-            // This is the base case
-            // If we get to a leaf in the tree and the
-            // left side is equal to the generic parameter in question,
-            // then we consider that a match to the right side and
-            // we return that.
-            if (declaration.equals(parameter)) {
-                return ImmutableList.of(usage);
-            } else {
-                return ImmutableList.of();
-            }
-        } else {
-
-            // Recursive case: If we get to a dependent type, we
-            // assert that the two types match up
-
-            List<Type> parameterTypesInUsage = Lists.newArrayList();
-
-            for (Pair<Type, Type> types: zip(declaration.getDependentTypes(), usage.getDependentTypes())) {
-                parameterTypesInUsage.addAll(getTypesOfGenericParameter(parameter, types.left, types.right));
-            }
-
-            return ImmutableList.copyOf(parameterTypesInUsage);
-        }
-    }
-
-
-
-    // NEW VERSION
 
 
     /**
@@ -387,7 +193,6 @@ public class Generics {
                 }
             }
         }
-
         return types;
     }
 
@@ -435,9 +240,23 @@ public class Generics {
         return pairs;
     }
 
+    public static class GenericInferenceSummary {
 
+        public final Boolean inferenceSuccessful;
 
+        public final Map<GenericParameter, Type> inferredTypes;
 
+        private GenericInferenceSummary(Boolean inferenceSuccessful, Map<GenericParameter, Type> inferredTypes) {
+            this.inferenceSuccessful = inferenceSuccessful;
+            this.inferredTypes = ImmutableMap.copyOf(inferredTypes);
+        }
 
+        public static GenericInferenceSummary success(Map<GenericParameter, Type> inferredTypes) {
+            return new GenericInferenceSummary(true, inferredTypes);
+        }
 
+        public static GenericInferenceSummary failure() {
+            return new GenericInferenceSummary(false, ImmutableMap.of());
+        }
+    }
 }

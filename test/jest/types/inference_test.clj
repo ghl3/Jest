@@ -13,7 +13,7 @@
 
   (let [T (new Types$GenericParameter "Foobar" "T")
         constraints [(new Utils$Pair T Core$PrimitiveType/Number)]]
-    (is (TypeInference/hasGenericsSolution constraints))))
+    (is (TypeInference/inferGenericTypes constraints))))
 
 
 (deftest test-inference-2
@@ -27,4 +27,4 @@
                      (new Utils$Pair T Core$PrimitiveType/Number)
                      (new Utils$Pair T U)
                      ]]
-    (is (TypeInference/hasGenericsSolution constraints))))
+    (is (TypeInference/inferGenericTypes constraints))))

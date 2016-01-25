@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 
@@ -31,7 +33,9 @@ public class Utils {
     }
 
     public static <T> Iterable<T> removeNulls(Iterable<T> lst) {
-        return Iterables.filter(lst, Predicates.notNull());
+        return StreamSupport.stream(lst.spliterator(), false)
+            .filter(Predicates.notNull()::apply)
+            .collect(Collectors.toList());
     }
 
     public static <T> Iterable<T> combine(T left, Iterable<T> right) {
@@ -61,14 +65,6 @@ public class Utils {
         }
         lst.add(right);
         return ImmutableList.copyOf(removeNulls(lst));
-    }
-
-    public static <T> Iterable<T> allButLast(List<T> lst) {
-        if (lst.size() == 0 || lst.size() == 1) {
-            return ImmutableList.of();
-        } else {
-            return lst.subList(0, lst.size()-2);
-        }
     }
 
     public static <T> Optional<T> last(List<T> lst) {

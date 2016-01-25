@@ -316,7 +316,7 @@ public class Validator extends JestBaseListener {
         if (ctx.typeAnnotation() != null) {
             Type annotatedType = getType(currentScope(), ctx.typeAnnotation());
 
-            if (!expressionType.implementsType(annotatedType)) { //typesEqual(annotatedType, expressionType)) {
+            if (!expressionType.implementsType(annotatedType)) {
                 throw new VariableTypeMismatch(ctx, name, annotatedType, expressionType);
             }
         }
