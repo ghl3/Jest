@@ -5,20 +5,18 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
-import jest.Exception.FunctionAlreadyDeclared;
-import jest.Exception.FunctionParameterTypeMismatch;
-import jest.Exception.UnknownFunction;
-import jest.Exception.UnknownVariable;
-import jest.Exception.ValidationException;
-import jest.Exception.VariableAlreadyDeclared;
-import jest.Exception.VariableTypeMismatch;
-import jest.Exception.WrongNumberOfFunctionParameters;
-import jest.Utils.Pair;
 import jest.Utils.Triplet;
+import jest.compiler.Errors.ParameterNumberMismatch;
+import jest.compiler.Errors.ParameterTypeMismatch;
+import jest.compiler.Exceptions.FunctionAlreadyDeclared;
+import jest.compiler.Exceptions.UnknownFunction;
+import jest.compiler.Exceptions.UnknownVariable;
+import jest.compiler.Exceptions.VariableAlreadyDeclared;
+import jest.compiler.Exceptions.VariableTypeMismatch;
+import jest.Utils.Pair;
 import jest.compiler.Contexts.FunctionParameterSummary;
 import jest.compiler.Core.PrimitiveType;
 import jest.compiler.Core.CollectionType;
-import jest.compiler.Generics.GenericFunctionCallTypeError;
 import jest.compiler.Types.DeclaredFunctionDeclaration;
 import jest.compiler.Types.FunctionDeclaration;
 import jest.compiler.Types.FunctionSignature;
@@ -28,12 +26,13 @@ import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
 import jest.grammar.JestBaseListener;
 import jest.grammar.JestParser;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import static jest.Exception.jestException;
-import static jest.Utils.range;
+import jest.compiler.Errors.FunctionCallError;
+
 import static jest.Utils.zip;
+import static jest.compiler.Exceptions.jestException;
+import static jest.Utils.range;
 import static jest.compiler.Contexts.getArgumentTypes;
 import static jest.compiler.Contexts.getFunctionName;
 import static jest.compiler.Contexts.getFunctionDeclaration;
@@ -42,6 +41,7 @@ import static jest.compiler.Contexts.getGenericParameters;
 import static jest.compiler.Contexts.getMethodSignature;
 import static jest.compiler.Contexts.getType;
 import static jest.compiler.Generics.checkGenericFunctionCall;
+
 
 
 public class Validator extends JestBaseListener {
@@ -361,7 +361,7 @@ public class Validator extends JestBaseListener {
                 .getFunctionDeclaration(functionName)
                 .orElseThrow(jestException(ctx));
 
-            Optional<GenericFunctionCallTypeError> error = checkGenericFunctionCall(typeDeclaration, argumentTypes);
+            Optional<FunctionCallError> error = checkGenericFunctionCall(typeDeclaration, argumentTypes);
 
             if (error.isPresent()) {
                 throw error.get().createException(functionName, ctx);
@@ -375,7 +375,7 @@ public class Validator extends JestBaseListener {
                 .getFunctionDeclaration(functionName)
                 .orElseThrow(jestException(ctx));
 
-            Optional<FunctionCallTypeError> error = checkFunctionCall(typeDeclaration, argumentTypes);
+            Optional<FunctionCallError> error = checkFunctionCall(typeDeclaration, argumentTypes);
 
             if (error.isPresent()) {
                 throw error.get().createException(functionName, ctx);
@@ -384,49 +384,7 @@ public class Validator extends JestBaseListener {
     }
 
 
-    interface FunctionCallTypeError {
-        ValidationException createException(String functionName, ParserRuleContext context);
-    }
-
-
-    public static class ParameterTypeMismatch implements FunctionCallTypeError {
-
-        public final String paramName;
-
-        public final Type expected;
-
-        public final Type actual;
-
-        public ParameterTypeMismatch(String paramName, Type expected, Type actual) {
-            this.paramName = paramName;
-            this.expected = expected;
-            this.actual = actual;
-        }
-
-        @Override
-        public ValidationException createException(String functionName, ParserRuleContext ctx) {
-            return new FunctionParameterTypeMismatch(ctx, functionName, paramName, expected, actual);
-        }
-    }
-
-    public static class ParameterNumberMismatch implements FunctionCallTypeError {
-
-        public final Integer numExpected;
-
-        public final Integer numActual;
-
-        public ParameterNumberMismatch(Integer numExpected, Integer numActual) {
-            this.numExpected = numExpected;
-            this.numActual = numActual;
-        }
-
-        @Override
-        public ValidationException createException(String functionName, ParserRuleContext ctx) {
-            return new WrongNumberOfFunctionParameters(ctx, functionName, numExpected, numActual);
-        }
-    }
-
-    public static Optional<FunctionCallTypeError> checkFunctionCall(FunctionDeclaration typeDeclaration, List<Type> argumentTypes) {
+    public static Optional<FunctionCallError> checkFunctionCall(FunctionDeclaration typeDeclaration, List<Type> argumentTypes) {
 
         if (argumentTypes.size() != typeDeclaration.getSignature().parameterTypes.size()) {
             return Optional.of(new ParameterNumberMismatch(typeDeclaration.getSignature().parameterTypes.size(), argumentTypes.size()));
@@ -439,4 +397,5 @@ public class Validator extends JestBaseListener {
         }
         return Optional.empty();
     }
+
 }

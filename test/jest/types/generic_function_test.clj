@@ -57,3 +57,12 @@
      '(clojure.core/defn applyIt [func t] (func t))
      '(applyIt numToString 5)]
     true))
+
+(deftest func-test-6
+  (test-code-exception
+    "defn numToString(x: Number) -> String {\"foobar\"};
+     defn <T, U> applyIt(func: (T) -> U, t: T, tt: T) -> U {
+         func(t);
+     };
+     applyIt(numToString, 5, \"Foo\");"
+    Exception$GenericInferenceError))

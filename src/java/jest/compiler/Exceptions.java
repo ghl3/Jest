@@ -1,8 +1,7 @@
-package jest;
+package jest.compiler;
 
 import java.util.List;
 import java.util.function.Supplier;
-import jest.compiler.Types.FunctionDeclaration;
 import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
@@ -10,7 +9,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 import static jest.Utils.getLineInfo;
 
-public class Exception {
+public class Exceptions {
 
     // Translation Exceptions
 
@@ -83,9 +82,18 @@ public class Exception {
         }
     }
 
+    public static class FunctionParameterCategoryMismatch extends ValidationException {
+        public FunctionParameterCategoryMismatch(ParserRuleContext context, String funcName,
+                                             Type expected, Type encountered) {
+            super(String.format("Expected parameter for function %s to have type %s but has type %s",
+                funcName, expected, encountered), context);
+        }
+    }
 
-    public static class GenericInferenceError extends ValidationException {
-        public GenericInferenceError(ParserRuleContext context, String funcName,
+
+
+    public static class GenericInferenceException extends ValidationException {
+        public GenericInferenceException(ParserRuleContext context, String funcName,
                                GenericFunctionDeclaration declaration, List<Type> callingTypes) {
             super(String.format("With function %s, unable to get solution to generics for function %s with calling types %s",
                 funcName, declaration, callingTypes), context);
@@ -171,5 +179,10 @@ public class Exception {
             }
         };
     }
+
+
+    public static class GenericMismatch extends Exception {
+    };
+
 
 }

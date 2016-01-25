@@ -2,12 +2,11 @@ package jest.compiler;
 
 import java.util.List;
 import java.util.Optional;
-import jest.Exception.BadSource;
-import jest.Exception.InconsistentGenericTypes;
-import jest.Exception.NoCommonType;
-import jest.Exception.NotExpression;
-import jest.Exception.NotYetImplemented;
-import jest.Exception.UnknownFunction;
+import jest.compiler.Exceptions.BadSource;
+import jest.compiler.Exceptions.NoCommonType;
+import jest.compiler.Exceptions.NotExpression;
+import jest.compiler.Exceptions.NotYetImplemented;
+import jest.compiler.Exceptions.UnknownFunction;
 import jest.compiler.Core.PrimitiveType;
 import jest.compiler.Core.CollectionType;
 import jest.compiler.Types.FunctionDeclaration;
@@ -50,7 +49,7 @@ import jest.grammar.JestParser.TypeAnnotationContext;
 import jest.grammar.JestParser.VarScopeContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import static jest.Exception.jestException;
+import static jest.compiler.Exceptions.jestException;
 import static jest.Utils.combine;
 import static jest.Utils.getAll;
 import static jest.Utils.last;

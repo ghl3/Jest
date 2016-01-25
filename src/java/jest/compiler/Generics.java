@@ -1,6 +1,5 @@
 package jest.compiler;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -9,88 +8,29 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
-import jest.Exception.FunctionParameterTypeMismatch;
-import jest.Exception.GenericInferenceError;
-import jest.Exception.ValidationException;
-import jest.Exception.WrongNumberOfFunctionParameters;
+import jest.compiler.Errors.ArgumentNumberError;
+import jest.compiler.Errors.GenericInferenceError;
+import jest.compiler.Errors.GenericTypeError;
 import jest.Utils.Pair;
 import jest.Utils.Triplet;
+import jest.compiler.Errors.ParameterCategoryMismatch;
+import jest.compiler.Errors.ParameterNumberMismatch;
+import jest.compiler.Errors.ParameterTypeMismatch;
+import jest.compiler.Exceptions.GenericMismatch;
 import jest.compiler.Types.FunctionType;
 import jest.compiler.Types.GenericFunctionDeclaration;
 import jest.compiler.Types.GenericParameter;
 import jest.compiler.Types.Type;
-import jest.compiler.Validator.ParameterTypeMismatch;
-import org.antlr.v4.runtime.ParserRuleContext;
+
+import jest.compiler.Errors.FunctionCallError;
 
 import static jest.Utils.zip;
 
 
 public class Generics {
 
-    public static class GenericMismatch extends Exception {
-    };
-
-    interface GenericFunctionCallTypeError {
-        ValidationException createException(String functionName, ParserRuleContext context);
-    }
-
-    public static class ArgumentNumberError implements GenericFunctionCallTypeError {
-
-        public final Integer numExpected;
-
-        public final Integer numEncountered;
-
-        public ArgumentNumberError(Integer numExpected, Integer numEncountered) {
-            this.numExpected = numExpected;
-            this.numEncountered = numEncountered;
-        }
-
-        @Override
-        public ValidationException createException(String functionName, ParserRuleContext context) {
-            return new WrongNumberOfFunctionParameters(context, functionName, numExpected, numEncountered);
-        }
-    }
-
-    public static class GenericTypeError implements GenericFunctionCallTypeError {
-
-        public final String paramName;
-
-        public final Type expected;
-
-        public final Type encountered;
-
-        public GenericTypeError(String paramName, Type expected, Type encountered) {
-            this.paramName = paramName;
-            this.expected = expected;
-            this.encountered = encountered;
-        }
-
-        @Override
-        public ValidationException createException(String functionName, ParserRuleContext context) {
-            return new FunctionParameterTypeMismatch(context, functionName, paramName, expected, encountered);
-        }
-    }
-
-    public static class GenericError implements GenericFunctionCallTypeError {
-
-        public final GenericFunctionDeclaration declaration;
-
-        public final List<Type> callingTypes;
-
-        public GenericError(GenericFunctionDeclaration typeDeclaration, List<Type> callingTypes) {
-            this.declaration = typeDeclaration;
-            this.callingTypes = ImmutableList.copyOf(callingTypes);
-        }
-
-        @Override
-        public ValidationException createException(String functionName, ParserRuleContext context) {
-            return new GenericInferenceError(context, functionName, declaration, callingTypes);
-        }
-    }
-
-
-    public static Optional<GenericFunctionCallTypeError> checkGenericFunctionCall(GenericFunctionDeclaration typeDeclaration,
-                                                                                  List<Type> argumentTypes) {
+    public static Optional<FunctionCallError> checkGenericFunctionCall(GenericFunctionDeclaration typeDeclaration,
+                                                                       List<Type> argumentTypes) {
 
         if (argumentTypes.size() != typeDeclaration.getSignature().parameterTypes.size()) {
             return Optional.of(new ArgumentNumberError(typeDeclaration.getSignature().parameterTypes.size(), argumentTypes.size()));
@@ -109,18 +49,27 @@ public class Generics {
         Set<Pair<GenericParameter, Type>> genericConstraints = Sets.newHashSet();
 
         for (Pair<Type, Type> types: zip(typeDeclaration.signature.parameterTypes, argumentTypes)) {
+
+            Optional<FunctionCallError> result = ensureMatchingShapesOfTypes(types.left, types.right);
+
+            if (result.isPresent()) {
+                return result;
+            }
+
+/*
             try {
                 ensureMatchingShapesOfTypes(types.left, types.right);
             } catch (GenericMismatch genericMismatch) {
                 return Optional.of(new GenericTypeError("", types.left, types.right));
             }
+            */
             genericConstraints.addAll(getGenericTypeConstraints(types.left, types.right));
         }
 
         GenericInferenceSummary result = TypeInference.inferGenericTypes(genericConstraints);
 
         if (!result.inferenceSuccessful) {
-            return Optional.of(new GenericError(typeDeclaration, argumentTypes));
+            return Optional.of(new GenericInferenceError(typeDeclaration, argumentTypes));
         }
 
         return Optional.empty();
@@ -139,16 +88,16 @@ public class Generics {
      * @return
      * @throws GenericMismatch
      */
-    public static Optional<ParameterTypeMismatch> ensureMatchingShapesOfTypes(Type declaration, Type usage)
-        throws GenericMismatch {
+    public static Optional<FunctionCallError> ensureMatchingShapesOfTypes(Type declaration, Type usage) {
 
         if (declaration.getDependentTypes().size() != usage.getDependentTypes().size()) {
-            throw new GenericMismatch();
+            return Optional.of(new ParameterNumberMismatch(declaration.getDependentTypes().size(), usage.getDependentTypes().size()));
+            //throw new GenericMismatch();
         }
 
         if (FunctionType.class.isAssignableFrom(declaration.getClass()) &&
             !FunctionType.class.isAssignableFrom(usage.getClass())) {
-            throw new GenericMismatch();
+            return Optional.of(new ParameterCategoryMismatch(declaration, usage));
         }
 
         if (declaration.getDependentTypes().size() == 0) {
@@ -156,12 +105,12 @@ public class Generics {
             if (!declaration.isGeneric() && !usage.isGeneric()) {
                 if (!usage.implementsType(declaration)) {
                     // TODO: Make this a better error
-                    return Optional.of(new ParameterTypeMismatch("foobar", declaration, usage));
+                    return Optional.of(new GenericTypeError("foobar", declaration, usage));
                 }
             }
         } else {
             for (Pair<Type, Type> types: zip(declaration.getDependentTypes(), usage.getDependentTypes())) {
-                Optional<ParameterTypeMismatch> error = ensureMatchingShapesOfTypes(types.left, types.right);
+                Optional<FunctionCallError> error = ensureMatchingShapesOfTypes(types.left, types.right);
                 if (error.isPresent()) {
                     return error;
                 }
