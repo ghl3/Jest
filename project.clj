@@ -21,6 +21,10 @@
 
                  [environ "1.0.0"]
 
+                 [org.slf4j/slf4j-log4j12 "1.7.13"]
+                 [log4j/log4j "1.2.17"]
+                 
+                 
                  [com.google.guava/guava "18.0"]
                  [org.apache.commons/commons-lang3 "3.1"]
 
@@ -32,6 +36,8 @@
                  [lein-cljfmt "0.1.4"]
 
                  [org.choco-solver/choco-solver "3.3.0"]
+
+
                  ]
 
   :main jest.jest
